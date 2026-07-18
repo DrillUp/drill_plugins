@@ -313,494 +313,1235 @@
  * @param ---GIF组 1至20---
  * @default
  *
+
+ * 
  * @param GIF-1
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-2
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-3
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-4
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-5
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-6
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-7
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-8
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-9
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-10
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-11
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-12
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-13
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-14
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-15
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-16
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-17
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-18
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-19
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
  * @param GIF-20
  * @parent ---GIF组 1至20---
  * @type struct<MenuGIF>
  * @desc GIF的详细配置信息。
  * @default 
- *
+ * 
+
+ * 
+ * @param GIF-21
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-22
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-23
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-24
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-25
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-26
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-27
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-28
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-29
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-30
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-31
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-32
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-33
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-34
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-35
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-36
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-37
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-38
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-39
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-40
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+
+ * 
+ * @param GIF-41
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-42
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-43
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-44
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-45
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-46
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-47
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-48
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-49
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-50
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-51
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-52
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-53
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-54
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-55
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-56
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-57
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-58
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-59
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-60
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+
+ * 
+ * @param GIF-61
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-62
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-63
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-64
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-65
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-66
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-67
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-68
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-69
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-70
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-71
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-72
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-73
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-74
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-75
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-76
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-77
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-78
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-79
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-80
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+
+ * 
+ * @param GIF-81
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-82
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-83
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-84
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-85
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-86
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-87
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-88
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-89
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-90
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-91
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-92
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-93
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-94
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-95
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-96
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-97
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-98
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-99
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-100
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+
+ * 
+ * @param GIF-101
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-102
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-103
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-104
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-105
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-106
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-107
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-108
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-109
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-110
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-111
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-112
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-113
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-114
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-115
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-116
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-117
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-118
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-119
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-120
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+
+ * 
+ * @param GIF-121
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-122
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-123
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-124
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-125
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-126
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-127
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-128
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-129
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-130
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-131
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-132
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-133
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-134
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-135
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-136
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-137
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-138
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-139
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-140
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+
+ * 
+ * @param GIF-141
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-142
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-143
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-144
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-145
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-146
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-147
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-148
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-149
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-150
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-151
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-152
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-153
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-154
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-155
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-156
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-157
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-158
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-159
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-160
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+
+ * 
+ * @param GIF-161
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-162
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-163
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-164
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-165
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-166
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-167
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-168
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-169
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-170
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-171
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-172
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-173
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-174
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-175
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-176
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-177
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-178
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-179
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-180
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+
+ * 
+ * @param GIF-181
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-182
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-183
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-184
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-185
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-186
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-187
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-188
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-189
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-190
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-191
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-192
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-193
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-194
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-195
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-196
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-197
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-198
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-199
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default 
+ * 
+ * @param GIF-200
+ * @parent ---GIF组 1至20---
+ * @type struct<MenuGIF>
+ * @desc GIF的详细配置信息。
+ * @default
+ * 
  * @param ---GIF组21至40---
  * @default
- *
- * @param GIF-21
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-22
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-23
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-24
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-25
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-26
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-27
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-28
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-29
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-30
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-31
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-32
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-33
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-34
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-35
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-36
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-37
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-38
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-39
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-40
- * @parent ---GIF组21至40---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
+ * 
  * @param ---GIF组41至60---
  * @default
- *
- * @param GIF-41
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-42
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-43
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-44
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-45
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-46
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-47
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-48
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-49
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-50
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-51
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-52
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-53
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-54
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-55
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-56
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-57
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-58
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-59
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-60
- * @parent ---GIF组41至60---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
+ * 
  * @param ---GIF组61至80---
  * @default
- *
- * @param GIF-61
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-62
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-63
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-64
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-65
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-66
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-67
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-68
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-69
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-70
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-71
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-72
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-73
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-74
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-75
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-76
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-77
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-78
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-79
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
- *
- * @param GIF-80
- * @parent ---GIF组61至80---
- * @type struct<MenuGIF>
- * @desc GIF的详细配置信息。
- * @default 
+ * 
  */
 /*~struct~MenuGIF:
  * 
@@ -1319,6 +2060,7 @@
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['layerIndex'] = String( dataFrom["菜单层级"] || "菜单前面层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		data['styleName'] = String( dataFrom["标签"] || "");
 		
 		// > A主体 - 其它特性
 		data['src_img_mask'] = String( dataFrom["资源-GIF遮罩"] || "");
@@ -1361,7 +2103,7 @@
 		// > Q随机位置
 		data['randomPos_enable'] = false;
 		
-		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		// > 控制器 - 『控制器与贴图的样式-静态数据-指针初始化』
 		Drill_MGi_Controller.drill_controller_initData( data );
 		
 		return data;
@@ -1382,7 +2124,7 @@
 		}
 	}
 	/*-----------------GIF------------------*/
-	DrillUp.g_MGi_style_length = 80;
+	DrillUp.g_MGi_style_length = 200;
 	DrillUp.g_MGi_style = [];
 	for( var i = 0; i < DrillUp.g_MGi_style_length; i++ ){
 		if( DrillUp.parameters["GIF-" + String(i+1) ] != undefined &&
@@ -2496,17 +3238,39 @@ Scene_MenuBase.prototype.drill_MGi_sortByZIndex = function () {
 // ** 菜单层级（接口实现）
 //=============================================================================
 //==============================
-// * 菜单层级 - 最顶层
+// * 菜单层级 - 创建
+//==============================
+var _drill_MGi_menuLayer_createBackground = Scene_MenuBase.prototype.createBackground;
+Scene_MenuBase.prototype.createBackground = function(){
+	
+	// > 『菜单后面层-创建』
+	_drill_MGi_menuLayer_createBackground.call(this);
+	
+	// > 『菜单前面层-创建』
+	if( this._foregroundSprite == undefined ){
+		this._foregroundSprite = new Sprite();
+	}
+};
+//==============================
+// * 菜单层级 - 帧刷新
 //==============================
 var _drill_MGi_menuLayer_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
 	_drill_MGi_menuLayer_update.call(this);
 	
-	if(!this._backgroundSprite ){		//菜单后面层（防止覆写报错）
+	// > 菜单后面层（防止覆写报错）
+	if( this._backgroundSprite == undefined ){
 		this._backgroundSprite = new Sprite();
 	}
-	if(!this._foregroundSprite ){		//菜单前面层
+	
+	// > 菜单前面层（防止覆写报错）
+	if( this._foregroundSprite == undefined ){
 		this._foregroundSprite = new Sprite();
+	}
+	
+	// > 『菜单前面层-顺序控制』
+	if( this._foregroundSprite_hasAddChild == undefined ){
+		this._foregroundSprite_hasAddChild = true;
 		this.addChild(this._foregroundSprite);	
 	}
 };
@@ -2571,9 +3335,9 @@ var _drill_MGi_createBackground = Scene_MenuBase.prototype.createBackground;
 Scene_MenuBase.prototype.createBackground = function() {
 	
 	// > GIF初始化
-	SceneManager._drill_MGi_created = false;	
+	SceneManager._drill_MGi_created = false;
    	this._drill_MGi_spriteTank = [];
-   	this._drill_MGi_dataTank = [];
+   	this._drill_MGi_controllerTank = [];
 	
 	// > 原函数
 	_drill_MGi_createBackground.call(this);
@@ -2716,8 +3480,8 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 // * 贴图控制 - 帧刷新
 //==============================
 Scene_MenuBase.prototype.drill_MGi_update = function() {
-	this.drill_MGi_updateController();
-	this.drill_MGi_updateAttr();
+	this.drill_MGi_updateController();		//帧刷新 - 控制器
+	this.drill_MGi_updateAttr();			//帧刷新 - 基础特性
 }
 //==============================
 // * 贴图控制 - 帧刷新 控制器
@@ -2726,8 +3490,6 @@ Scene_MenuBase.prototype.drill_MGi_updateController = function(){
 	for(var i = 0; i < this._drill_MGi_controllerTank.length; i++ ){
 		var temp_controller = this._drill_MGi_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
-		
-		// > 控制器帧刷新
 		temp_controller.drill_controller_update();
 	}
 }
@@ -2868,7 +3630,8 @@ Scene_MenuBase.prototype.drill_MGi_create = function() {
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
@@ -2973,7 +3736,7 @@ Drill_MGi_Controller.prototype.drill_controller_resetData = function( data_id ){
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -2993,16 +3756,16 @@ Drill_MGi_Controller.prototype.drill_controller_setPause = function( pause ){
 	this._drill_pause = pause;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 判断销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -3044,72 +3807,72 @@ Drill_MGi_Controller.METHOD__drill_controller_GIF_setLocked                = 61;
 Drill_MGi_Controller.METHOD__drill_controller_GIF_setOncePlay              = 62;
 Drill_MGi_Controller.METHOD__drill_controller_GIF_setFrame                 = 63;
 
-//##############################
-// * A主体 - 切换混合模式【标准函数】
+//==============================
+// * A主体 - 切换混合模式（开放函数）
 //
 //			参数：	> blendMode 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MGi_Controller.prototype.drill_controller_setBlendMode = function( blendMode ){
 	this._drill_blendMode = blendMode;
 };
-//##############################
-// * A主体 - 切换菜单层级【标准函数】
+//==============================
+// * A主体 - 切换层级（开放函数）
 //
 //			参数：	> layerIndex 字符串
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MGi_Controller.prototype.drill_controller_setLayerIndex = function( layerIndex ){
 	this._drill_layerIndex = layerIndex;
 };
-//##############################
-// * A主体 - 切换图片层级【标准函数】
+//==============================
+// * A主体 - 切换堆叠级（开放函数）
 //
 //			参数：	> zIndex 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MGi_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 	this._drill_zIndex = zIndex;
 };
-//##############################
-// * A主体 - 还原混合模式【标准函数】
+//==============================
+// * A主体 - 还原混合模式（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MGi_Controller.prototype.drill_controller_restoreBlendMode = function(){
 	var data = this.drill_data();
 	this._drill_blendMode = data['blendMode'];
 };
-//##############################
-// * A主体 - 还原地图层级【标准函数】
+//==============================
+// * A主体 - 还原层级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MGi_Controller.prototype.drill_controller_restoreLayerIndex = function(){
 	var data = this.drill_data();
 	this._drill_layerIndex = data['layerIndex'];
 };
-//##############################
-// * A主体 - 还原图片层级【标准函数】
+//==============================
+// * A主体 - 还原堆叠级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MGi_Controller.prototype.drill_controller_restoreZIndex = function(){
 	var data = this.drill_data();
 	this._drill_zIndex = data['zIndex'];
 };
 
-//##############################
-// * O播放GIF - 设置帧【标准函数】
+//==============================
+// * O播放GIF - 设置帧（开放函数）
 //
 //			参数：	> cur_frame 数字（当前帧）
 //			返回：	> 无
 //			
 //			说明：	> 从帧数0开始计数。
-//##############################
+//==============================
 Drill_MGi_Controller.prototype.drill_controller_GIF_setFrame = function( cur_frame ){
 	var data = this.drill_data();
 	
@@ -3127,22 +3890,22 @@ Drill_MGi_Controller.prototype.drill_controller_GIF_setFrame = function( cur_fra
 	}
 	this._drill_GIF_index = Math.floor(inter);
 };
-//##############################
-// * O播放GIF - 锁定帧/解锁帧【标准函数】
+//==============================
+// * O播放GIF - 锁定帧/解锁帧（开放函数）
 //
 //			参数：	> locked 布尔
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MGi_Controller.prototype.drill_controller_GIF_setLocked = function( locked ){
 	this._drill_GIF_lockEnabled = locked;
 	this._drill_GIF_oncePlay = false;
 };
-//##############################
-// * O播放GIF - 单次播放【标准函数】
+//==============================
+// * O播放GIF - 单次播放（开放函数）
 //
 //			参数：	> once_type 字符串（forwardRun正向播放/backRun反向播放）
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MGi_Controller.prototype.drill_controller_GIF_setOncePlay = function( once_type ){
 	var data = this.drill_data();
 	this._drill_GIF_oncePlay = true;
@@ -3151,6 +3914,33 @@ Drill_MGi_Controller.prototype.drill_controller_GIF_setOncePlay = function( once
 	this._drill_GIF_onceTarTime = data['src_img_gif'].length * data['interval'];
 };
 
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
+//##############################
+DrillUp.g_MGi_notFindStyleAlertOnce = true;
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』获取数据指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，所以只读静态数据。不要存储到存档中，也不要挂载到控制器身上。
+//					> 该函数直接获取指针，可以放在帧刷新中使用。
+//##############################
+Drill_MGi_Controller.prototype.drill_data = function(){
+	var cur_styleId   = this._drill_data_id +1;
+	var cur_styleData = DrillUp.g_MGi_style[ this._drill_data_id ];
+	if( cur_styleData == undefined ){
+		
+		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
+		if( DrillUp.g_MGi_notFindStyleAlertOnce == true ){
+			DrillUp.g_MGi_notFindStyleAlertOnce = false;
+			alert( DrillUp.drill_MGi_getPluginTip_StyleNotFind(cur_styleId) );
+		}
+		return {};
+	}
+	return cur_styleData;
+};
 //##############################
 // * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
@@ -3161,7 +3951,7 @@ Drill_MGi_Controller.prototype.drill_controller_GIF_setOncePlay = function( once
 //##############################
 Drill_MGi_Controller.drill_controller_initData = function( data ){
 	//	（该函数是静态函数，直接修改 静态数据 的指针值）
-	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 @注释定义 的参数）
 	
 	// > A主体 - 基础特性
 	if( data['src_img_gif'] == undefined ){ data['src_img_gif'] = [] };								//A主体 - 资源
@@ -3177,6 +3967,7 @@ Drill_MGi_Controller.drill_controller_initData = function( data ){
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };									//A主体 - 混合模式
 	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "菜单前面层" };						//A主体 - 菜单层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };										//A主体 - 图片层级
+	if( data['styleName'] == undefined ){ data['styleName'] = "" };									//A主体 - 标签
 	
 	// > A主体 - 其它特性
 	if( data['src_img_mask'] == undefined ){ data['src_img_mask'] = "" };							//A主体 - 遮罩资源
@@ -3269,40 +4060,6 @@ Drill_MGi_Controller.prototype.drill_controller_resetData_Private = function( da
 	//this.drill_controller_initData();										//初始化数据
 	this.drill_controller_initChild();										//初始化子功能
 }
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
-//##############################
-DrillUp.g_MGi_notFindStyleAlertOnce = true;
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』空的静态数据
-//			
-//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
-//##############################
-Drill_MGi_Controller.emptyData = {};
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』获取静态数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 对象指针
-//			
-//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
-//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
-//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
-//##############################
-Drill_MGi_Controller.prototype.drill_data = function(){
-	var cur_styleId   = this._drill_data_id +1;
-	var cur_styleData = DrillUp.g_MGi_style[ this._drill_data_id ];
-	if( cur_styleData == undefined ){
-		
-		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
-		if( DrillUp.g_MGi_notFindStyleAlertOnce == true ){
-			DrillUp.g_MGi_notFindStyleAlertOnce = false;
-			alert( DrillUp.drill_MGi_getPluginTip_StyleNotFind(cur_styleId) );
-		}
-		return Drill_MGi_Controller.emptyData;
-	}
-	return cur_styleData;
-};
 
 
 //==============================
@@ -3401,55 +4158,55 @@ Drill_MGi_Controller.prototype.drill_controller_updateChange_Rotation = function
 	this._drill_childGIF_rotation += this._drill_childGIF_rotateSpeed;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置X【标准函数】
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_finalTransform_x = function(){
 	return this._drill_change_x;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置Y【标准函数】
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_finalTransform_y = function(){
 	return this._drill_change_y;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放X【标准函数】
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_finalTransform_scaleX = function(){
 	return this._drill_change_scaleX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放Y【标准函数】
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_finalTransform_scaleY = function(){
 	return this._drill_change_scaleY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 透明度（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 透明度【标准函数】
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_finalTransform_opacity = function(){
 	return this._drill_change_opacity;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切X【标准函数】
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_finalTransform_skewX = function(){
 	return this._drill_change_skewX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切Y【标准函数】
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_finalTransform_skewY = function(){
 	return this._drill_change_skewY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 旋转（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 旋转【标准函数】
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_finalTransform_rotate = function(){
 	return this._drill_change_rotate;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 转速（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 转速【标准函数】
 //##############################
 Drill_MGi_Controller.prototype.drill_controller_finalTransform_rotateSpeed = function(){
 	return this._drill_childGIF_rotateSpeed;
@@ -4231,8 +4988,8 @@ Drill_MGi_Controller.prototype.drill_controller_updateRandomPos = function(){
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁（未使用）
-// **						->销毁（手动）
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
 // **					->A贴图主体
 // **					->B变换特性
@@ -4293,7 +5050,7 @@ Drill_MGi_Sprite.prototype.update = function(){
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -4305,7 +5062,7 @@ Drill_MGi_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -4330,7 +5087,7 @@ Drill_MGi_Sprite.prototype.drill_sprite_initChild = function(){
 // * GIF贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -4350,10 +5107,10 @@ Drill_MGi_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
 	return true;
 };
 //##############################
-// * GIF贴图 - 是否需要销毁【标准函数】
+// * GIF贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -4363,7 +5120,7 @@ Drill_MGi_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * GIF贴图 - 销毁【标准函数】
+// * GIF贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无

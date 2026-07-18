@@ -8,7 +8,7 @@
  * 
  * @Drill_LE_param "预设-%d"
  * @Drill_LE_parentKey "---预设组%d至%d---"
- * @Drill_LE_var "DrillUp.g_DCCE_style_length"
+ * @Drill_LE_var "DrillUp.g_DCCE_list_length"
  * 
  * 
  * @help  

@@ -119,115 +119,474 @@
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-3
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-4
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-5
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-6
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-7
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-8
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-9
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-10
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-11
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-12
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-13
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-14
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-15
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-16
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-17
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-18
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-19
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
- *
+ * 
  * @param 选项边框样式-20
  * @parent ---选项边框样式集---
  * @type struct<DrillMCBStyle>
  * @desc GIF菜单边框的详细配置信息。
  * @default 
  * 
+ * @param 选项边框样式-21
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-22
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-23
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-24
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-25
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-26
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-27
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-28
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-29
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-30
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-31
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-32
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-33
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-34
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-35
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-36
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-37
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-38
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-39
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-40
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-41
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-42
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-43
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-44
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-45
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-46
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-47
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-48
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-49
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-50
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-51
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-52
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-53
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-54
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-55
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-56
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-57
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-58
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-59
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-60
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-61
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-62
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-63
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-64
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-65
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-66
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-67
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-68
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-69
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-70
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-71
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-72
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-73
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-74
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-75
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-76
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-77
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-78
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-79
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default 
+ * 
+ * @param 选项边框样式-80
+ * @parent ---选项边框样式集---
+ * @type struct<DrillMCBStyle>
+ * @desc GIF菜单边框的详细配置信息。
+ * @default
  * 
  */
 /*~struct~DrillMCBStyle:
@@ -500,7 +859,7 @@
 	}
 	
 	/*-----------------样式集------------------*/
-	DrillUp.g_MCB_list_length = 20;
+	DrillUp.g_MCB_list_length = 80;
 	DrillUp.g_MCB_list = [];
 	for( var i = 0; i < DrillUp.g_MCB_list_length; i++ ){
 		if( DrillUp.parameters["选项边框样式-" + String(i+1) ] != undefined &&
@@ -735,7 +1094,7 @@ Window_Selectable.prototype.drill_MCB_borderStyleId = function() {
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						x->销毁
+// **						x->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					

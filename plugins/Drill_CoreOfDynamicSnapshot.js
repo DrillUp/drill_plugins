@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        游戏窗体 - 动态屏幕快照核心
+ * @plugindesc [v1.2]        游戏窗体 - 动态屏幕快照核心
  * @author Drill_up
  * 
  * 
@@ -60,6 +60,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 整理改进了内部结构。
+ * [v1.2]
+ * 改进了天窗层帧刷新的结构。
  *
  */
  
@@ -98,8 +100,8 @@
 //			->☆天窗层 标准模块
 //				->添加贴图到层级【标准函数】
 //				->去除贴图【标准函数】
+//				->去除全部贴图【标准函数】
 //				->图片层级排序【标准函数】
-//				->清空全部天窗层【标准函数】
 //			->☆天窗层实现
 //			
 //			->☆DEBUG测试
@@ -148,6 +150,19 @@
 			message += DrillUp.g_CODS_PluginTip_baseList[i];
 		}
 		return message;
+	};
+	//==============================
+	// * 提示信息 - 报错 - 底层版本过低
+	//==============================
+	DrillUp.drill_CODS_getPluginTip_LowVersion = function(){
+		return "【" + DrillUp.g_CODS_PluginTip_curName + "】\n核心检测到子插件用了旧函数。请更新全部插件：\n"+
+			"Drill_HtmlDynamicSnapshotBackground.js 游戏窗体-天窗层的多层背景\n"+
+			"Drill_HtmlDynamicSnapshotCircle.js 游戏窗体-天窗层的多层魔法圈\n"+
+			"Drill_HtmlDynamicSnapshotGif.js 游戏窗体-天窗层的多层GIF\n"+
+			"Drill_HtmlDynamicSnapshotSpaceWrench.js 游戏窗体-动态快照次元斩\n"+
+			"Drill_HtmlDynamicSnapshotSprite.js 游戏窗体-天窗层的多层动态快照\n"+
+			"Drill_HtmlDynamicSnapshotTiledGif.js 游戏窗体-天窗层的多层平铺GIF\n"+
+			"Drill_MenuMainCutscenes.js 主菜单-主菜单面板的动画转场\n";
 	};
 	
 	
@@ -424,6 +439,19 @@ Graphics.drill_CODS_overstoryLayerRemoveSprite = function( sprite ){
 	}
 }
 //##############################
+// * 天窗层 - 去除全部贴图【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 无
+//          
+//			说明：	> 强行规范的接口，将全部贴图从天窗层中去除。
+//					> 注意，子插件不要乱用这个函数，子插件应该管好自己的贴图。
+//##############################
+Graphics.drill_CODS_overstoryLayerClearAll = function(){
+	this.drill_CODS_removeChildConnect( this._drill_CODS_overstoryLayer );
+	this.drill_CODS_setRenderingEnabled( false );				//（天窗层所有贴图都没了，则关闭 渲染动态快照 ）
+}
+//##############################
 // * 天窗层 - 图片层级排序【标准函数】
 //			
 //			参数：	> 无
@@ -434,23 +462,11 @@ Graphics.drill_CODS_overstoryLayerRemoveSprite = function( sprite ){
 Graphics.drill_CODS_sortByZIndex = function () {
 	this._drill_CODS_overstoryLayer.children.sort(function(a, b){return a.zIndex-b.zIndex});	//（比较器）
 }
-//##############################
-// * 天窗层 - 清空全部天窗层【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 无
-//          
-//			说明：	> 清空全部即关闭动态快照。
-//##############################
-Graphics.drill_CODS_overstoryLayerClear = function(){
-	this.drill_CODS_removeChildConnect( this._drill_CODS_overstoryLayer );
-	this.drill_CODS_setRenderingEnabled( false );				//（天窗层所有贴图都没了，则关闭 渲染动态快照 ）
-}
 
 //=============================================================================
 // ** ☆天窗层实现
 //			
-//			说明：	> 处于天窗层的贴图，常规场景贴图的销毁够不到此层，需要手动 drill_CODS_overstoryLayerClear 。
+//			说明：	> 处于天窗层的贴图，常规场景贴图的销毁够不到此层。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
@@ -465,6 +481,47 @@ Graphics.initialize = function( width, height, type ){
 	this._drill_CODS_overstoryLayer = temp_sprite;
 	this._drill_CODS_overstoryBackground.addChild( temp_sprite );	//（直接加在 动态快照底图 上）
 };
+//==============================
+// * 天窗层实现 - 容器初始化
+//
+//			说明：	> 容器初始化时，$gameTemp 需要清空天窗层。
+//					  这个过程应该由核心插件自己控制，子插件不应该擅自销毁全部。
+//==============================
+var _drill_CODS_temp_initialize = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function(){
+	_drill_CODS_temp_initialize.call(this);
+	
+	// > 天窗层 清空
+	Graphics.drill_CODS_overstoryLayerClearAll();
+};
+//==============================
+// * 天窗层实现 - 标题界面初始化
+//
+//			说明：	> 标题界面时，需要清空天窗层。
+//					  这个过程应该由核心插件自己控制，子插件不应该擅自销毁全部。
+//==============================
+var _drill_CODS_title_initialize = Scene_Title.prototype.initialize;
+Scene_Title.prototype.initialize = function(){
+	_drill_CODS_title_initialize.call(this);
+	
+	// > 天窗层 清空
+	Graphics.drill_CODS_overstoryLayerClearAll();
+};
+//==============================
+// * 天窗层实现 - 旧函数 - 参数
+//==============================
+DrillUp.g_CODS_checkClear = true;
+//==============================
+// * 天窗层实现 - 旧函数 - 去除全部贴图
+//==============================
+Graphics.drill_CODS_overstoryLayerClear = function(){
+	
+	// > 提示更新
+	if( DrillUp.g_CODS_checkClear == true ){
+		DrillUp.g_CODS_checkClear = false;
+		alert( DrillUp.drill_CODS_getPluginTip_LowVersion() );
+	}
+}
 //==============================
 // * 天窗层实现 - 销毁 - 断开贴图连接（私有）『递归函数-头』
 //==============================
@@ -618,7 +675,18 @@ Scene_Map.prototype.drill_CODS_updateDebugDestroy = function() {
     if( $gameTemp._drill_CODS_DebugDestroy != true ){ return; }
 	$gameTemp._drill_CODS_DebugDestroy = false;
 	
-	Graphics.drill_CODS_overstoryLayerClear();
+	if( this._drill_CODS_overstory_sprite1 != undefined ){
+		Graphics.drill_CODS_overstoryLayerRemoveSprite(this._drill_CODS_overstory_sprite1);
+	}
+	if( this._drill_CODS_overstory_sprite2 != undefined ){
+		Graphics.drill_CODS_overstoryLayerRemoveSprite(this._drill_CODS_overstory_sprite2);
+	}
+	if( this._drill_CODS_overstory_sprite3 != undefined ){
+		Graphics.drill_CODS_overstoryLayerRemoveSprite(this._drill_CODS_overstory_sprite3);
+	}
+	if( this._drill_CODS_overstory_sprite4 != undefined ){
+		Graphics.drill_CODS_overstoryLayerRemoveSprite(this._drill_CODS_overstory_sprite4);
+	}
 	this._drill_CODS_overstory_sprite1 = null;
 	this._drill_CODS_overstory_sprite2 = null;
 	this._drill_CODS_overstory_sprite3 = null;

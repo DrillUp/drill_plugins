@@ -1128,13 +1128,6 @@
 //			->☆预加载
 //			
 //			->参数条【Drill_COGM_MeterSprite】
-//				->标准模块
-//					->显示/隐藏【标准函数】
-//					->是否就绪【标准函数】
-//					->销毁【标准函数】
-//					->修改变化因子【标准函数】
-//					->修改段上限【标准函数】
-//					->初始化数据【标准默认值】
 //				->A主体
 //				->B分段条
 //				->C追逐值
@@ -1504,13 +1497,13 @@ if( DrillUp.g_COGM_preloadEnabled == true ){
 // **						->显示贴图/隐藏贴图
 // **						->是否就绪
 // **						->优化策略
-// **						->销毁
+// **						->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					->参数条
 // **						->延迟初始化
-// **						->修改变化因子【开放函数】
-// **						->修改段上限【开放函数】
+// **						->修改变化因子【标准函数】
+// **						->修改段上限【标准函数】
 // **						
 // **					->A主体
 // **						->层级
@@ -1701,7 +1694,7 @@ Drill_COGM_MeterSprite.prototype.drill_sprite_updateDelayingInit = function() {
 //##############################
 // * 参数条 - 显示贴图/隐藏贴图【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1714,7 +1707,7 @@ Drill_COGM_MeterSprite.prototype.drill_COGM_setVisible = function( visible ){
 // * 参数条 - 是否就绪【标准函数】
 //
 //			参数：	> 无
-//			返回：	> visible 布尔
+//			返回：	> 布尔
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
@@ -1734,7 +1727,7 @@ Drill_COGM_MeterSprite.prototype.drill_COGM_isOptimizationPassed = function(){
     return true;	//（暂无策略）
 };
 //##############################
-// * 参数条 - 销毁【标准函数】
+// * 参数条 - 销毁独立贴图【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1746,7 +1739,7 @@ Drill_COGM_MeterSprite.prototype.drill_COGM_destroy = function(){
 };
 
 //##############################
-// * 参数条 - 修改变化因子【开放函数】
+// * 参数条 - 修改变化因子【标准函数】
 //
 //			参数：	> value 数字（变化因子值）
 //			返回：	> 无
@@ -1758,7 +1751,7 @@ Drill_COGM_MeterSprite.prototype.drill_COGM_reflashValue = function( value ){
 	this._drill_new_value = value;
 }
 //##############################
-// * 参数条 - 修改段上限【开放函数】
+// * 参数条 - 修改段上限【标准函数】
 //
 //			参数：	> level_max 数字（段上限）
 //			返回：	> 无
@@ -1874,7 +1867,7 @@ Drill_COGM_MeterSprite.prototype.drill_initSprite = function() {
 }
 
 //==============================
-// * 参数条 - 销毁（私有）
+// * 参数条 - 销毁独立贴图（私有）
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_COGM_destroy_Private = function() {
 	this.visible = false;
@@ -1919,14 +1912,14 @@ Drill_COGM_MeterSprite.prototype.drill_COGM_destroy_Private = function() {
 	this._drill_filling_mask = null;
 }
 //==============================
-// * 参数条 - 销毁 - 断开贴图连接（私有）『递归函数-头』
+// * 参数条 - 销毁独立贴图 - 断开贴图连接（私有）『递归函数-头』
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_sprite_removeChildConnect = function( parent_sprite ){
 	if( parent_sprite == undefined ){ return; }
 	this.drill_sprite_removeChildConnect_Recursion( parent_sprite );
 };
 //==============================
-// * 参数条 - 销毁 - 断开贴图连接（私有）『递归函数-节』
+// * 参数条 - 销毁独立贴图 - 断开贴图连接（私有）『递归函数-节』
 //==============================
 Drill_COGM_MeterSprite.prototype.drill_sprite_removeChildConnect_Recursion = function( parent_sprite ){
 	var sprite_list = parent_sprite.children;
@@ -3158,7 +3151,7 @@ Drill_COGM_SpringSprite.prototype.drill_updateSprite = function() {
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						x->销毁
+// **						x->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					->帧刷新 加满动画

@@ -3031,7 +3031,8 @@ Sprite_Animation.prototype.remove = function() {
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体
 // **					->B变化控制
@@ -3102,7 +3103,7 @@ Drill_ASu_Controller.prototype.drill_controller_resetData = function( data ){
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】（暂未使用，采用 $gameSystem._drill_ASu_visible 控制）
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -3114,7 +3115,7 @@ Drill_ASu_Controller.prototype.drill_controller_setVisible = function( visible )
 //##############################
 // * 控制器 - 暂停/继续【标准函数】
 //
-//			参数：	> enable 布尔
+//			参数：	> pause 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -3124,16 +3125,16 @@ Drill_ASu_Controller.prototype.drill_controller_setPause = function( pause ){
 	data['pause'] = pause;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_ASu_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 判断销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -3142,30 +3143,30 @@ Drill_ASu_Controller.prototype.drill_controller_isDead = function(){
 	return this._drill_needDestroy == true;
 };
 
-//##############################
-// * 2A阶段 - 获取当前阶段【开放函数】
+//==============================
+// * 2A阶段 - 获取当前阶段（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 布尔
-//##############################
+//==============================
 Drill_ASu_Controller.prototype.drill_ASu_getState = function(){
 	return this._drill_curState;
 };
-//##############################
-// * 2A阶段 - 设置当前阶段【开放函数】
+//==============================
+// * 2A阶段 - 设置当前阶段（开放函数）
 //
 //			参数：	> state 字符串
 //			返回：	> 无
-//##############################
+//==============================
 Drill_ASu_Controller.prototype.drill_ASu_setState = function( state ){
 	this.drill_ASu_setState_Private( state );
 };
-//##############################
-// * 2A阶段 - 判断阶段销毁【开放函数】
+//==============================
+// * 2A阶段 - 判断阶段销毁（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 布尔
-//##############################
+//==============================
 Drill_ASu_Controller.prototype.drill_ASu_isDead = function(){
 	return  this.drill_controller_isDead() || 
 			this._drill_curState == "销毁";
@@ -3708,8 +3709,8 @@ Drill_ASu_Controller.prototype.drill_initDeathState = function() {
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁（未使用）
-// **						->销毁（手动）
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
 // **					->A主体
 // **					->B变化控制
@@ -3761,7 +3762,7 @@ Drill_ASu_Sprite.prototype.update = function() {
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -3772,7 +3773,7 @@ Drill_ASu_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * C对象绑定 - 设置动画贴图【开放函数】
+// * C对象绑定 - 设置动画贴图【标准函数】
 //			
 //			参数：	> animation_sprite 动画贴图
 //			返回：	> 无
@@ -3782,7 +3783,7 @@ Drill_ASu_Sprite.prototype.drill_sprite_setAnimationSprite = function( animation
 	this._animation = animation_sprite._animation;
 };
 //##############################
-// * C对象绑定 - 设置个体贴图【开放函数】
+// * C对象绑定 - 设置个体贴图【标准函数】
 //			
 //			参数：	> individual_sprite 贴图对象
 //			返回：	> 无
@@ -3793,7 +3794,7 @@ Drill_ASu_Sprite.prototype.drill_sprite_setIndividualSprite = function( individu
 	this._drill_individualSprite = individual_sprite;
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3812,7 +3813,7 @@ Drill_ASu_Sprite.prototype.drill_sprite_initChild = function(){
 // * 环绕球贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -3834,10 +3835,10 @@ Drill_ASu_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return true;
 };
 //##############################
-// * 环绕球贴图 - 是否需要销毁【标准函数】
+// * 环绕球贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -3847,7 +3848,7 @@ Drill_ASu_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * 环绕球贴图 - 销毁【标准函数】
+// * 环绕球贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无

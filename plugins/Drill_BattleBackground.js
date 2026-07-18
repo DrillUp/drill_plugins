@@ -1913,11 +1913,11 @@
 //			->☆控制器与贴图
 //				->界面创建
 //				->实时创建
-//				->控制器与镜头
+//				->帧刷新 控制器
+//				->帧刷新 镜头
 //					> 位移比
-//					->控制器帧刷新
-//				->基础特性
-//				->销毁
+//				->帧刷新 基础特性
+//				->帧刷新 自动销毁
 //			
 //			->战斗背景控制器【Drill_BBa_Controller】
 //				->Z镜头参数
@@ -2005,12 +2005,6 @@
 	//==============================
 	// * 提示信息 - 报错 - 强制更新提示
 	//==============================
-	DrillUp.drill_BBa_getPluginTip_NeedUpdate_Camera = function(){
-		return "【" + DrillUp.g_BBa_PluginTip_curName + "】\n活动战斗镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
-	};
-	//==============================
-	// * 提示信息 - 报错 - 强制更新提示
-	//==============================
 	DrillUp.drill_BBa_getPluginTip_NeedUpdate_Ballistics = function(){
 		return "【" + DrillUp.g_BBa_PluginTip_curName + "】\n弹道核心插件版本过低，你需要更新 弹道核心 至少v2.2及以上版本。";
 	};
@@ -2052,6 +2046,7 @@
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['layerIndex'] = String( dataFrom["战斗层级"] || "下层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		data['styleName'] = String( dataFrom["标签"] || "");
 		
 		// > A主体 - 其它特性
 		data['XPer'] = Number( dataFrom["位移比X"] || 0);
@@ -2082,7 +2077,7 @@
 		data['effect_zoomSpeed'] = Number( dataFrom["缩放速度"] || 1.0);
 		data['effect_zoomRange'] = Number( dataFrom["缩放幅度范围"] || 0.2);
 		
-		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		// > 控制器 - 『控制器与贴图的样式-静态数据-指针初始化』
 		Drill_BBa_Controller.drill_controller_initData( data );
 		
 		return data;
@@ -4012,9 +4007,10 @@ var _drill_BBa_smap_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
 	_drill_BBa_smap_update.call(this);
 	this.drill_BBa_updateRestatisticsCreate();	//帧刷新 - 实时创建
-	this.drill_BBa_updateControllerCamera();	//帧刷新 - 控制器与镜头
+	this.drill_BBa_updateController();			//帧刷新 - 控制器
+	this.drill_BBa_updateCamera();				//帧刷新 - 镜头
 	this.drill_BBa_updateAttr();				//帧刷新 - 基础特性
-	this.drill_BBa_updateDestroy();				//帧刷新 - 销毁
+	this.drill_BBa_updateDestroy();				//帧刷新 - 自动销毁
 };
 //==============================
 // * 控制器与贴图 - 界面创建时（战斗界面）
@@ -4097,16 +4093,22 @@ Scene_Battle.prototype.drill_BBa_hasSpriteBinding = function( serial ){
 }
 
 //==============================
-// * 控制器与贴图 - 帧刷新 控制器与镜头
+// * 控制器与贴图 - 帧刷新 控制器
 //==============================
-Scene_Battle.prototype.drill_BBa_updateControllerCamera = function(){
+Scene_Battle.prototype.drill_BBa_updateController = function(){
 	for(var i = 0; i < $gameSystem._drill_BBa_controllerTank.length; i++ ){
 		var temp_controller = $gameSystem._drill_BBa_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
-		
-		// > 控制器帧刷新
 		temp_controller.drill_controller_update();
-		
+	}
+}
+//==============================
+// * 控制器与贴图 - 帧刷新 镜头
+//==============================
+Scene_Battle.prototype.drill_BBa_updateCamera = function(){
+	for(var i = 0; i < $gameSystem._drill_BBa_controllerTank.length; i++ ){
+		var temp_controller = $gameSystem._drill_BBa_controllerTank[i];
+		if( temp_controller == undefined ){ continue; }
 		
 		// > 镜头位移结果（战斗参照）
 		var xx = 0;
@@ -4128,7 +4130,6 @@ Scene_Battle.prototype.drill_BBa_updateControllerCamera = function(){
 		//		（控制器位移与镜头位移 独立，这样在控制器暂停时，贴图也仍然能兼容镜头移动）
 		temp_controller._drill_cameraResultSpriteX = xx;
 		temp_controller._drill_cameraResultSpriteY = yy;
-		
 	}
 }
 //==============================
@@ -4161,7 +4162,7 @@ Scene_Battle.prototype.drill_BBa_updateAttr = function(){
 	}
 }
 //==============================
-// * 控制器与贴图 - 帧刷新 销毁
+// * 控制器与贴图 - 帧刷新 自动销毁
 //==============================
 Scene_Battle.prototype.drill_BBa_updateDestroy = function(){
 	
@@ -4200,8 +4201,8 @@ Scene_Battle.prototype.drill_BBa_updateDestroy = function(){
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->设置销毁
-// **						->是否销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
@@ -4299,7 +4300,7 @@ Drill_BBa_Controller.prototype.drill_controller_resetData = function( data_id ){
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -4319,16 +4320,16 @@ Drill_BBa_Controller.prototype.drill_controller_setPause = function( pause ){
 	this._drill_pause = pause;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 是否销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -4367,75 +4368,102 @@ Drill_BBa_Controller.METHOD__drill_controller_commandChange_restoreAttr    = 45;
 Drill_BBa_Controller.METHOD__drill_controller_commandChange_setMove        = 51;
 Drill_BBa_Controller.METHOD__drill_controller_commandChange_restoreMove    = 52;
 
-//##############################
-// * A主体 - 切换混合模式【标准函数】
+//==============================
+// * A主体 - 切换混合模式（开放函数）
 //
 //			参数：	> blendMode 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_BBa_Controller.prototype.drill_controller_setBlendMode = function( blendMode ){
 	this._drill_blendMode = blendMode;
 };
-//##############################
-// * A主体 - 切换战斗层级【标准函数】
+//==============================
+// * A主体 - 切换层级（开放函数）
 //
 //			参数：	> layerIndex 字符串
 //			返回：	> 无
-//##############################
+//==============================
 Drill_BBa_Controller.prototype.drill_controller_setLayerIndex = function( layerIndex ){
 	this._drill_layerIndex = layerIndex;
 };
-//##############################
-// * A主体 - 切换图片层级【标准函数】
+//==============================
+// * A主体 - 切换堆叠级（开放函数）
 //
 //			参数：	> zIndex 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_BBa_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 	this._drill_zIndex = zIndex;
 };
-//##############################
-// * A主体 - 还原混合模式【标准函数】
+//==============================
+// * A主体 - 还原混合模式（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_BBa_Controller.prototype.drill_controller_restoreBlendMode = function(){
 	var data = this.drill_data();
 	this._drill_blendMode = data['blendMode'];
 };
-//##############################
-// * A主体 - 还原战斗层级【标准函数】
+//==============================
+// * A主体 - 还原层级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_BBa_Controller.prototype.drill_controller_restoreLayerIndex = function(){
 	var data = this.drill_data();
 	this._drill_layerIndex = data['layerIndex'];
 };
-//##############################
-// * A主体 - 还原图片层级【标准函数】
+//==============================
+// * A主体 - 还原堆叠级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_BBa_Controller.prototype.drill_controller_restoreZIndex = function(){
 	var data = this.drill_data();
 	this._drill_zIndex = data['zIndex'];
 };
 
-//##############################
-// * A主体 - 修改位移比【标准函数】
+//==============================
+// * A主体 - 修改位移比（开放函数）
 //
 //			参数：	> xPer,yPer 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_BBa_Controller.prototype.drill_controller_setPer = function( xPer, yPer ){
 	this._drill_XPer = xPer;
 	this._drill_YPer = yPer;
 };
 
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
+//##############################
+DrillUp.g_BBa_notFindStyleAlertOnce = true;
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』获取数据指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，所以只读静态数据。不要存储到存档中，也不要挂载到控制器身上。
+//					> 该函数直接获取指针，可以放在帧刷新中使用。
+//##############################
+Drill_BBa_Controller.prototype.drill_data = function(){
+	var cur_styleId   = this._drill_data_id +1;
+	var cur_styleData = DrillUp.g_BBa_style[ this._drill_data_id ];
+	if( cur_styleData == undefined ){
+		
+		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
+		if( DrillUp.g_BBa_notFindStyleAlertOnce == true ){
+			DrillUp.g_BBa_notFindStyleAlertOnce = false;
+			alert( DrillUp.drill_BBa_getPluginTip_StyleNotFind(cur_styleId) );
+		}
+		return {};
+	}
+	return cur_styleData;
+};
 //##############################
 // * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
@@ -4446,7 +4474,7 @@ Drill_BBa_Controller.prototype.drill_controller_setPer = function( xPer, yPer ){
 //##############################
 Drill_BBa_Controller.drill_controller_initData = function( data ){
 	//	（该函数是静态函数，直接修改 静态数据 的指针值）
-	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 @注释定义 的参数）
 	
 	// > A主体 - 基础特性
 	if( data['src_img'] == undefined ){ data['src_img'] = "" };										//A主体 - 资源
@@ -4459,6 +4487,7 @@ Drill_BBa_Controller.drill_controller_initData = function( data ){
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };									//A主体 - 混合模式
 	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "上层" };							//A主体 - 战斗层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };										//A主体 - 图片层级
+	if( data['styleName'] == undefined ){ data['styleName'] = "" };									//A主体 - 标签
 	
 	// > A主体 - 其它特性
 	if( data['XPer'] == undefined ){ data['XPer'] = 0 };											//A主体 - 位移比X
@@ -4533,40 +4562,6 @@ Drill_BBa_Controller.prototype.drill_controller_resetData_Private = function( da
 	//this.drill_controller_initData();										//初始化数据
 	this.drill_controller_initChild();										//初始化子功能
 }
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
-//##############################
-DrillUp.g_BBa_notFindStyleAlertOnce = true;
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』空的静态数据
-//			
-//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
-//##############################
-Drill_BBa_Controller.emptyData = {};
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』获取静态数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 对象指针
-//			
-//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
-//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
-//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
-//##############################
-Drill_BBa_Controller.prototype.drill_data = function(){
-	var cur_styleId   = this._drill_data_id +1;
-	var cur_styleData = DrillUp.g_BBa_style[ this._drill_data_id ];
-	if( cur_styleData == undefined ){
-		
-		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
-		if( DrillUp.g_BBa_notFindStyleAlertOnce == true ){
-			DrillUp.g_BBa_notFindStyleAlertOnce = false;
-			alert( DrillUp.drill_BBa_getPluginTip_StyleNotFind(cur_styleId) );
-		}
-		return Drill_BBa_Controller.emptyData;
-	}
-	return cur_styleData;
-};
 
 
 //==============================
@@ -4671,63 +4666,63 @@ Drill_BBa_Controller.prototype.drill_controller_updateChange_Position = function
 	this._drill_change_selfYAcc += this.drill_controller_finalTransform_selfYSpeed();
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置X【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_x = function(){
 	return this._drill_change_x + this._drill_change_selfXAcc + this._drill_move_originOffsetX
-		+ this._drill_cameraResultSpriteX;	//（镜头位移结果，见函数 drill_BBa_updateControllerCamera ）
+		+ this._drill_cameraResultSpriteX;	//（镜头位移结果，见函数 drill_BBa_updateCamera ）
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置Y【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_y = function(){
 	return this._drill_change_y + this._drill_change_selfYAcc + this._drill_move_originOffsetY
-		+ this._drill_cameraResultSpriteY;	//（镜头位移结果，见函数 drill_BBa_updateControllerCamera ）
+		+ this._drill_cameraResultSpriteY;	//（镜头位移结果，见函数 drill_BBa_updateCamera ）
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 移动速度X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 移动速度X【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_selfXSpeed = function(){
 	return this._drill_change_selfXSpeed;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 移动速度Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 移动速度Y【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_selfYSpeed = function(){
 	return this._drill_change_selfYSpeed;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放X【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_scaleX = function(){
 	return this._drill_change_scaleX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放Y【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_scaleY = function(){
 	return this._drill_change_scaleY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 透明度（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 透明度【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_opacity = function(){
 	return this._drill_change_opacity;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切X【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_skewX = function(){
 	return this._drill_change_skewX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切Y【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_skewY = function(){
 	return this._drill_change_skewY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 旋转（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 旋转【标准函数】
 //##############################
 Drill_BBa_Controller.prototype.drill_controller_finalTransform_rotate = function(){
 	return this._drill_change_rotate;
@@ -5557,8 +5552,8 @@ Drill_BBa_Controller.prototype.drill_controller_initCamera = function(){
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁（未使用）
-// **						->销毁（手动）
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
 // **					->A贴图主体
 // **					->B变换特性
@@ -5611,7 +5606,7 @@ Drill_BBa_Sprite.prototype.update = function(){
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -5623,7 +5618,7 @@ Drill_BBa_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -5644,7 +5639,7 @@ Drill_BBa_Sprite.prototype.drill_sprite_initChild = function(){
 // * 背景贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -5664,10 +5659,10 @@ Drill_BBa_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return true;
 };
 //##############################
-// * 背景贴图 - 是否需要销毁【标准函数】
+// * 背景贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -5677,7 +5672,7 @@ Drill_BBa_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * 背景贴图 - 销毁【标准函数】
+// * 背景贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无

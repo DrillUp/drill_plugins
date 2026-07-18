@@ -736,32 +736,43 @@ Scene_Title.prototype.drill_TVi_sortByZIndex = function () {
 // ** 标题层级（接口实现）
 //=============================================================================
 //==============================
-// * 标题层级 - 层级初始化1
+// * 标题层级 - 创建
 //==============================
 var _drill_TVi_titleLayer_createBackground = Scene_Title.prototype.createBackground;
 Scene_Title.prototype.createBackground = function() {
 	_drill_TVi_titleLayer_createBackground.call(this);
 	
-	// > 创建 菜单后面层（注意，Scene_Title 没有继承 Scene_MenuBase，提前创建）
+	// > 『菜单后面层-创建』（注意，Scene_Title 没有继承 Scene_MenuBase，提前创建）
 	if( this._backgroundSprite == undefined ){
 		this._backgroundSprite = new Sprite();
 		this.addChild(this._backgroundSprite);
 	}
+	
+	// > 『菜单前面层-创建』
+	if( this._foregroundSprite == undefined ){
+		this._foregroundSprite = new Sprite();
+	}
 };
 //==============================
-// * 标题层级 - 层级初始化2
+// * 标题层级 - 帧刷新
 //==============================
 var _drill_TVi_titleLayer_update = Scene_Title.prototype.update;
 Scene_Title.prototype.update = function() {
 	_drill_TVi_titleLayer_update.call(this);
 	
-	// > 创建 菜单后面层（防止报错）
+	// > 菜单后面层（防止覆写报错）
 	if( this._backgroundSprite == undefined ){
 		this._backgroundSprite = new Sprite();
 	}
-	// > 创建 菜单前面层
+	
+	// > 菜单前面层（防止覆写报错）
 	if( this._foregroundSprite == undefined ){
 		this._foregroundSprite = new Sprite();
+	}
+	
+	// > 『菜单前面层-顺序控制』
+	if( this._foregroundSprite_hasAddChild == undefined ){
+		this._foregroundSprite_hasAddChild = true;
 		this.addChild(this._foregroundSprite);	
 	}
 };
@@ -996,7 +1007,7 @@ WebAudio.setMasterVolume = function( value ){
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						->销毁
+// **						->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					
@@ -1082,7 +1093,7 @@ Drill_TVi_VideoSprite.prototype.drill_initSprite = function() {
 	this.drill_sprite_initVideo();			//初始化子功能 - B视频
 };
 //==============================
-// * 视频贴图 - 执行销毁
+// * 视频贴图 - 销毁独立贴图
 //==============================
 Drill_TVi_VideoSprite.prototype.drill_TVi_destroy = function() {
 	var data = this._drill_data;

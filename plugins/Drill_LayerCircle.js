@@ -1981,8 +1981,8 @@
 //		★时间复杂度		o(n^2)*o(贴图处理) 每帧
 //		★性能测试因素	地图管理层
 //		★性能测试消耗	2026/4/21：
-//							》游戏本：17.9ms（Drill_LCi_Sprite.update）12.5ms（drill_sprite_updateCommandChange）4.2ms（drill_LCi_updateControllerCamera）
-//							》垃圾本：58.8ms（Drill_LCi_Sprite.update）39.4ms（drill_sprite_updateCommandChange）27.9ms（drill_LCi_updateControllerCamera）
+//							》游戏本：17.9ms（Drill_LCi_Sprite.update）12.5ms（drill_sprite_updateCommandChange）4.2ms（drill_LCi_updateController）
+//							》垃圾本：58.8ms（Drill_LCi_Sprite.update）39.4ms（drill_sprite_updateCommandChange）27.9ms（drill_LCi_updateController）
 //							》目前看来 贴图 和 控制器 的计算量对半分。垃圾本要慢3倍的速度。
 //							》使用小工程 "动画转场设计-眩晕圆环动画" 来测试，垃圾本能保持60帧满帧。其中，运行指令容器会掉1.5帧，变换过程消耗可能在0.3帧。
 //		★最坏情况		暂无
@@ -2020,16 +2020,16 @@
 //				->不匹配时
 //			->☆控制器与贴图
 //				->界面创建
-//				->控制器与镜头
+//				->帧刷新 控制器
+//				->帧刷新 镜头
 //					> 图块平移
 //					> 位移比
 //					> 循环积累值
-//					->控制器帧刷新
-//				->基础特性
-//				->动态遮罩
+//				->帧刷新 基础特性
+//				->帧刷新 动态遮罩
 //					->创建
 //					->延迟创建
-//				->销毁
+//				->帧刷新 自动销毁
 //			
 //			->地图魔法圈控制器【Drill_LCi_Controller】
 //				->Z镜头参数
@@ -2188,6 +2188,7 @@
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['layerIndex'] = String( dataFrom["地图层级"] || "下层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		data['styleName'] = String( dataFrom["标签"] || "");
 		
 		// > A主体 - 其它特性
 		data['XPer'] = Number( dataFrom["位移比X"] || 0);
@@ -2226,7 +2227,7 @@
 		data['effect_zoomSpeed'] = Number( dataFrom["缩放速度"] || 1.0);
 		data['effect_zoomRange'] = Number( dataFrom["缩放幅度范围"] || 0.2);
 		
-		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		// > 控制器 - 『控制器与贴图的样式-静态数据-指针初始化』
 		Drill_LCi_Controller.drill_controller_initData( data );
 		
 		return data;
@@ -3736,10 +3737,11 @@ Scene_Map.prototype.terminate = function(){
 var _drill_LCi_smap_update = Scene_Map.prototype.update;
 Scene_Map.prototype.update = function(){
 	_drill_LCi_smap_update.call(this);
-	this.drill_LCi_updateControllerCamera();	//帧刷新 - 控制器与镜头
+	this.drill_LCi_updateController();			//帧刷新 - 控制器
+	this.drill_LCi_updateCamera();				//帧刷新 - 镜头
 	this.drill_LCi_updateAttr();				//帧刷新 - 基础特性
 	this.drill_LCi_updateMask();				//帧刷新 - 动态遮罩
-	this.drill_LCi_updateDestroy();				//帧刷新 - 销毁
+	this.drill_LCi_updateDestroy();				//帧刷新 - 自动销毁
 };
 //==============================
 // * 控制器与贴图 - 界面创建时（地图界面）
@@ -3786,16 +3788,22 @@ Scene_Map.prototype.drill_LCi_create = function(){
 	this.drill_LCi_sortByZIndex();
 }
 //==============================
-// * 控制器与贴图 - 帧刷新 控制器与镜头
+// * 控制器与贴图 - 帧刷新 控制器
 //==============================
-Scene_Map.prototype.drill_LCi_updateControllerCamera = function(){
+Scene_Map.prototype.drill_LCi_updateController = function(){
 	for(var i = 0; i < $gameSystem._drill_LCi_dataTank_curController.length; i++ ){
 		var temp_controller = $gameSystem._drill_LCi_dataTank_curController[i];
 		if( temp_controller == undefined ){ continue; }
-		
-		// > 控制器帧刷新
 		temp_controller.drill_controller_update();
-		
+	}
+}
+//==============================
+// * 控制器与贴图 - 帧刷新 镜头
+//==============================
+Scene_Map.prototype.drill_LCi_updateCamera = function(){
+	for(var i = 0; i < $gameSystem._drill_LCi_dataTank_curController.length; i++ ){
+		var temp_controller = $gameSystem._drill_LCi_dataTank_curController[i];
+		if( temp_controller == undefined ){ continue; }
 		
 		// > 镜头位移结果（地图参照）
 		var xx = 0;
@@ -3900,7 +3908,7 @@ Scene_Map.prototype.drill_LCi_updateMask = function(){
 	}
 }
 //==============================
-// * 控制器与贴图 - 帧刷新 销毁
+// * 控制器与贴图 - 帧刷新 自动销毁
 //==============================
 Scene_Map.prototype.drill_LCi_updateDestroy = function(){
 	
@@ -3938,7 +3946,8 @@ Scene_Map.prototype.drill_LCi_updateDestroy = function(){
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
@@ -4036,7 +4045,7 @@ Drill_LCi_Controller.prototype.drill_controller_resetData = function( data_id ){
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -4056,16 +4065,16 @@ Drill_LCi_Controller.prototype.drill_controller_setPause = function( pause ){
 	this._drill_pause = pause;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 判断销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -4103,75 +4112,102 @@ Drill_LCi_Controller.METHOD__drill_controller_commandChange_restoreAttr    = 45;
 Drill_LCi_Controller.METHOD__drill_controller_commandChange_setMove        = 51;
 Drill_LCi_Controller.METHOD__drill_controller_commandChange_restoreMove    = 52;
 
-//##############################
-// * A主体 - 切换混合模式【标准函数】
+//==============================
+// * A主体 - 切换混合模式（开放函数）
 //
 //			参数：	> blendMode 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_LCi_Controller.prototype.drill_controller_setBlendMode = function( blendMode ){
 	this._drill_blendMode = blendMode;
 };
-//##############################
-// * A主体 - 切换地图层级【标准函数】
+//==============================
+// * A主体 - 切换层级（开放函数）
 //
 //			参数：	> layerIndex 字符串
 //			返回：	> 无
-//##############################
+//==============================
 Drill_LCi_Controller.prototype.drill_controller_setLayerIndex = function( layerIndex ){
 	this._drill_layerIndex = layerIndex;
 };
-//##############################
-// * A主体 - 切换图片层级【标准函数】
+//==============================
+// * A主体 - 切换堆叠级（开放函数）
 //
 //			参数：	> zIndex 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_LCi_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 	this._drill_zIndex = zIndex;
 };
-//##############################
-// * A主体 - 还原混合模式【标准函数】
+//==============================
+// * A主体 - 还原混合模式（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_LCi_Controller.prototype.drill_controller_restoreBlendMode = function(){
 	var data = this.drill_data();
 	this._drill_blendMode = data['blendMode'];
 };
-//##############################
-// * A主体 - 还原地图层级【标准函数】
+//==============================
+// * A主体 - 还原层级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_LCi_Controller.prototype.drill_controller_restoreLayerIndex = function(){
 	var data = this.drill_data();
 	this._drill_layerIndex = data['layerIndex'];
 };
-//##############################
-// * A主体 - 还原图片层级【标准函数】
+//==============================
+// * A主体 - 还原堆叠级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_LCi_Controller.prototype.drill_controller_restoreZIndex = function(){
 	var data = this.drill_data();
 	this._drill_zIndex = data['zIndex'];
 };
 
-//##############################
-// * A主体 - 修改位移比【标准函数】
+//==============================
+// * A主体 - 修改位移比（开放函数）
 //
 //			参数：	> xPer,yPer 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_LCi_Controller.prototype.drill_controller_setPer = function( xPer, yPer ){
 	this._drill_XPer = xPer;
 	this._drill_YPer = yPer;
 };
 
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
+//##############################
+DrillUp.g_LCi_notFindStyleAlertOnce = true;
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』获取数据指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，所以只读静态数据。不要存储到存档中，也不要挂载到控制器身上。
+//					> 该函数直接获取指针，可以放在帧刷新中使用。
+//##############################
+Drill_LCi_Controller.prototype.drill_data = function(){
+	var cur_styleId   = this._drill_data_id +1;
+	var cur_styleData = DrillUp.g_LCi_layers[ this._drill_data_id ];
+	if( cur_styleData == undefined ){
+		
+		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
+		if( DrillUp.g_LCi_notFindStyleAlertOnce == true ){
+			DrillUp.g_LCi_notFindStyleAlertOnce = false;
+			alert( DrillUp.drill_LCi_getPluginTip_StyleNotFind(cur_styleId) );
+		}
+		return {};
+	}
+	return cur_styleData;
+};
 //##############################
 // * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
@@ -4182,7 +4218,7 @@ Drill_LCi_Controller.prototype.drill_controller_setPer = function( xPer, yPer ){
 //##############################
 Drill_LCi_Controller.drill_controller_initData = function( data ){
 	//	（该函数是静态函数，直接修改 静态数据 的指针值）
-	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 @注释定义 的参数）
 	
 	// > A主体 - 基础特性
 	if( data['src_img'] == undefined ){ data['src_img'] = "" };										//A主体 - 资源
@@ -4195,6 +4231,7 @@ Drill_LCi_Controller.drill_controller_initData = function( data ){
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };									//A主体 - 混合模式
 	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "上层" };							//A主体 - 地图层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };										//A主体 - 图片层级
+	if( data['styleName'] == undefined ){ data['styleName'] = "" };									//A主体 - 标签
 	
 	// > A主体 - 其它特性
 	if( data['XPer'] == undefined ){ data['XPer'] = 0 };											//A主体 - 位移比X
@@ -4275,40 +4312,6 @@ Drill_LCi_Controller.prototype.drill_controller_resetData_Private = function( da
 	//this.drill_controller_initData();										//初始化数据
 	this.drill_controller_initChild();										//初始化子功能
 }
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
-//##############################
-DrillUp.g_LCi_notFindStyleAlertOnce = true;
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』空的静态数据
-//			
-//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
-//##############################
-Drill_LCi_Controller.emptyData = {};
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』获取静态数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 对象指针
-//			
-//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
-//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
-//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
-//##############################
-Drill_LCi_Controller.prototype.drill_data = function(){
-	var cur_styleId   = this._drill_data_id +1;
-	var cur_styleData = DrillUp.g_LCi_layers[ this._drill_data_id ];
-	if( cur_styleData == undefined ){
-		
-		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
-		if( DrillUp.g_LCi_notFindStyleAlertOnce == true ){
-			DrillUp.g_LCi_notFindStyleAlertOnce = false;
-			alert( DrillUp.drill_LCi_getPluginTip_StyleNotFind(cur_styleId) );
-		}
-		return Drill_LCi_Controller.emptyData;
-	}
-	return cur_styleData;
-};
 
 
 //==============================
@@ -4406,57 +4409,57 @@ Drill_LCi_Controller.prototype.drill_controller_updateChange_Rotation = function
 	this._drill_childCircle_rotation += this._drill_childCircle_rotateSpeed;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置X【标准函数】
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_finalTransform_x = function(){
 	return this._drill_change_x
-		+ this._drill_cameraResultSpriteX;	//（镜头位移结果，见函数 drill_LCi_updateControllerCamera ）
+		+ this._drill_cameraResultSpriteX;	//（镜头位移结果，见函数 drill_LCi_updateCamera ）
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置Y【标准函数】
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_finalTransform_y = function(){
 	return this._drill_change_y
-		+ this._drill_cameraResultSpriteY;	//（镜头位移结果，见函数 drill_LCi_updateControllerCamera ）
+		+ this._drill_cameraResultSpriteY;	//（镜头位移结果，见函数 drill_LCi_updateCamera ）
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放X【标准函数】
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_finalTransform_scaleX = function(){
 	return this._drill_change_scaleX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放Y【标准函数】
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_finalTransform_scaleY = function(){
 	return this._drill_change_scaleY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 透明度（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 透明度【标准函数】
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_finalTransform_opacity = function(){
 	return this._drill_change_opacity;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切X【标准函数】
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_finalTransform_skewX = function(){
 	return this._drill_change_skewX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切Y【标准函数】
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_finalTransform_skewY = function(){
 	return this._drill_change_skewY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 旋转（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 旋转【标准函数】
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_finalTransform_rotate = function(){
 	return this._drill_change_rotate;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 转速（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 转速【标准函数】
 //##############################
 Drill_LCi_Controller.prototype.drill_controller_finalTransform_rotateSpeed = function(){
 	return this._drill_childCircle_rotateSpeed;
@@ -5164,8 +5167,8 @@ Drill_LCi_Controller.prototype.drill_controller_getCameraYAcc = function(){
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁（未使用）
-// **						->销毁（手动）
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
 // **					->A贴图主体
 // **					->B变换特性
@@ -5218,7 +5221,7 @@ Drill_LCi_Sprite.prototype.update = function(){
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -5230,7 +5233,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -5251,7 +5254,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_initChild = function(){
 // * 魔法圈贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -5268,13 +5271,13 @@ Drill_LCi_Sprite.prototype.drill_sprite_isReady = function(){
 //			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
 //##############################
 Drill_LCi_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
-    return this.drill_sprite_isOptimizationPassed_Private();
+    return true;
 };
 //##############################
-// * 魔法圈贴图 - 是否需要销毁【标准函数】
+// * 魔法圈贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -5284,7 +5287,7 @@ Drill_LCi_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * 魔法圈贴图 - 销毁【标准函数】
+// * 魔法圈贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -5688,47 +5691,6 @@ Drill_LCi_Sprite.prototype.drill_sprite_updateEffect = function(){
 		this._drill_layerSprite.scale.y += value;
 	}
 }
-
-
-//==============================
-// * 优化策略 - 判断通过（私有）
-//==============================
-Drill_LCi_Sprite.prototype.drill_sprite_isOptimizationPassed_Private = function(){
-	return true;
-}
-/*
-//// > 镜头范围外时，不工作
-//if( this.drill_LCi_posIsInCamera( this._character._realX, this._character._realY ) == false ){
-//	this.visible = false;
-//	return false;
-//}
-//return true;
-
-// > 强制更新提示 锁
-DrillUp.g_LCa_alert = true;
-//==============================
-// * 优化策略 - 判断贴图是否在镜头范围内
-//==============================
-Drill_LCi_Sprite.prototype.drill_LCi_posIsInCamera = function( realX, realY ){
-	var oww = Graphics.boxWidth  / $gameMap.tileWidth();
-	var ohh = Graphics.boxHeight / $gameMap.tileHeight();
-	var sww = oww;
-	var shh = ohh;
-	if( Imported.Drill_LayerCamera ){	// 【地图 - 活动地图镜头】镜头范围内+缩放
-		
-		// > 强制更新提示
-		if( $gameSystem._drill_LCa_controller == undefined && DrillUp.g_LCa_alert == true ){ 
-			alert( DrillUp.drill_LCi_getPluginTip_NeedUpdate_Camera() );
-			DrillUp.g_LCa_alert = false;
-		}
-		
-		sww = sww / $gameSystem._drill_LCa_controller._drill_scaleX;
-		shh = shh / $gameSystem._drill_LCa_controller._drill_scaleY;
-	}
-	return  Math.abs($gameMap.adjustX(realX + 0.5) - oww*0.5) <= sww*0.5 + 5.5 &&	//（镜头范围+5个图块边框区域） 
-			Math.abs($gameMap.adjustY(realY + 0.5) - ohh*0.5) <= shh*0.5 + 5.5 ;
-}
-*/
 
 
 //=============================================================================

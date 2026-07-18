@@ -2120,7 +2120,7 @@ Drill_OKe_PadBean.prototype.initialize = function(){
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
-// * 手柄实体类 - 启用/关闭【开放函数】
+// * 手柄实体类 - 启用/关闭【标准函数】
 //			
 //			参数：	> enabled 布尔
 //			返回：	> 无
@@ -2129,7 +2129,7 @@ Drill_OKe_PadBean.prototype.drill_bean_setEnabled = function( enabled ){
 	this._drill_enabled = enabled;
 };
 //##############################
-// * 手柄实体类 - 设置键值（基本键）【开放函数】
+// * 手柄实体类 - 设置键值（基本键）【标准函数】
 //			
 //			参数：	> name 字符串     （键）
 //					> str_value 字符串（值）
@@ -2154,7 +2154,7 @@ Drill_OKe_PadBean.prototype.drill_bean_setNameAndStrValue_Base = function( name,
 	this._drill_has_fn = false;
 };
 //##############################
-// * 手柄实体类 - 设置键值（扩展键）【开放函数】
+// * 手柄实体类 - 设置键值（扩展键）【标准函数】
 //			
 //			参数：	> name 字符串     （键）
 //					> str_value 字符串（值）
@@ -2179,7 +2179,7 @@ Drill_OKe_PadBean.prototype.drill_bean_setNameAndStrValue_Extend = function( nam
 	}
 };
 //##############################
-// * 手柄实体类 - 设置功能键附加【开放函数】
+// * 手柄实体类 - 设置功能键附加【标准函数】
 //			
 //			参数：	> has_fn 布尔
 //			返回：	> 无
@@ -2188,7 +2188,7 @@ Drill_OKe_PadBean.prototype.drill_bean_setHasFn = function( has_fn ){
 	this._drill_has_fn = has_fn;
 };
 //##############################
-// * 手柄实体类 - 复制对象【开放函数】
+// * 手柄实体类 - 复制对象【标准函数】
 //			
 //			参数：	> bean 手柄实体类
 //			返回：	> 无
@@ -2556,7 +2556,7 @@ Drill_OKe_KeyboardBean.prototype.initialize = function(){
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
-// * 键盘实体类 - 启用/关闭【开放函数】
+// * 键盘实体类 - 启用/关闭【标准函数】
 //			
 //			参数：	> enabled 布尔
 //			返回：	> 无
@@ -2565,7 +2565,7 @@ Drill_OKe_KeyboardBean.prototype.drill_bean_setEnabled = function( enabled ){
 	this._drill_enabled = enabled;
 };
 //##############################
-// * 键盘实体类 - 设置键值（基本键）【开放函数】
+// * 键盘实体类 - 设置键值（基本键）【标准函数】
 //			
 //			参数：	> name 字符串     （键）
 //					> str_value 字符串（值）
@@ -2591,7 +2591,7 @@ Drill_OKe_KeyboardBean.prototype.drill_bean_setNameAndStrValue_Base = function( 
 	this._drill_valueB = null;
 };
 //##############################
-// * 键盘实体类 - 设置键值（扩展键）【开放函数】
+// * 键盘实体类 - 设置键值（扩展键）【标准函数】
 //			
 //			参数：	> name 字符串     （键）
 //					> str_value 字符串（值）
@@ -2618,7 +2618,7 @@ Drill_OKe_KeyboardBean.prototype.drill_bean_setNameAndStrValue_Extend = function
 	}
 };
 //##############################
-// * 键盘实体类 - 是否触发按键【开放函数】
+// * 键盘实体类 - 是否触发按键【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
@@ -2643,7 +2643,7 @@ Drill_OKe_KeyboardBean.prototype.drill_bean_isTriggered = function(){
 	return false; 
 };
 //##############################
-// * 键盘实体类 - 是否按下按键【开放函数】
+// * 键盘实体类 - 是否按下按键【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
@@ -2667,7 +2667,7 @@ Drill_OKe_KeyboardBean.prototype.drill_bean_isPressed = function(){
 	return false; 
 };
 //##############################
-// * 键盘实体类 - 复制对象【开放函数】
+// * 键盘实体类 - 复制对象【标准函数】
 //			
 //			参数：	> bean 键盘实体类
 //			返回：	> 无

@@ -297,7 +297,7 @@ Drill_CODM_MaskStage.prototype.drill_CODM_setEnabled = function( enabled ){
 //##############################
 // * 容器 - 暂停/继续【标准函数】
 //
-//			参数：	> enable 布尔
+//			参数：	> pause 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。

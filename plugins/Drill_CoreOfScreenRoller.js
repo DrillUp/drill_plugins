@@ -199,7 +199,7 @@ if( Imported.Drill_CoreOfWindowCharacter ){
 // **						x->显示贴图/隐藏贴图
 // **						->是否就绪
 // **						->优化策略
-// **						->销毁
+// **						->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **						
@@ -262,7 +262,7 @@ Drill_COSR_Sprite.prototype.update = function() {
 // * 长画布贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -286,7 +286,7 @@ Drill_COSR_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return true;
 };
 //##############################
-// * 长画布贴图 - 销毁【标准函数】
+// * 长画布贴图 - 销毁独立贴图【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -298,7 +298,7 @@ Drill_COSR_Sprite.prototype.drill_sprite_destroy = function(){
 };
 
 //##############################
-// * C画布滚动 - 开始滚动【开放函数】
+// * C画布滚动 - 开始滚动【标准函数】
 //
 //			说明：	> 该函数只能单次调用。
 //##############################
@@ -307,7 +307,7 @@ Drill_COSR_Sprite.prototype.drill_COSR_start = function() {
 	this.visible = true;
 }
 //##############################
-// * C画布滚动 - 加速滚动【开放函数】
+// * C画布滚动 - 加速滚动【标准函数】
 //
 //			说明：	> 该函数可以放帧刷新中反复调用。
 //##############################
@@ -315,7 +315,7 @@ Drill_COSR_Sprite.prototype.drill_COSR_speedUp = function( enabled ){
 	this._drill_roll_speedUp = enabled;
 }
 //##############################
-// * C画布滚动 - 滚动是否结束【开放函数】
+// * C画布滚动 - 滚动是否结束【标准函数】
 //
 //			说明：	> 该函数可以放帧刷新中反复调用。
 //##############################
@@ -395,7 +395,7 @@ Drill_COSR_Sprite.prototype.drill_initSprite = function() {
 }
 
 //==============================
-// * 长画布贴图 - 销毁（私有）
+// * 长画布贴图 - 销毁独立贴图（私有）
 //==============================
 Drill_COSR_Sprite.prototype.drill_sprite_destroy_Private = function() {
 	
@@ -418,14 +418,14 @@ Drill_COSR_Sprite.prototype.drill_sprite_destroy_Private = function() {
 	this._drill_music_lastBGM = null;
 };
 //==============================
-// * 长画布贴图 - 销毁 - 断开贴图连接（私有）『递归函数-头』
+// * 长画布贴图 - 销毁独立贴图 - 断开贴图连接（私有）『递归函数-头』
 //==============================
 Drill_COSR_Sprite.prototype.drill_sprite_removeChildConnect = function( parent_sprite ){
 	if( parent_sprite == undefined ){ return; }
 	this.drill_sprite_removeChildConnect_Recursion( parent_sprite );
 };
 //==============================
-// * 长画布贴图 - 销毁 - 断开贴图连接（私有）『递归函数-节』
+// * 长画布贴图 - 销毁独立贴图 - 断开贴图连接（私有）『递归函数-节』
 //==============================
 Drill_COSR_Sprite.prototype.drill_sprite_removeChildConnect_Recursion = function( parent_sprite ){
 	var sprite_list = parent_sprite.children;

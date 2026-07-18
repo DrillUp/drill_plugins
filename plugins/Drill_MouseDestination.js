@@ -653,26 +653,33 @@ Spriteset_Map.prototype.update = function() {
 
 //=============================================================================
 // ** 目的地贴图【Drill_MDe_DestSprite】
-// **		
-// **		作用域：	地图界面、战斗界面
-// **		主功能：	定义一个 鼠标目的地 的贴图。
-// **		子功能：	
-// **					->贴图
-// **					->A主体
-// **						->层级
-// **					->B播放GIF
-// **					->C自变化效果
-// **					->D淡入淡出
-// **
-// **		代码：	> 范围 - 仅用于可视化。
-// **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
-// **				> 数量 - [ ●单个 /多个] 
-// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
-// **				> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
-// **				> 样式 - [不可修改/ ●自变化 /外部变化] 样式在贴图帧刷新中自变化。
+// 			
+// 			作用域：	地图界面、战斗界面
+// 			主功能：	定义一个 鼠标目的地 的贴图。
+// 			子功能：	
+// 						->贴图『独立贴图』
+// 							x->显示贴图/隐藏贴图
+// 							->是否就绪
+// 							->优化策略
+// 							->销毁独立贴图
+//							->初始化数据
+//							->初始化对象
+// 						
+// 						->A主体
+// 							->层级
+// 						->B播放GIF
+// 						->C自变化效果
+// 						->D淡入淡出
+// 	
+// 			代码：	> 范围 - 仅用于可视化。
+// 					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
+// 					> 数量 - [ ●单个 /多个] 
+// 					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+// 					> 销毁 - [ ●不考虑 /自销毁/外部销毁] 
+// 					> 样式 - [不可修改/ ●自变化 /外部变化] 样式在贴图帧刷新中自变化。
 //=============================================================================
 //==============================
-// * 贴图 - 定义
+// * 目的地贴图 - 定义
 //==============================
 function Drill_MDe_DestSprite() {
 	this.initialize.apply(this, arguments);
@@ -680,17 +687,16 @@ function Drill_MDe_DestSprite() {
 Drill_MDe_DestSprite.prototype = Object.create(Sprite_Base.prototype);
 Drill_MDe_DestSprite.prototype.constructor = Drill_MDe_DestSprite;
 //==============================
-// * 贴图 - 初始化
+// * 目的地贴图 - 初始化
 //==============================
 Drill_MDe_DestSprite.prototype.initialize = function() {
 	Sprite_Base.prototype.initialize.call(this);
 	this._drill_data = null;					//样式数据
 	this._drill_curStyle = -1;					//当前样式
-	this.drill_sprite_initSelf();				//初始化自身
-	this.drill_sprite_initChild();				//初始化子功能
+	this.drill_sprite_initChild();				//初始化对象
 };
 //##############################
-// * 贴图 - 帧刷新【标准函数】
+// * 目的地贴图 - 帧刷新【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -709,10 +715,10 @@ Drill_MDe_DestSprite.prototype.update = function() {
 	this.drill_sprite_updateFade();					//帧刷新 - D淡入淡出
 };
 //##############################
-// * 贴图 - 是否就绪【标准函数】
+// * 目的地贴图 - 是否就绪【标准函数】
 //
 //			参数：	> 无
-//			返回：	> visible 布尔
+//			返回：	> 布尔
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
@@ -721,7 +727,7 @@ Drill_MDe_DestSprite.prototype.drill_sprite_isReady = function(){
 	return true;
 }
 //##############################
-// * 贴图 - 优化策略【标准函数】
+// * 目的地贴图 - 优化策略【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔（是否通过）
@@ -732,26 +738,18 @@ Drill_MDe_DestSprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return true;	//（暂无策略）
 };
 //##############################
-// * 贴图 - 销毁【标准函数】
+// * 目的地贴图 - 销毁独立贴图【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
-//			
-//			说明：	> 如果需要重建时。
 //##############################
 Drill_MDe_DestSprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroyChild();
 	this.drill_sprite_destroySelf();
 };
-//##############################
-// * 贴图 - 初始化数据【标准默认值】
-//
-//			参数：	> 无
-//			返回：	> 无
-//			
-//			说明：	> data 动态参数对象（来自类初始化）
-//					  该对象包含 类所需的所有默认值。
-//##############################
+//==============================
+// * 目的地贴图 - 初始化数据『独立贴图』
+//==============================
 Drill_MDe_DestSprite.prototype.drill_sprite_initData = function() {
 	var data = this._drill_data;
 	
@@ -786,13 +784,7 @@ Drill_MDe_DestSprite.prototype.drill_sprite_initData = function() {
 	if( data['fade_enable'] == undefined ){ data['fade_enable'] = true };
 };
 //==============================
-// * 贴图 - 初始化自身（私有）
-//==============================
-Drill_MDe_DestSprite.prototype.drill_sprite_initSelf = function(){
-	this._drill_curSerial = -1;				//当前序列号（由于没有控制器，所以保持-1值）
-};
-//==============================
-// * 贴图 - 初始化子功能（私有）
+// * 目的地贴图 - 初始化对象『独立贴图』
 //==============================
 Drill_MDe_DestSprite.prototype.drill_sprite_initChild = function() {
 	this.drill_sprite_initAttr();			//初始化对象 - A主体
@@ -801,7 +793,7 @@ Drill_MDe_DestSprite.prototype.drill_sprite_initChild = function() {
 	this.drill_sprite_initFade();			//初始化对象 - D淡入淡出
 };
 //==============================
-// * 贴图 - 销毁子功能（私有）
+// * 目的地贴图 - 销毁独立贴图 - 销毁子功能（私有）
 //==============================
 Drill_MDe_DestSprite.prototype.drill_sprite_destroyChild = function(){
 	this.visible = false;
@@ -813,13 +805,13 @@ Drill_MDe_DestSprite.prototype.drill_sprite_destroyChild = function(){
 	this._drill_MDe_shadow = null;
 };
 //==============================
-// * 贴图 - 销毁自身（私有）
+// * 目的地贴图 - 销毁独立贴图 - 销毁自身（私有）
 //==============================
 Drill_MDe_DestSprite.prototype.drill_sprite_destroySelf = function() {
 	this._drill_curSerial = -1;				//当前序列号
 };
 //==============================
-// * 贴图 - 重设数据（私有）
+// * 目的地贴图 - 重设数据（私有）
 //==============================
 Drill_MDe_DestSprite.prototype.drill_sprite_resetData = function( data ){
 	this._drill_data = data;

@@ -617,7 +617,7 @@ Window_Message.prototype.drill_CODi_message_doTerminate = function() {
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						x->销毁
+// **						x->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					

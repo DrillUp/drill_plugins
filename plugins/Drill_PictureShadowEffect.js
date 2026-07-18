@@ -688,7 +688,7 @@ Spriteset_Battle.prototype.drill_PSwE_createShadow = Spriteset_Map.prototype.dri
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						->销毁
+// **						->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					
@@ -749,7 +749,7 @@ SceneManager.initialize = function() {
 	};
 	
 	//##############################
-	// * 图片阴影贴图 - 销毁【标准函数】
+	// * 图片阴影贴图 - 销毁独立贴图【标准函数】
 	//			
 	//			参数：	> 无
 	//			返回：	> 无
@@ -782,7 +782,7 @@ SceneManager.initialize = function() {
 		this.drill_sprite_initStyle();			//初始化子功能 - B样式切换
 	};
 	//==============================
-	// * 图片阴影贴图 - 销毁（私有）
+	// * 图片阴影贴图 - 销毁独立贴图（私有）
 	//==============================
 	Drill_PSwE_ShadowSprite.prototype.drill_sprite_destroy_Private = function(){
 		

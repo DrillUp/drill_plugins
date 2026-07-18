@@ -1287,9 +1287,11 @@ Game_Event.prototype.update = function(){
 // **		子功能：	
 // **					->控制器
 // **						->帧刷新
+// **						->重设数据
 // **						->显示/隐藏
 // **						x->暂停/继续
-// **						->重设数据
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体
 // **						->可见
@@ -1349,7 +1351,7 @@ Drill_ET_Controller.prototype.drill_controller_resetData = function( data ){
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1359,7 +1361,7 @@ Drill_ET_Controller.prototype.drill_controller_setVisible = function( visible ){
 	data['visible'] = visible;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1370,7 +1372,7 @@ Drill_ET_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 判断销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -1380,7 +1382,7 @@ Drill_ET_Controller.prototype.drill_controller_isDead = function(){
 };
 
 //##############################
-// * A主体 - 设置偏移【开放函数】
+// * A主体 - 设置偏移【标准函数】
 //
 //			参数：	> x 数字
 //					> y 数字
@@ -1392,7 +1394,7 @@ Drill_ET_Controller.prototype.drill_ET_setOffset = function( x, y ){
 	data['y'] = y;
 };
 //##############################
-// * A主体 - 设置对齐方式【开放函数】
+// * A主体 - 设置对齐方式【标准函数】
 //
 //			参数：	> align 字符串（左对齐/居中/右对齐）
 //			返回：	> 无
@@ -1402,7 +1404,7 @@ Drill_ET_Controller.prototype.drill_ET_setAlign = function( align ){
 	data['align'] = align;
 };
 //##############################
-// * A主体 - 设置外框显示【开放函数】
+// * A主体 - 设置外框显示【标准函数】
 //
 //			参数：	> visible 布尔
 //			返回：	> 无
@@ -1413,7 +1415,7 @@ Drill_ET_Controller.prototype.drill_ET_setFrameVisible = function( visible ){
 };
 
 //##############################
-// * B窗口内容 - 修改文本【开放函数】
+// * B窗口内容 - 修改文本【标准函数】
 //
 //			参数：	> text 字符串（可以为空字符串）
 //			返回：	> 无
@@ -1423,7 +1425,7 @@ Drill_ET_Controller.prototype.drill_ET_setText = function( text ){
 	this.drill_ET_forceRefresh();
 };
 //##############################
-// * B窗口内容 - 强制刷新文本【开放函数】
+// * B窗口内容 - 强制刷新文本【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1433,7 +1435,7 @@ Drill_ET_Controller.prototype.drill_ET_forceRefresh = function(){
 };
 
 //##############################
-// * C轮播 - 轮播文本开关【开放函数】
+// * C轮播 - 轮播文本开关【标准函数】
 //
 //			参数：	> enabled 布尔
 //			返回：	> 无
@@ -1447,7 +1449,7 @@ Drill_ET_Controller.prototype.drill_ET_setLoopEnabled = function( enabled ){
 	}
 }
 //##############################
-// * C轮播 - 设置轮播文本【开放函数】
+// * C轮播 - 设置轮播文本【标准函数】
 //
 //			参数：	> text_list 字符串列表
 //			返回：	> 无
@@ -1466,7 +1468,7 @@ Drill_ET_Controller.prototype.drill_ET_setLoopText = function( text_list ){
 	this._drill_curLoopPos = 0;
 };
 //##############################
-// * C轮播 - 添加轮播文本【开放函数】
+// * C轮播 - 添加轮播文本【标准函数】
 //
 //			参数：	> text 字符串
 //			返回：	> 无
@@ -1479,7 +1481,7 @@ Drill_ET_Controller.prototype.drill_ET_addLoopText = function( text ){
 	data['loop_textTank'].push( text );
 };
 //##############################
-// * C轮播 - 设置轮播间隔【开放函数】
+// * C轮播 - 设置轮播间隔【标准函数】
 //
 //			参数：	> loop_interval 数字
 //			返回：	> 无
@@ -1489,7 +1491,7 @@ Drill_ET_Controller.prototype.drill_ET_setLoopInterval = function( loop_interval
 	data['loop_interval'] = loop_interval;
 };
 //##############################
-// * C轮播 - 设置轮播模式【开放函数】
+// * C轮播 - 设置轮播模式【标准函数】
 //
 //			参数：	> loop_mode 字符串（单次/循环/随机）
 //			返回：	> 无
@@ -1757,7 +1759,11 @@ Drill_ET_Controller.prototype.drill_controller_getData_loop_mode = function() {
 // **		主功能：	定义一个漂浮文字贴图，能够播放自定义文本。
 // **		子功能：	
 // **					->窗口
-// **						->帧刷新
+// **						->是否就绪
+// **						->优化策略
+// **						->贴图是否销毁
+// **						->贴图执行销毁
+// **					
 // **					->A主体
 // **					->B对象绑定
 // **						->设置事件
@@ -1798,7 +1804,7 @@ Drill_ET_WindowSprite.prototype.update = function() {
 }
 
 //##############################
-// * B对象绑定 - 设置事件【开放函数】
+// * B对象绑定 - 设置事件【标准函数】
 //			
 //			参数：	> e 事件对象
 //			返回：	> 无
@@ -1810,7 +1816,7 @@ Drill_ET_WindowSprite.prototype.drill_sprite_setEvent = function( e ){
 	this._character = e;
 };
 //##############################
-// * B对象绑定 - 设置控制器【开放函数】
+// * B对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -1821,7 +1827,7 @@ Drill_ET_WindowSprite.prototype.drill_sprite_setController = function( controlle
 	this._drill_controller = controller;
 };
 //##############################
-// * B对象绑定 - 初始化子功能【开放函数】
+// * B对象绑定 - 初始化子功能【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -1838,7 +1844,7 @@ Drill_ET_WindowSprite.prototype.drill_sprite_initChild = function(){
 // * 文字贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> visible 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -1859,10 +1865,10 @@ Drill_ET_WindowSprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return this.drill_sprite_isOptimizationPassed_Private();
 };
 //##############################
-// * 文字贴图 - 是否需要销毁【标准函数】
+// * 文字贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> visible 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -1874,7 +1880,7 @@ Drill_ET_WindowSprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * 文字贴图 - 销毁【标准函数】
+// * 文字贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无

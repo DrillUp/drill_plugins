@@ -132,115 +132,474 @@
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-3
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-4
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-5
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-6
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-7
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-8
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-9
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-10
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-11
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-12
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-13
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-14
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-15
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-16
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-17
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-18
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-19
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
- *
+ * 
  * @param 菜单指针样式-20
  * @parent ---菜单指针样式集---
  * @type struct<DrillMCuStyle>
  * @desc GIF菜单指针的详细配置信息。
  * @default 
  * 
+ * @param 菜单指针样式-21
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-22
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-23
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-24
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-25
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-26
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-27
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-28
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-29
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-30
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-31
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-32
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-33
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-34
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-35
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-36
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-37
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-38
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-39
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-40
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-41
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-42
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-43
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-44
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-45
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-46
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-47
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-48
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-49
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-50
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-51
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-52
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-53
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-54
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-55
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-56
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-57
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-58
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-59
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-60
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-61
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-62
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-63
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-64
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-65
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-66
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-67
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-68
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-69
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-70
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-71
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-72
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-73
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-74
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-75
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-76
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-77
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-78
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-79
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default 
+ * 
+ * @param 菜单指针样式-80
+ * @parent ---菜单指针样式集---
+ * @type struct<DrillMCuStyle>
+ * @desc GIF菜单指针的详细配置信息。
+ * @default
  * 
  */
 /*~struct~DrillMCuStyle:
@@ -737,7 +1096,7 @@
 	};
 	
 	/*-----------------样式集------------------*/
-	DrillUp.g_MCu_list_length = 20;
+	DrillUp.g_MCu_list_length = 80;
 	DrillUp.g_MCu_list = [];
 	for( var i = 0; i < DrillUp.g_MCu_list_length; i++ ){
 		if( DrillUp.parameters["菜单指针样式-" + String(i+1) ] != undefined &&
@@ -1229,17 +1588,39 @@ Scene_MenuBase.prototype.drill_MCu_sortByZIndex = function () {
 // ** 菜单层级（接口实现）
 //=============================================================================
 //==============================
+// * 菜单层级 - 创建
+//==============================
+var _drill_MCu_menuLayer_createBackground = Scene_MenuBase.prototype.createBackground;
+Scene_MenuBase.prototype.createBackground = function(){
+	
+	// > 『菜单后面层-创建』
+	_drill_MCu_menuLayer_createBackground.call(this);
+	
+	// > 『菜单前面层-创建』
+	if( this._foregroundSprite == undefined ){
+		this._foregroundSprite = new Sprite();
+	}
+};
+//==============================
 // * 菜单层级 - 最顶层
 //==============================
 var _drill_MCu_menuLayer_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
 	_drill_MCu_menuLayer_update.call(this);
 	
-	if(!this._backgroundSprite ){		//菜单后面层（防止覆写报错）
+	// > 菜单后面层（防止覆写报错）
+	if( this._backgroundSprite == undefined ){
 		this._backgroundSprite = new Sprite();
 	}
-	if(!this._foregroundSprite ){		//菜单前面层
+	
+	// > 菜单前面层（防止覆写报错）
+	if( this._foregroundSprite == undefined ){
 		this._foregroundSprite = new Sprite();
+	}
+	
+	// > 『菜单前面层-顺序控制』
+	if( this._foregroundSprite_hasAddChild == undefined ){
+		this._foregroundSprite_hasAddChild = true;
 		this.addChild(this._foregroundSprite);	
 	}
 };
@@ -1560,7 +1941,7 @@ Drill_MCu_Bean.prototype.initialize = function(){
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
-// * 实体类 - 启用/关闭【开放函数】
+// * 实体类 - 启用/关闭【标准函数】
 //			
 //			参数：	> enable 布尔
 //			返回：	> 无
@@ -1569,7 +1950,7 @@ Drill_MCu_Bean.prototype.drill_bean_setEnable = function( enable ){
 	this._drill_enabled = enable;
 };
 //##############################
-// * 实体类 - 设置当前样式【开放函数】
+// * 实体类 - 设置当前样式【标准函数】
 //			
 //			参数：	> style_id 数字
 //			返回：	> 无
@@ -1578,7 +1959,7 @@ Drill_MCu_Bean.prototype.drill_bean_setStyleId = function( style_id ){
 	this._drill_styleId = style_id;
 };
 //##############################
-// * 实体类 - 设置目标中心【开放函数】
+// * 实体类 - 设置目标中心【标准函数】
 //			
 //			参数：	> x 数字
 //					> y 数字
@@ -1591,7 +1972,7 @@ Drill_MCu_Bean.prototype.drill_bean_setCenterPosition = function( x, y ){
 	this._drill_y = y;
 };
 //##############################
-// * 实体类 - 设置选项索引【开放函数】
+// * 实体类 - 设置选项索引【标准函数】
 //			
 //			参数：	> index 数字
 //			返回：	> 无
@@ -1600,7 +1981,7 @@ Drill_MCu_Bean.prototype.drill_bean_setIndex = function( index ){
 	this._drill_index = index;
 };
 //##############################
-// * 实体类 - 设置矩形范围【开放函数】
+// * 实体类 - 设置矩形范围【标准函数】
 //			
 //			参数：	> rect_x,rect_y,rect_w,rect_h 矩形对象
 //			返回：	> 无
@@ -1664,7 +2045,7 @@ Scene_Map.prototype.update = function() {
 	_drill_MCu_sceneMap_update.call(this);
 	this.drill_MCu_updateController();			//帧刷新 - 控制器
 	this.drill_MCu_updateAttr();				//帧刷新 - 主体属性变化
-	this.drill_MCu_updateDestroy();				//帧刷新 - 销毁
+	this.drill_MCu_updateDestroy();				//帧刷新 - 自动销毁
 };
 //==============================
 // * 控制器与贴图 - 界面创建时（地图界面）
@@ -1748,7 +2129,7 @@ Scene_Map.prototype.drill_MCu_updateAttr = function() {
 	}
 }
 //==============================
-// * 控制器与贴图 - 帧刷新 销毁
+// * 控制器与贴图 - 帧刷新 自动销毁
 //==============================
 Scene_Map.prototype.drill_MCu_updateDestroy = function() {
 	
@@ -1784,7 +2165,7 @@ Scene_Battle.prototype.update = function() {
 	_drill_MCu_sceneBattle_update.call(this);
 	this.drill_MCu_updateController();			//帧刷新 - 控制器
 	this.drill_MCu_updateAttr();				//帧刷新 - 主体属性变化
-	this.drill_MCu_updateDestroy();				//帧刷新 - 销毁
+	this.drill_MCu_updateDestroy();				//帧刷新 - 自动销毁
 };
 //==============================
 // * 控制器与贴图 - 界面创建时（战斗界面）
@@ -1807,7 +2188,7 @@ Scene_Battle.prototype.drill_MCu_updateController = Scene_Map.prototype.drill_MC
 //==============================
 Scene_Battle.prototype.drill_MCu_updateAttr = Scene_Map.prototype.drill_MCu_updateAttr;
 //==============================
-// * 控制器与贴图 - 销毁（战斗界面）
+// * 控制器与贴图 - 自动销毁（战斗界面）
 //==============================
 Scene_Battle.prototype.drill_MCu_updateDestroy = Scene_Map.prototype.drill_MCu_updateDestroy;
 
@@ -1828,7 +2209,7 @@ Scene_MenuBase.prototype.update = function() {
 	this.drill_MCu_updateCreate();				//帧刷新 - 菜单界面创建
 	this.drill_MCu_updateController();			//帧刷新 - 控制器
 	this.drill_MCu_updateAttr();				//帧刷新 - 主体属性变化
-	this.drill_MCu_updateDestroy();				//帧刷新 - 销毁
+	this.drill_MCu_updateDestroy();				//帧刷新 - 自动销毁
 };
 //==============================
 // * 控制器与贴图 - 菜单界面创建（菜单界面）
@@ -1869,7 +2250,7 @@ Scene_MenuBase.prototype.drill_MCu_updateController = Scene_Map.prototype.drill_
 //==============================
 Scene_MenuBase.prototype.drill_MCu_updateAttr = Scene_Map.prototype.drill_MCu_updateAttr;
 //==============================
-// * 控制器与贴图 - 销毁（菜单界面）
+// * 控制器与贴图 - 自动销毁（菜单界面）
 //==============================
 Scene_MenuBase.prototype.drill_MCu_updateDestroy = Scene_Map.prototype.drill_MCu_updateDestroy;
 
@@ -1954,7 +2335,8 @@ Scene_Title.prototype.drill_MCu_updateDestroy = Scene_Map.prototype.drill_MCu_up
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体
 // **					->B指针目标
@@ -2030,7 +2412,7 @@ Drill_MCu_Controller.prototype.drill_controller_resetData = function( data ){
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -2042,7 +2424,7 @@ Drill_MCu_Controller.prototype.drill_controller_setVisible = function( visible )
 //##############################
 // * 控制器 - 暂停/继续【标准函数】
 //
-//			参数：	> enable 布尔
+//			参数：	> pause 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -2052,16 +2434,16 @@ Drill_MCu_Controller.prototype.drill_controller_setPause = function( pause ){
 	data['pause'] = pause;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_MCu_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 判断销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -2070,14 +2452,14 @@ Drill_MCu_Controller.prototype.drill_controller_isDead = function(){
 	return this._drill_needDestroy == true;
 };
 
-//##############################
-// * D播放GIF - 设置帧【标准函数】
+//==============================
+// * D播放GIF - 设置帧（开放函数）
 //
 //			参数：	> cur_frame 数字（当前帧）
 //			返回：	> 无
 //			
 //			说明：	> 从帧数0开始计数。
-//##############################
+//==============================
 Drill_MCu_Controller.prototype.drill_controller_GIF_setFrame = function( cur_frame ){
 	var data = this._drill_data;
 	
@@ -2095,23 +2477,23 @@ Drill_MCu_Controller.prototype.drill_controller_GIF_setFrame = function( cur_fra
 	}
 	this._drill_GIF_index = Math.floor(inter);
 };
-//##############################
-// * D播放GIF - 锁定帧/解锁帧【标准函数】
+//==============================
+// * D播放GIF - 锁定帧/解锁帧（开放函数）
 //
 //			参数：	> locked 布尔
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MCu_Controller.prototype.drill_controller_GIF_setLocked = function( locked ){
 	var data = this._drill_data;
 	data['gif_lock'] = locked;
 	this._drill_GIF_oncePlay = false;
 };
-//##############################
-// * D播放GIF - 单次播放【标准函数】
+//==============================
+// * D播放GIF - 单次播放（开放函数）
 //
 //			参数：	> once_type 字符串（forwardRun正向播放/backRun反向播放）
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MCu_Controller.prototype.drill_controller_GIF_setOncePlay = function( once_type ){
 	var data = this._drill_data;
 	this._drill_GIF_oncePlay = true;
@@ -2655,8 +3037,8 @@ Drill_MCu_Controller.prototype.drill_controller_updateEffect = function(){
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁（未使用）
-// **						->销毁（手动）
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
 // **					->A主体
 // **					->B指针目标
@@ -2710,7 +3092,7 @@ Drill_MCu_Sprite.prototype.update = function() {
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -2721,7 +3103,7 @@ Drill_MCu_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2740,7 +3122,7 @@ Drill_MCu_Sprite.prototype.drill_sprite_initChild = function(){
 // * 菜单指针贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -2760,10 +3142,10 @@ Drill_MCu_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return true;		//（由于场景复杂，且指针只有一个，此处不优化）
 };
 //##############################
-// * 菜单指针贴图 - 是否需要销毁【标准函数】
+// * 菜单指针贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -2773,7 +3155,7 @@ Drill_MCu_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * 菜单指针贴图 - 销毁【标准函数】
+// * 菜单指针贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无

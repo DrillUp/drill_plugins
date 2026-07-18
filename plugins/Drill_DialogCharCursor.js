@@ -1439,7 +1439,8 @@ Game_Temp.prototype.drill_DCCu_getController = function( serial ){
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体
 // **					->B光标前进
@@ -1510,7 +1511,7 @@ Drill_DCCu_Controller.prototype.drill_controller_resetData = function( data ){
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1522,7 +1523,7 @@ Drill_DCCu_Controller.prototype.drill_controller_setVisible = function( visible 
 //##############################
 // * 控制器 - 暂停/继续【标准函数】
 //
-//			参数：	> enable 布尔
+//			参数：	> pause 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1532,16 +1533,16 @@ Drill_DCCu_Controller.prototype.drill_controller_setPause = function( pause ){
 	data['pause'] = pause;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_DCCu_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 判断销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -1550,12 +1551,12 @@ Drill_DCCu_Controller.prototype.drill_controller_isDead = function(){
 	return this._drill_needDestroy == true;
 };
 
-//##############################
-// * A主体 - 设置样式【标准函数】
+//==============================
+// * A主体 - 设置样式（开放函数）
 //
 //			参数：	> style_id 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_DCCu_Controller.prototype.drill_controller_setStyleId = function( style_id ){
 	if( this._drill_curStyleId == style_id ){ return; }
 	this._drill_curStyleId = style_id;
@@ -1573,12 +1574,12 @@ Drill_DCCu_Controller.prototype.drill_controller_setStyleId = function( style_id
 		this.drill_controller_resetData( cur_styleData );
 	}
 };
-//##############################
-// * B光标前进 - 设置当前目标矩形【标准函数】
+//==============================
+// * B光标前进 - 设置当前目标矩形（开放函数）
 //
 //			参数：	> x, y, width, height 矩形范围
 //			返回：	> 无
-//##############################
+//==============================
 Drill_DCCu_Controller.prototype.drill_controller_setPosRect = function( x, y, width, height ){
 	if( width  == 0 ){ return; }
 	if( height == 0 ){ return; }
@@ -1595,14 +1596,14 @@ Drill_DCCu_Controller.prototype.drill_controller_setPosRect = function( x, y, wi
 	}
 };
 
-//##############################
-// * D播放GIF - 设置帧【标准函数】
+//==============================
+// * D播放GIF - 设置帧（开放函数）
 //
 //			参数：	> cur_frame 数字（当前帧）
 //			返回：	> 无
 //			
 //			说明：	> 从帧数0开始计数。
-//##############################
+//==============================
 Drill_DCCu_Controller.prototype.drill_controller_GIF_setFrame = function( cur_frame ){
 	var data = this._drill_data;
 	
@@ -1620,23 +1621,23 @@ Drill_DCCu_Controller.prototype.drill_controller_GIF_setFrame = function( cur_fr
 	}
 	this._drill_GIF_index = Math.floor(inter);
 };
-//##############################
-// * D播放GIF - 锁定帧/解锁帧【标准函数】
+//==============================
+// * D播放GIF - 锁定帧/解锁帧（开放函数）
 //
 //			参数：	> locked 布尔
 //			返回：	> 无
-//##############################
+//==============================
 Drill_DCCu_Controller.prototype.drill_controller_GIF_setLocked = function( locked ){
 	var data = this._drill_data;
 	data['gif_lock'] = locked;
 	this._drill_GIF_oncePlay = false;
 };
-//##############################
-// * D播放GIF - 单次播放【标准函数】
+//==============================
+// * D播放GIF - 单次播放（开放函数）
 //
 //			参数：	> once_type 字符串（forwardRun正向播放/backRun反向播放）
 //			返回：	> 无
-//##############################
+//==============================
 Drill_DCCu_Controller.prototype.drill_controller_GIF_setOncePlay = function( once_type ){
 	var data = this._drill_data;
 	this._drill_GIF_oncePlay = true;
@@ -1969,8 +1970,8 @@ Drill_DCCu_Controller.prototype.drill_controller_updateEffect = function(){
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁（未使用）
-// **						->销毁（手动）
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
 // **					->A主体
 // **					->B光标前进
@@ -2024,7 +2025,7 @@ Drill_DCCu_Sprite.prototype.update = function() {
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -2035,7 +2036,7 @@ Drill_DCCu_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_controller = controller;
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2054,7 +2055,7 @@ Drill_DCCu_Sprite.prototype.drill_sprite_initChild = function(){
 // * 文本光标贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -2074,10 +2075,10 @@ Drill_DCCu_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return true;		//（由于场景复杂，且指针只有一个，此处不优化）
 };
 //##############################
-// * 文本光标贴图 - 是否需要销毁【标准函数】
+// * 文本光标贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -2087,7 +2088,7 @@ Drill_DCCu_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * 文本光标贴图 - 销毁【标准函数】
+// * 文本光标贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无

@@ -102,61 +102,121 @@
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
  * @param 网址按钮-2
  * @parent ----按钮组----
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
  * @param 网址按钮-3
  * @parent ----按钮组----
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
  * @param 网址按钮-4
  * @parent ----按钮组----
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
  * @param 网址按钮-5
  * @parent ----按钮组----
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
  * @param 网址按钮-6
  * @parent ----按钮组----
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
  * @param 网址按钮-7
  * @parent ----按钮组----
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
  * @param 网址按钮-8
  * @parent ----按钮组----
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
  * @param 网址按钮-9
  * @parent ----按钮组----
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
  * @param 网址按钮-10
  * @parent ----按钮组----
  * @type struct<SocialButton>
  * @desc 网址按钮的详细配置信息。
  * @default 
- *
+ * 
+ * @param 网址按钮-11
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 网址按钮-12
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 网址按钮-13
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 网址按钮-14
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 网址按钮-15
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 网址按钮-16
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 网址按钮-17
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 网址按钮-18
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 网址按钮-19
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default 
+ * 
+ * @param 网址按钮-20
+ * @parent ----按钮组----
+ * @type struct<SocialButton>
+ * @desc 网址按钮的详细配置信息。
+ * @default
+ * 
  */
 /*~struct~SocialButton:
  * 
@@ -262,7 +322,7 @@
 	DrillUp.g_TSB_btn_l_opacity = Number(DrillUp.parameters['高亮按钮透明度'] || 255);
 	
 	/*-----------------网址按钮------------------*/
-	DrillUp.g_TSB_btn_length = 10;
+	DrillUp.g_TSB_btn_length = 20;
 	DrillUp.g_TSB_btn = [];
 	for(var i = 0; i < DrillUp.g_TSB_btn_length; i++ ){
 		if( DrillUp.parameters['网址按钮-' + String(i+1) ] != undefined &&

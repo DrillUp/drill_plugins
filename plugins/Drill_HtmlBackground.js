@@ -427,16 +427,26 @@
 //<<<<<<<<插件记录<<<<<<<<
 //
 //		★功能结构树：
-//			黑边背景：
-//				->html
-//					->获取body、创建div、修改背景属性（摒弃）
-//					->建立canvas和render
-//					->建立场景
-//				->贴图
-//					->四贴边图像贴边
-//					->淡入淡出的显示/隐藏
-//					->贴边图像的条件显示/隐藏
-//					->贴边图像切换插件指令
+//			->☆提示信息
+//			->☆静态数据
+//			->☆插件指令
+//			->☆存储数据
+//			
+//			->☆黑边渲染器控制
+//			->黑边渲染器【Drill_HB_Renderer】
+//				->A画布
+//				->B渲染
+//			
+//			->☆黑边场景控制
+//			->黑边场景【Scene_Drill_HB】
+//				->2A主体
+//				->2B背景
+//				->2C贴边图像
+//				->2D变化大小
+//				->☆原型链规范（Scene_Drill_HB）
+//			
+//			->☆引擎兼容（STG）
+//			->☆引擎兼容（ACT）
 //
 //
 //		★家谱：
@@ -446,12 +456,11 @@
 //			无
 //		
 //		★插件私有类：
+//			* 黑边渲染器【Drill_HB_Renderer】
 //			* 黑边场景【Scene_Drill_HB】
-//			* 渲染器【Drill_HB_Renderer】
 //		
 //		★必要注意事项：
-//			1.该插件为了支持加密，必须从底层新建一个画布和渲染器。
-//			2.渲染器并没有想象中的那么稳定，目前底层知识还不全，可能有潜在的报错。
+//			无
 //		
 //		★其它说明细节：
 //			1.blendMode不能直接使用，pixi会报错，目前不清楚原因。
@@ -464,7 +473,7 @@
 //
 
 //=============================================================================
-// ** 提示信息
+// ** ☆提示信息
 //=============================================================================
 	//==============================
 	// * 提示信息 - 参数
@@ -475,7 +484,7 @@
 	
 	
 //=============================================================================
-// ** 静态数据
+// ** ☆静态数据
 //=============================================================================
 	var Imported = Imported || {};
 	Imported.Drill_HtmlBackground = true;
@@ -499,6 +508,20 @@
 		data['zIndex'] = Number( dataFrom["图片层级"] || 4);
 		return data;
 	}
+	/*----------------黑边背景---------------*/
+	DrillUp.g_HB_background_list_length = 20;
+	DrillUp.g_HB_background_list = [];
+	for (var i = 0; i < DrillUp.g_HB_background_list_length; i++) {
+		if( DrillUp.parameters['黑边背景-' + String(i+1) ] != undefined &&
+			DrillUp.parameters['黑边背景-' + String(i+1) ] != "" ){
+			var data = JSON.parse(DrillUp.parameters['黑边背景-' + String(i+1) ]);
+			DrillUp.g_HB_background_list[i] = DrillUp.drill_HB_initBlackBackground( data );
+			DrillUp.g_HB_background_list[i]['inited'] = true;
+		}else{
+			DrillUp.g_HB_background_list[i] = DrillUp.drill_HB_initBlackBackground( {} );
+			DrillUp.g_HB_background_list[i]['inited'] = false;
+		}
+	}
 	
 	/*----------------常规---------------*/
 	DrillUp.g_HB_background_time = Number(DrillUp.parameters["背景显现时长"] || 120);
@@ -516,29 +539,8 @@
 	DrillUp.g_HB_weltImg_down = String(DrillUp.parameters["资源-下侧图像"] || "" );
 	DrillUp.g_HB_weltImg_backImg = JSON.parse(DrillUp.parameters["资源-备用替换图像"] || [] );
 	
-	/*----------------黑边背景---------------*/
-	DrillUp.g_HB_background_list_length = 20;
-	DrillUp.g_HB_background_list = [];
-	for (var i = 0; i < DrillUp.g_HB_background_list_length; i++) {
-		if( DrillUp.parameters['黑边背景-' + String(i+1) ] != undefined &&
-			DrillUp.parameters['黑边背景-' + String(i+1) ] != "" ){
-			var data = JSON.parse(DrillUp.parameters['黑边背景-' + String(i+1) ]);
-			DrillUp.g_HB_background_list[i] = DrillUp.drill_HB_initBlackBackground( data );
-			DrillUp.g_HB_background_list[i]['inited'] = true;
-		}else{
-			DrillUp.g_HB_background_list[i] = DrillUp.drill_HB_initBlackBackground( {} );
-			DrillUp.g_HB_background_list[i]['inited'] = false;
-		}
-	}
 	
-//=============================================================================
-// ** 资源文件夹
-//=============================================================================
-ImageManager.load_SpecialLayer = function(filename) {
-    return this.loadBitmap('img/Special__layer/', filename, 0, true);
-};
-
-
+	
 //=============================================================================
 // ** ☆插件指令
 //=============================================================================
@@ -626,7 +628,7 @@ Game_Interpreter.prototype.drill_HB_pluginCommand = function( command, args ){
 
 
 //#############################################################################
-// ** 【标准模块】存储数据
+// ** 【标准模块】存储数据 ☆存储数据
 //#############################################################################
 //##############################
 // * 存储数据 - 参数存储 开关
@@ -691,8 +693,9 @@ Game_System.prototype.drill_HB_checkSysData = function() {
 // * 存储数据 - 初始化数据（私有）
 //==============================
 Game_System.prototype.drill_HB_initSysData_Private = function() {
+	
 	this._drill_HB_dataTank = [];
-	for(var i=0; i < DrillUp.g_HB_background_list.length ;i++){
+	for(var i = 0; i < DrillUp.g_HB_background_list.length; i++ ){
 		var temp = DrillUp.g_HB_background_list[i];
 			
 		var temp_data = {};
@@ -754,106 +757,64 @@ Game_System.prototype.drill_HB_checkSysData_Private = function() {
 };
 
 
+
 //=============================================================================
-// ** 渲染器【Drill_HB_Renderer】
-//			
-//			说明：	> 该类为静态类，单独定义一个渲染器结构。
-//					> 该渲染器与 主游戏画面 完全并行渲染场景。
+// ** ☆黑边渲染器控制
+//
+//			说明：	> 该模块专门控制 黑边场景 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 渲染器 - 定义
+// * 黑边渲染器控制 - 初始化
+//==============================
+var _drill_HB_createAllElements = Graphics._createAllElements;
+Graphics._createAllElements = function() {
+	_drill_HB_createAllElements.call(this);
+	Drill_HB_Renderer.initialize();
+};
+//==============================
+// * 黑边渲染器控制 - 刷新（非帧）
+//==============================
+var _drill_HB_updateAllElements = Graphics._updateAllElements;
+Graphics._updateAllElements = function() {
+	_drill_HB_updateAllElements.call(this);
+	Drill_HB_Renderer.update();
+};
+
+
+//=============================================================================
+// ** 黑边渲染器【Drill_HB_Renderer】
+// **
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 提供一个黑边渲染器结构。
+// **		子功能：	
+// **					->A画布
+// **					->B渲染
+// **		
+// **		说明：	> 该类为静态类，与 主游戏画面 完全并行渲染场景。
+//=============================================================================
+//==============================
+// * 黑边渲染器 - 定义
 //==============================
 function Drill_HB_Renderer() {
 	this.initialize.apply(this, arguments);
 }
 //==============================
-// * 渲染器 - 初始化
+// * 黑边渲染器 - 初始化
 //==============================
 Drill_HB_Renderer.initialize = function(){
-	this.drill_HB_createCanvas();		//创建 - 画布
-	this.drill_HB_createRenderer();		//创建 - 渲染器
+	this.drill_HB_createCanvas();		//初始化 - A画布
+	this.drill_HB_createRenderer();		//初始化 - B渲染
 };
 //==============================
-// * 渲染器 - 刷新（非帧）
+// * 黑边渲染器 - 刷新（非帧刷新）
 //==============================
 Drill_HB_Renderer.update = function() {
-	this.drill_HB_updateCanvas();		//刷新 - 画布
-	this.drill_HB_updateRenderer();		//刷新 - 渲染器
-}
-//==============================
-// * 渲染器 - 常量
-//==============================
-Drill_HB_Renderer.drill_HB_width = function() { return Math.floor(window.innerWidth) - DrillUp.g_HB_padding *2; }
-Drill_HB_Renderer.drill_HB_height = function() { return Math.floor(window.innerHeight) - DrillUp.g_HB_padding *2; }
-//==============================
-// * 创建 - 画布
-//==============================
-Drill_HB_Renderer.drill_HB_createCanvas = function() {
-	this._drill_HB_canvas = document.createElement('canvas');		//（canvas是非常基础的对象，一个texture/bitmap就有一个canvas）
-	this._drill_HB_canvas.id = 'drill_HB_canvas';
-	this._drill_HB_canvas.style.position = "absolute";
-	this._drill_HB_canvas.style.top = DrillUp.g_HB_padding + "px";
-	this._drill_HB_canvas.style.left = DrillUp.g_HB_padding + "px";
-
-	this.drill_HB_updateCanvas();		//（创建后刷新）
-
-	if( DrillUp.g_HB_scrollDisable == true ){
-		document.body.parentNode.style.overflow = "hidden";
-	}
-	document.body.appendChild(this._drill_HB_canvas);
+	this.drill_HB_updateCanvas();		//刷新 - A画布
+	this.drill_HB_updateRenderer();		//刷新 - B渲染
 };
 //==============================
-// * 创建 - 渲染器
-//==============================
-Drill_HB_Renderer.drill_HB_createRenderer = function() {
-	PIXI.dontSayHello = true;
-	var width = this.drill_HB_width();
-	var height = this.drill_HB_height();
-	var options = { view: this._drill_HB_canvas };
-	try {
-		switch( Graphics._rendererType ){
-			
-		// > canvas渲染器
-		case 'canvas':
-			this._drill_HB_renderer = new PIXI.CanvasRenderer(width, height, options);
-			break;
-			
-		// > webgl渲染器
-		case 'webgl':
-			this._drill_HB_renderer = new PIXI.WebGLRenderer(width, height, options);
-			break;
-			
-		// > 自动渲染器（在canvas和webgl选一）
-		default:
-			this._drill_HB_renderer = PIXI.autoDetectRenderer(width, height, options);
-			break;
-		}
-	
-		// > webgl渲染器 的材质缓存数
-		if( this._drill_HB_renderer && this._drill_HB_renderer.textureGC ){
-			this._drill_HB_renderer.textureGC.maxIdle = 60;		//（最大缓存值：60）
-		}
-	}catch( e ){
-		this._drill_HB_renderer = null;
-	}
-};
-//==============================
-// * 刷新 - 画布
-//==============================
-Drill_HB_Renderer.drill_HB_updateCanvas = function() {
-	this._drill_HB_canvas.style.width = this.drill_HB_width();		//（保持窗口高宽）
-	this._drill_HB_canvas.style.height = this.drill_HB_height();
-	//this._drill_HB_canvas.style.zIndex = 0;
-};
-//==============================
-// * 刷新 - 渲染器
-//==============================
-Drill_HB_Renderer.drill_HB_updateRenderer = function() {
-	if( this._drill_HB_renderer == undefined ){ return; }			//（保持窗口高宽）
-	this._drill_HB_renderer.resize( this.drill_HB_width(), this.drill_HB_height() );
-};
-//==============================
-// * 渲染器 - 执行渲染（接口）
+// * 黑边渲染器 - 执行渲染（开放函数）
 //==============================
 Drill_HB_Renderer.drill_HB_doRender = function( stage ){
 	if( stage ){
@@ -863,40 +824,120 @@ Drill_HB_Renderer.drill_HB_doRender = function( stage ){
 		}
 	}
 };
+
 //==============================
-// * 渲染器 - 初始化（绑定）
+// * A画布 - 初始化
+//
+//			说明：	> 该函数部分参考 Graphics._createCanvas 。（0E元素之游戏画布）
 //==============================
-var _drill_HB_createAllElements = Graphics._createAllElements;
-Graphics._createAllElements = function() {
-	_drill_HB_createAllElements.call(this);
-	Drill_HB_Renderer.initialize();		//渲染器初始化
-}
+Drill_HB_Renderer.drill_HB_createCanvas = function() {
+	
+	// > 创建
+	this._drill_HB_canvas = document.createElement('canvas');		//（canvas是非常基础的对象，一个texture/bitmap就有一个canvas）
+	this._drill_HB_canvas.id = 'drill_HB_canvas';
+	this._drill_HB_canvas.style.position = "absolute";
+	this._drill_HB_canvas.style.top = DrillUp.g_HB_padding + "px";
+	this._drill_HB_canvas.style.left = DrillUp.g_HB_padding + "px";
+	if( DrillUp.g_HB_scrollDisable == true ){
+		document.body.parentNode.style.overflow = "hidden";
+	}
+	
+	// > 创建后刷新
+	this.drill_HB_updateCanvas();
+	
+	// > 添加到dom
+	document.body.appendChild(this._drill_HB_canvas);
+};
 //==============================
-// * 渲染器 - 刷新（非帧）
+// * A画布 - 刷新
+//
+//			说明：	> 该函数部分参考 Graphics._updateCanvas 。（0E元素之游戏画布）
 //==============================
-var _drill_HB_updateAllElements = Graphics._updateAllElements;
-Graphics._updateAllElements = function() {
-	_drill_HB_updateAllElements.call(this);
-	Drill_HB_Renderer.update();			//渲染器刷新
-}
+Drill_HB_Renderer.drill_HB_updateCanvas = function() {
+	this._drill_HB_canvas.style.width = this.drill_HB_width();		//（保持窗口高宽）
+	this._drill_HB_canvas.style.height = this.drill_HB_height();
+	//this._drill_HB_canvas.style.zIndex = 0;						//（不需要修改dom位置和堆叠级）
+	//this._centerElement(this._drill_HB_canvas);					//
+};
+//==============================
+// * A画布 - 常量
+//==============================
+Drill_HB_Renderer.drill_HB_width = function() { return Math.floor(window.innerWidth) - DrillUp.g_HB_padding *2; }
+Drill_HB_Renderer.drill_HB_height = function() { return Math.floor(window.innerHeight) - DrillUp.g_HB_padding *2; }
+
+//==============================
+// * B渲染 - 初始化
+//
+//			说明：	> 该函数部分参考 Graphics._createRenderer 。（0I渲染器）
+//==============================
+Drill_HB_Renderer.drill_HB_createRenderer = function() {
+	PIXI.dontSayHello = true;
+	var width = this.drill_HB_width();
+	var height = this.drill_HB_height();
+	var options = { view: this._drill_HB_canvas };
+	try {
+		switch( Graphics._rendererType ){
+		
+		// > canvas渲染器
+		case 'canvas':
+			this._drill_HB_renderer = new PIXI.CanvasRenderer(width, height, options);
+			break;
+		
+		// > webgl渲染器
+		case 'webgl':
+			this._drill_HB_renderer = new PIXI.WebGLRenderer(width, height, options);
+			break;
+		
+		// > 自动渲染器（在canvas和webgl选一）
+		default:
+			this._drill_HB_renderer = PIXI.autoDetectRenderer(width, height, options);
+			break;
+		}
+		
+		// > webgl渲染器 的材质缓存数
+		if( this._drill_HB_renderer && this._drill_HB_renderer.textureGC ){
+			this._drill_HB_renderer.textureGC.maxIdle = 60;		//（最大缓存值：60）
+		}
+		
+	}catch( e ){
+		this._drill_HB_renderer = null;
+	}
+};
+//==============================
+// * B渲染 - 刷新
+//
+//			说明：	> 该函数部分参考 Graphics._updateRenderer 。（0I渲染器）
+//==============================
+Drill_HB_Renderer.drill_HB_updateRenderer = function() {
+	if( this._drill_HB_renderer ){		//（刷新渲染高宽）
+		this._drill_HB_renderer.resize( this.drill_HB_width(), this.drill_HB_height() );
+	}
+};
+
+
 
 //=============================================================================
-// ** 场景帧刷新
+// ** ☆黑边场景控制
+//
+//			说明：	> 该模块专门控制 黑边场景 。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+//==============================
+// * 黑边场景控制 - 场景帧刷新
+//==============================
 var _drill_HB_renderScene = SceneManager.renderScene;
 SceneManager.renderScene = function() {
 	_drill_HB_renderScene.call(this);
 	
-	// > 创建场景
-	if( !this._drill_HB_scene ){		//（直接new唯一一个Scene）
+	// > 黑边场景 - 初始化
+	if( !this._drill_HB_scene ){						//直接new唯一的场景
 		this._drill_HB_scene = new Scene_Drill_HB();	//流程： new >> isReady() >> render()
 		this._drill_HB_scene.start();					//start是Scene_Base自己的小方法
 		this._drill_HB_scene.create();
 	}
 	
-	// > 渲染场景
-	if( this._drill_HB_scene.isReady() ) {
-		this._drill_HB_scene.drill_setSize( Drill_HB_Renderer.drill_HB_width(),Drill_HB_Renderer.drill_HB_height() );
+	// > 黑边场景 - 帧刷新
+	if( this._drill_HB_scene.isReady() ){
 		this._drill_HB_scene.update();
 		Drill_HB_Renderer.drill_HB_doRender(this._drill_HB_scene);
 	}
@@ -905,6 +946,34 @@ SceneManager.renderScene = function() {
 
 //=============================================================================
 // ** 黑边场景【Scene_Drill_HB】
+// **
+// **		作用域：	地图界面、战斗界面、菜单界面
+// **		主功能：	> 提供一个场景，包含背景和图像。
+// **		子功能：	
+// **					->界面重要函数
+// **						> 初始化（initialize）
+// **						> 创建（create）
+// **						> 帧刷新（update）
+// **						x> 开始运行（start）
+// **						x> 结束运行（stop）
+// **						x> 忙碌状态（isBusy）
+// **						x> 析构函数（terminate）
+// **						x> 判断加载完成（isReady）
+// **						x> 判断是否激活/启动（isActive）
+// **						x> 当前角色切换时（onActorChange）
+// **						x> 创建 - 菜单背景（createBackground）
+// **						x> 创建 - 帮助窗口（createHelpWindow）
+// **					
+// **					->2A主体
+// **					->2B背景
+// **					->2C贴边图像
+// **					->2D变化大小
+// **		界面成员：
+// **					> ._drill_main_layer			主层
+// **						> ._drill_upArea			图像层
+// **						> ._drill_downArea			背景层
+// **
+// **		说明：	> 暂无
 //=============================================================================
 //==============================
 // * 黑边场景 - 定义
@@ -919,38 +988,63 @@ Scene_Drill_HB.prototype.constructor = Scene_Drill_HB;
 //==============================
 Scene_Drill_HB.prototype.initialize = function() {
     Scene_Base.prototype.initialize.call(this);
-	
-	this._drill_cur_width = 0;
-	this._drill_cur_height = 0;
-	
-	this._drill_background_tank = [];
-	this._drill_background_dataTank = [];
-	
-	this._drill_leftSprite_data = {};
-	this._drill_rightSprite_data = {};
-	this._drill_upSprite_data = {};
-	this._drill_downSprite_data = {};
+	this.drill_scene_initAttr();				//初始化子功能 - 2A主体
+	this.drill_scene_initBackground();			//初始化子功能 - 2B背景
+	this.drill_scene_initWeltImg();				//初始化子功能 - 2C贴边图像
+	this.drill_scene_initSize();				//初始化子功能 - 2D变化大小
 };
-
 //==============================
 // * 黑边场景 - 创建
 //==============================
 Scene_Drill_HB.prototype.create = function() {
     Scene_Base.prototype.create.call(this);
-	this._drill_main_layer = new Sprite();
-	this.addChild(this._drill_main_layer);	//主层
-	
-	this.drill_createBackground();
-	this.drill_createWeltImg();
+	this.drill_scene_createAttr();				//创建 - 2A主体
+	this.drill_scene_createBackground();		//创建 - 2B背景
+	this.drill_scene_createWeltImg();			//创建 - 2C贴边图像
+												//创建 - 2D变化大小（无）
 };
 //==============================
-// * 黑边场景 - 背景
+// * 黑边场景 - 帧刷新
 //==============================
-Scene_Drill_HB.prototype.drill_createBackground = function() {
+Scene_Drill_HB.prototype.update = function() { 
+	Scene_Base.prototype.update.call(this);	
+												//帧刷新 - 2A主体（无）
+	this.drill_scene_updateBackground();		//帧刷新 - 2B背景
+	this.drill_scene_updateWeltImg();			//帧刷新 - 2C贴边图像
+	this.drill_scene_updateSize();				//帧刷新 - 2D变化大小
+};
+
+
+//==============================
+// * 2A主体 - 初始化子功能
+//==============================
+Scene_Drill_HB.prototype.drill_scene_initAttr = function() {
+	this._drill_main_layer = null;
+}
+//==============================
+// * 2A主体 - 创建
+//==============================
+Scene_Drill_HB.prototype.drill_scene_createAttr = function() {
+	this._drill_main_layer = new Sprite();
+	this.addChild(this._drill_main_layer);	//主层
+}
+
+
+//==============================
+// * 2B背景 - 初始化子功能
+//==============================
+Scene_Drill_HB.prototype.drill_scene_initBackground = function() {
+	this._drill_background_spriteTank = [];
+	this._drill_background_dataTank = [];
+}
+//==============================
+// * 2B背景 - 创建
+//==============================
+Scene_Drill_HB.prototype.drill_scene_createBackground = function() {
 	this._drill_downArea = new Sprite();
 	this._drill_main_layer.addChild(this._drill_downArea);	//背景层
 	
-	for(var i=0; i < DrillUp.g_HB_background_list.length; i++){
+	for(var i = 0; i < DrillUp.g_HB_background_list.length; i++){
 		var src_data = DrillUp.g_HB_background_list[i];
 		
 		// > 数据初始化
@@ -972,83 +1066,31 @@ Scene_Drill_HB.prototype.drill_createBackground = function() {
 		this._drill_background_dataTank.push(temp_data);
 		
 		// > 贴图初始化
-		var temp_sprite = new TilingSprite(ImageManager.load_SpecialLayer(temp_data.src_img));	//TilingSprite平铺图层
+		var temp_sprite = new TilingSprite();
+		temp_sprite.bitmap = ImageManager.loadBitmap("img/Special__layer/", temp_data.src_img, 0, true);
 		temp_sprite.origin.x = temp_data.curX;
 		temp_sprite.origin.y = temp_data.curY;
 		temp_sprite.opacity = temp_data.curOpacity;
 		temp_sprite.zIndex = temp_data.zIndex;
 		this._drill_downArea.addChild(temp_sprite);
-		this._drill_background_tank.push(temp_sprite);
+		this._drill_background_spriteTank.push(temp_sprite);
 	}
 	this.drill_sortByZIndex();
 }
 //==============================
-// ** 层级排序
+// * 2B背景 - 创建 - 层级排序
 //==============================
 Scene_Drill_HB.prototype.drill_sortByZIndex = function() {
 	this._drill_downArea.children.sort(function(a, b){return a.zIndex-b.zIndex});	//比较器
 };
 //==============================
-// * 创建 - 贴边图像
+// * 2B背景 - 帧刷新
 //==============================
-Scene_Drill_HB.prototype.drill_createWeltImg = function() {
-	this._drill_upArea = new Sprite();
-	this._drill_main_layer.addChild(this._drill_upArea);	//图像层
-	
-	// > 数据初始化
-	this._drill_leftSprite_data.src_img = DrillUp.g_HB_weltImg_left;
-	this._drill_leftSprite_data.cur_visible = true;
-	this._drill_leftSprite_data.cur_opacity = 0;
-	this._drill_rightSprite_data.src_img = DrillUp.g_HB_weltImg_right;
-	this._drill_rightSprite_data.cur_visible = true;
-	this._drill_rightSprite_data.cur_opacity = 0;
-	this._drill_upSprite_data.src_img = DrillUp.g_HB_weltImg_up;
-	this._drill_upSprite_data.cur_visible = true;
-	this._drill_upSprite_data.cur_opacity = 0;
-	this._drill_downSprite_data.src_img = DrillUp.g_HB_weltImg_down;
-	this._drill_downSprite_data.cur_visible = true;
-	this._drill_downSprite_data.cur_opacity = 0;
-	
-	// > 贴图初始化
-	this._drill_leftSprite = new Sprite(ImageManager.load_SpecialLayer(DrillUp.g_HB_weltImg_left));
-	this._drill_leftSprite.opacity = 0;
-	this._drill_leftSprite.anchor.x = 0.0;
-	this._drill_leftSprite.anchor.y = 0.5;
-	this._drill_rightSprite = new Sprite(ImageManager.load_SpecialLayer(DrillUp.g_HB_weltImg_right));
-	this._drill_rightSprite.opacity = 0;
-	this._drill_rightSprite.anchor.x = 1.0;
-	this._drill_rightSprite.anchor.y = 0.5;
-	this._drill_upSprite = new Sprite(ImageManager.load_SpecialLayer(DrillUp.g_HB_weltImg_up));
-	this._drill_upSprite.opacity = 0;
-	this._drill_upSprite.anchor.x = 0.5;
-	this._drill_upSprite.anchor.y = 0.0;
-	this._drill_downSprite = new Sprite(ImageManager.load_SpecialLayer(DrillUp.g_HB_weltImg_down));
-	this._drill_downSprite.opacity = 0;
-	this._drill_downSprite.anchor.x = 0.5;
-	this._drill_downSprite.anchor.y = 1.0;
-	
-	this._drill_upArea.addChild(this._drill_leftSprite);
-	this._drill_upArea.addChild(this._drill_rightSprite);
-	this._drill_upArea.addChild(this._drill_upSprite);
-	this._drill_upArea.addChild(this._drill_downSprite);
-}
-
-//==============================
-// * 黑边场景 - 帧刷新
-//==============================
-Scene_Drill_HB.prototype.update = function() { 
-	Scene_Base.prototype.update.call(this);	
-	this.drill_updateBackground();
-	this.drill_updateWeltImg();
-}
-//==============================
-// * 帧刷新 - 背景
-//==============================
-Scene_Drill_HB.prototype.drill_updateBackground = function() {
+Scene_Drill_HB.prototype.drill_scene_updateBackground = function() {
 	
 	for(var i=0; i < this._drill_background_dataTank.length; i++){
 		var temp_data = this._drill_background_dataTank[i];
-		var temp_sprite = this._drill_background_tank[i];
+		var temp_sprite = this._drill_background_spriteTank[i];
 		
 		// > 数据刷新
 		if( $gameSystem ){
@@ -1091,10 +1133,69 @@ Scene_Drill_HB.prototype.drill_updateBackground = function() {
 		}
 	}
 }
+
+
 //==============================
-// * 帧刷新 - 贴边图像
+// * 2C贴边图像 - 初始化子功能
 //==============================
-Scene_Drill_HB.prototype.drill_updateWeltImg = function() {
+Scene_Drill_HB.prototype.drill_scene_initWeltImg = function() {
+	this._drill_leftSprite_data = {};
+	this._drill_rightSprite_data = {};
+	this._drill_upSprite_data = {};
+	this._drill_downSprite_data = {};
+}
+//==============================
+// * 2C贴边图像 - 创建
+//==============================
+Scene_Drill_HB.prototype.drill_scene_createWeltImg = function() {
+	this._drill_upArea = new Sprite();
+	this._drill_main_layer.addChild(this._drill_upArea);	//图像层
+	
+	// > 数据初始化
+	this._drill_leftSprite_data.src_img = DrillUp.g_HB_weltImg_left;
+	this._drill_leftSprite_data.cur_visible = true;
+	this._drill_leftSprite_data.cur_opacity = 0;
+	this._drill_rightSprite_data.src_img = DrillUp.g_HB_weltImg_right;
+	this._drill_rightSprite_data.cur_visible = true;
+	this._drill_rightSprite_data.cur_opacity = 0;
+	this._drill_upSprite_data.src_img = DrillUp.g_HB_weltImg_up;
+	this._drill_upSprite_data.cur_visible = true;
+	this._drill_upSprite_data.cur_opacity = 0;
+	this._drill_downSprite_data.src_img = DrillUp.g_HB_weltImg_down;
+	this._drill_downSprite_data.cur_visible = true;
+	this._drill_downSprite_data.cur_opacity = 0;
+	
+	// > 贴图初始化
+	this._drill_leftSprite = new Sprite();
+	this._drill_leftSprite.bitmap = ImageManager.loadBitmap("img/Special__layer/", DrillUp.g_HB_weltImg_left, 0, true);
+	this._drill_leftSprite.opacity = 0;
+	this._drill_leftSprite.anchor.x = 0.0;
+	this._drill_leftSprite.anchor.y = 0.5;
+	this._drill_rightSprite = new Sprite();
+	this._drill_rightSprite.bitmap = ImageManager.loadBitmap("img/Special__layer/", DrillUp.g_HB_weltImg_right, 0, true);
+	this._drill_rightSprite.opacity = 0;
+	this._drill_rightSprite.anchor.x = 1.0;
+	this._drill_rightSprite.anchor.y = 0.5;
+	this._drill_upSprite = new Sprite();
+	this._drill_upSprite.bitmap = ImageManager.loadBitmap("img/Special__layer/", DrillUp.g_HB_weltImg_up, 0, true);
+	this._drill_upSprite.opacity = 0;
+	this._drill_upSprite.anchor.x = 0.5;
+	this._drill_upSprite.anchor.y = 0.0;
+	this._drill_downSprite = new Sprite();
+	this._drill_downSprite.bitmap = ImageManager.loadBitmap("img/Special__layer/", DrillUp.g_HB_weltImg_down, 0, true);
+	this._drill_downSprite.opacity = 0;
+	this._drill_downSprite.anchor.x = 0.5;
+	this._drill_downSprite.anchor.y = 1.0;
+	
+	this._drill_upArea.addChild(this._drill_leftSprite);
+	this._drill_upArea.addChild(this._drill_rightSprite);
+	this._drill_upArea.addChild(this._drill_upSprite);
+	this._drill_upArea.addChild(this._drill_downSprite);
+}
+//==============================
+// * 2C贴边图像 - 帧刷新
+//==============================
+Scene_Drill_HB.prototype.drill_scene_updateWeltImg = function() {
 	
 	// > 数据刷新
 	var isChanging = false;
@@ -1102,33 +1203,33 @@ Scene_Drill_HB.prototype.drill_updateWeltImg = function() {
 		if( this._drill_weltImg_left != $gameSystem._drill_HB_weltImg_left ){
 			isChanging = true;
 			this._drill_leftSprite_data.cur_opacity -= 255/DrillUp.g_HB_weltImg_time;
-			if(this._drill_leftSprite_data.cur_opacity <= 0 ){
+			if( this._drill_leftSprite_data.cur_opacity <= 0 ){
 				this._drill_weltImg_left = $gameSystem._drill_HB_weltImg_left;
-				this._drill_leftSprite.bitmap = ImageManager.load_SpecialLayer(this._drill_weltImg_left);
+				this._drill_leftSprite.bitmap = ImageManager.loadBitmap("img/Special__layer/", this._drill_weltImg_left, 0, true);
 			}
 		}
 		if( this._drill_weltImg_right != $gameSystem._drill_HB_weltImg_right ){
 			isChanging = true;
 			this._drill_rightSprite_data.cur_opacity -= 255/DrillUp.g_HB_weltImg_time;
-			if(this._drill_rightSprite_data.cur_opacity <= 0 ){
+			if( this._drill_rightSprite_data.cur_opacity <= 0 ){
 				this._drill_weltImg_right = $gameSystem._drill_HB_weltImg_right;
-				this._drill_rightSprite.bitmap = ImageManager.load_SpecialLayer(this._drill_weltImg_right);
+				this._drill_rightSprite.bitmap = ImageManager.loadBitmap("img/Special__layer/", this._drill_weltImg_right, 0, true);
 			}
 		}
 		if( this._drill_weltImg_up != $gameSystem._drill_HB_weltImg_up ){
 			isChanging = true;
 			this._drill_upSprite_data.cur_opacity -= 255/DrillUp.g_HB_weltImg_time;
-			if(this._drill_upSprite_data.cur_opacity <= 0 ){
+			if( this._drill_upSprite_data.cur_opacity <= 0 ){
 				this._drill_weltImg_up = $gameSystem._drill_HB_weltImg_up;
-				this._drill_upSprite.bitmap = ImageManager.load_SpecialLayer(this._drill_weltImg_up);
+				this._drill_upSprite.bitmap = ImageManager.loadBitmap("img/Special__layer/", this._drill_weltImg_up, 0, true);
 			}
 		}
 		if( this._drill_weltImg_down != $gameSystem._drill_HB_weltImg_down ){
 			isChanging = true;
 			this._drill_downSprite_data.cur_opacity -= 255/DrillUp.g_HB_weltImg_time;
-			if(this._drill_downSprite_data.cur_opacity <= 0 ){
+			if( this._drill_downSprite_data.cur_opacity <= 0 ){
 				this._drill_weltImg_down = $gameSystem._drill_HB_weltImg_down;
-				this._drill_downSprite.bitmap = ImageManager.load_SpecialLayer(this._drill_weltImg_down);
+				this._drill_downSprite.bitmap = ImageManager.loadBitmap("img/Special__layer/", this._drill_weltImg_down, 0, true);
 			}
 		}
 	}
@@ -1162,16 +1263,16 @@ Scene_Drill_HB.prototype.drill_updateWeltImg = function() {
 	this._drill_downSprite_data.cur_opacity = this._drill_downSprite_data.cur_opacity.clamp(0,255);
 	
 	
-	// > 贴图刷新
-	this._drill_leftSprite.x = 0;			//贴边
-	this._drill_leftSprite.y = this._drill_cur_height/2;
-	this._drill_rightSprite.x = this._drill_cur_width;
-	this._drill_rightSprite.y = this._drill_cur_height/2;
+	// > 贴图刷新（根据 2D变化大小 实时刷新）
+	this._drill_leftSprite.x = 0;
+	this._drill_leftSprite.y = this._drill_cur_sceneHeight *0.5;
+	this._drill_rightSprite.x = this._drill_cur_sceneWidth;
+	this._drill_rightSprite.y = this._drill_cur_sceneHeight *0.5;
 	
-	this._drill_upSprite.x = this._drill_cur_width/2;
+	this._drill_upSprite.x = this._drill_cur_sceneWidth *0.5;
 	this._drill_upSprite.y = 0;
-	this._drill_downSprite.x = this._drill_cur_width/2;
-	this._drill_downSprite.y = this._drill_cur_height;
+	this._drill_downSprite.x = this._drill_cur_sceneWidth *0.5;
+	this._drill_downSprite.y = this._drill_cur_sceneHeight;
 	
 	this._drill_leftSprite.opacity = this._drill_leftSprite_data.cur_opacity;
 	this._drill_rightSprite.opacity = this._drill_rightSprite_data.cur_opacity;
@@ -1179,34 +1280,187 @@ Scene_Drill_HB.prototype.drill_updateWeltImg = function() {
 	this._drill_downSprite.opacity = this._drill_downSprite_data.cur_opacity;
 }
 
+
 //==============================
-// * 设置变化大小（可放入帧刷新中）
+// * 2D变化大小 - 初始化子功能
 //==============================
-Scene_Drill_HB.prototype.drill_setSize = function(width,height) {
-	if(this._drill_cur_width == width && this._drill_cur_height == height){ return; }
-	this._drill_cur_width = width;
-	this._drill_cur_height = height;
+Scene_Drill_HB.prototype.drill_scene_initSize = function() {
+	this._drill_cur_sceneWidth = 0;
+	this._drill_cur_sceneHeight = 0;
+}
+//==============================
+// * 2D变化大小 - 帧刷新
+//==============================
+Scene_Drill_HB.prototype.drill_scene_updateSize = function(){
 	
-	// > 背景宽高
-	for(var i=0; i < this._drill_background_tank.length; i++){
-		var temp_sprite = this._drill_background_tank[i];
-		temp_sprite.move(0,0,this._drill_cur_width,this._drill_cur_height);
+	// > 变化锁
+	var render_width  = Drill_HB_Renderer.drill_HB_width();
+	var render_height = Drill_HB_Renderer.drill_HB_height();
+	if( this._drill_cur_sceneWidth == render_width && this._drill_cur_sceneHeight == render_height ){ return; }
+	this._drill_cur_sceneWidth = render_width;
+	this._drill_cur_sceneHeight = render_height;
+	
+	// > 刷新高宽
+	this.drill_scene_refreshSize( render_width, render_height );
+}
+//==============================
+// * 2D变化大小 - 刷新高宽
+//==============================
+Scene_Drill_HB.prototype.drill_scene_refreshSize = function( width, height ){
+	
+	// > 刷新高宽 - 2B背景
+	for(var i=0; i < this._drill_background_spriteTank.length; i++){
+		var temp_sprite = this._drill_background_spriteTank[i];
+		temp_sprite.move( 0, 0, width, height );
 	}
 	
-	// > 贴边图形显现条件
-	if( this._drill_cur_width - Graphics._width*Graphics._realScale >= DrillUp.g_HB_weltImg_width * 2 ){
+	// > 刷新高宽 - 2C贴边图像
+	//		（超过一定高宽时，显现贴边图像）
+	var graph_real_width  = Graphics._width  * Graphics._realScale;
+	if( width - graph_real_width >= DrillUp.g_HB_weltImg_width * 2 ){
 		this._drill_leftSprite_data.cur_visible = true;
 		this._drill_rightSprite_data.cur_visible = true;
 	}else{
 		this._drill_leftSprite_data.cur_visible = false;
 		this._drill_rightSprite_data.cur_visible = false;
 	}
-	if( this._drill_cur_height - Graphics._height*Graphics._realScale >= DrillUp.g_HB_weltImg_height * 2 ){
+	var graph_real_height = Graphics._height * Graphics._realScale;
+	if( height - graph_real_height >= DrillUp.g_HB_weltImg_height * 2 ){
 		this._drill_upSprite_data.cur_visible = true;
 		this._drill_downSprite_data.cur_visible = true;
 	}else{
 		this._drill_upSprite_data.cur_visible = false;
 		this._drill_downSprite_data.cur_visible = false;
+	}
+}
+
+
+//=============================================================================
+// ** ☆原型链规范（Scene_Drill_HB）
+//
+//			说明：	> 此处专门补上缺失的原型链，未缺失的则注释掉。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 启动标志界面（场景基类） - 初始化
+//==============================
+//Scene_Drill_HB.prototype.initialize = function() {
+//    Scene_Base.prototype.initialize.call(this);
+//};
+//==============================
+// * 启动标志界面（场景基类） - 创建
+//==============================
+//Scene_Drill_HB.prototype.create = function() {
+//    Scene_Base.prototype.create.call(this);
+//};
+//==============================
+// * 启动标志界面（场景基类） - 帧刷新
+//==============================
+//Scene_Drill_HB.prototype.update = function() {
+//    Scene_Base.prototype.update.call(this);
+//};
+//==============================
+// * 启动标志界面（场景基类） - 开始运行
+//==============================
+Scene_Drill_HB.prototype.start = function() {
+    Scene_Base.prototype.start.call(this);
+};
+//==============================
+// * 启动标志界面（场景基类） - 结束运行
+//==============================
+Scene_Drill_HB.prototype.stop = function() {
+    Scene_Base.prototype.stop.call(this);
+};
+//==============================
+// * 启动标志界面（场景基类） - 忙碌状态
+//==============================
+Scene_Drill_HB.prototype.isBusy = function() {
+	return Scene_Base.prototype.isBusy.call(this);
+};
+//==============================
+// * 启动标志界面（场景基类） - 析构函数
+//==============================
+Scene_Drill_HB.prototype.terminate = function() {
+    Scene_Base.prototype.terminate.call(this);
+};
+//==============================
+// * 启动标志界面（场景基类） - 判断加载完成
+//==============================
+Scene_Drill_HB.prototype.isReady = function() {
+	return Scene_Base.prototype.isReady.call(this);
+};
+//==============================
+// * 启动标志界面（场景基类） - 判断是否激活/启动
+//==============================
+Scene_Drill_HB.prototype.isActive = function() {
+	return Scene_Base.prototype.isActive.call(this);
+};
+
+
+//=============================================================================
+// ** ☆引擎兼容（STG）
+//
+//			说明：	> 此模块对引擎进行专门兼容。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 引擎兼容 - 最后继承1级
+//==============================
+var _drill_STG_HB_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_STG_HB_scene_initialize.call(this);
+	
+	//==============================
+	// * 引擎兼容 - 插件指令『STG的插件指令』（游戏窗体，插件位置在前面，需要最后继承）
+	//==============================
+	if( Imported.Drill_STG__objects ){
+		
+		//==============================
+		// * 插件指令 - STG指令绑定
+		//==============================
+		var _drill_STG_HB_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+		Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+			_drill_STG_HB_pluginCommand.call(this, command, args);
+			this.drill_HB_pluginCommand( command, args );
+		}
+		//==============================
+		// * 插件指令 - STG指令执行
+		//==============================
+		Drill_STG_GameInterpreter.prototype.drill_HB_pluginCommand = Game_Interpreter.prototype.drill_HB_pluginCommand;
+	}
+}
+
+
+//=============================================================================
+// ** ☆引擎兼容（ACT）
+//
+//			说明：	> 此模块对引擎进行专门兼容。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 引擎兼容 - 最后继承1级
+//==============================
+var _drill_ACT_HB_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_ACT_HB_scene_initialize.call(this);
+	
+	//==============================
+	// * 引擎兼容 - 插件指令『ACT的插件指令』（游戏窗体，插件位置在前面，需要最后继承）
+	//==============================
+	if( Imported.Drill_ACT__objects ){
+		
+		//==============================
+		// * 插件指令 - ACT指令绑定
+		//==============================
+		var _drill_ACT_HB_pluginCommand = Drill_ACT_GameInterpreter.prototype.pluginCommand;
+		Drill_ACT_GameInterpreter.prototype.pluginCommand = function( command, args ){
+			_drill_ACT_HB_pluginCommand.call(this, command, args);
+			this.drill_HB_pluginCommand( command, args );
+		}
+		//==============================
+		// * 插件指令 - ACT指令执行
+		//==============================
+		Drill_ACT_GameInterpreter.prototype.drill_HB_pluginCommand = Game_Interpreter.prototype.drill_HB_pluginCommand;
 	}
 }
 

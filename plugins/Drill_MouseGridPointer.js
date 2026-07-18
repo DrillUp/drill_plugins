@@ -625,11 +625,11 @@ Game_System.prototype.drill_MGP_checkSysData_Private = function() {
 //=============================================================================
 // ** ☆贴图控制
 //
-//			说明：	> 此模块专门管理 控制器与贴图 的创建与销毁。
+//			说明：	> 此模块专门管理 贴图 的创建与销毁。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 贴图控制 - 图层 - 创建
+// * 贴图控制 - 创建绑定
 //==============================
 var _drill_MGP_createDestination = Spriteset_Map.prototype.createDestination;
 Spriteset_Map.prototype.createDestination = function() {
@@ -637,15 +637,7 @@ Spriteset_Map.prototype.createDestination = function() {
 	this.drill_MGP_rebuild();
 };
 //==============================
-// * 贴图控制 - 图层 - 帧刷新
-//==============================
-var _drill_MGP_update = Spriteset_Map.prototype.update;
-Spriteset_Map.prototype.update = function() {
-	_drill_MGP_update.call(this);
-	this.drill_MGP_updateStyle();
-};
-//==============================
-// * 贴图控制 - 图层 - 重建贴图
+// * 贴图控制 - 创建
 //==============================
 Spriteset_Map.prototype.drill_MGP_rebuild = function() {
 	
@@ -668,7 +660,15 @@ Spriteset_Map.prototype.drill_MGP_rebuild = function() {
 	}
 };
 //==============================
-// * 贴图控制 - 帧刷新 样式
+// * 贴图控制 - 帧刷新绑定
+//==============================
+var _drill_MGP_update = Spriteset_Map.prototype.update;
+Spriteset_Map.prototype.update = function() {
+	_drill_MGP_update.call(this);
+	this.drill_MGP_updateStyle();
+};
+//==============================
+// * 贴图控制 - 帧刷新
 //==============================
 Spriteset_Map.prototype.drill_MGP_updateStyle = function() {
 	
@@ -696,27 +696,34 @@ Spriteset_Map.prototype.drill_MGP_updateStyle = function() {
 
 
 //=============================================================================
-// ** 网格指向标【Drill_MGP_GridSprite】
-// **		
-// **		作用域：	地图界面、战斗界面
-// **		主功能：	定义一个 网格指向标 的贴图。
-// **		子功能：	
-// **					->贴图
-// **					->A主体
-// **						->层级
-// **					->B播放GIF
-// **					->C自变化效果
-// **					->D自动隐藏
-// **
-// **		代码：	> 范围 - 仅用于可视化。
-// **				> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
-// **				> 数量 - [单个/ ●多个 ] 
-// **				> 创建 - [ ●一次性 /自延迟/外部延迟] 
-// **				> 销毁 - [不考虑/自销毁/ ●外部销毁] 
-// **				> 样式 - [不可修改/自变化/ ●外部变化] 样式在 帧刷新样式 函数中变化。
+// ** 网格指向标贴图【Drill_MGP_GridSprite】
+//			
+//			作用域：	地图界面、战斗界面
+//			主功能：	定义一个 网格指向标 的贴图。
+//			子功能：	
+//						->贴图『独立贴图』
+// 							x->显示贴图/隐藏贴图
+// 							->是否就绪
+// 							->优化策略
+// 							->销毁独立贴图
+//							->初始化数据
+//							->初始化对象
+// 						
+//						->A主体
+//							->层级
+//						->B播放GIF
+//						->C自变化效果
+//						->D自动隐藏
+//	
+//			代码：	> 范围 - 仅用于可视化。
+//					> 结构 - [ ●合并 /分离/混乱] 贴图与数据合并。
+//					> 数量 - [单个/ ●多个 ] 
+//					> 创建 - [ ●一次性 /自延迟/外部延迟] 
+//					> 销毁 - [不考虑/自销毁/ ●外部销毁] 
+//					> 样式 - [不可修改/自变化/ ●外部变化] 样式在 帧刷新样式 函数中变化。
 //=============================================================================
 //==============================
-// * 贴图 - 定义
+// * 网格指向标贴图 - 定义
 //==============================
 function Drill_MGP_GridSprite() {
 	this.initialize.apply(this, arguments);
@@ -724,18 +731,17 @@ function Drill_MGP_GridSprite() {
 Drill_MGP_GridSprite.prototype = Object.create(Sprite_Base.prototype);
 Drill_MGP_GridSprite.prototype.constructor = Drill_MGP_GridSprite;
 //==============================
-// * 贴图 - 初始化
+// * 网格指向标贴图 - 初始化
 //==============================
 Drill_MGP_GridSprite.prototype.initialize = function() {
 	Sprite_Base.prototype.initialize.call(this);
 	this._drill_data = null;					//样式数据
 	this._drill_curStyle = -1;					//当前样式
 	this._drill_curIndex = -1;					//当前样式
-	this.drill_sprite_initSelf();				//初始化自身
-	this.drill_sprite_initChild();				//初始化子功能
+	this.drill_sprite_initChild();				//初始化对象
 };
 //##############################
-// * 贴图 - 帧刷新【标准函数】
+// * 网格指向标贴图 - 帧刷新【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -751,10 +757,10 @@ Drill_MGP_GridSprite.prototype.update = function() {
 	this.drill_sprite_updateVisibleCheck();			//帧刷新 - D自动隐藏
 };
 //##############################
-// * 贴图 - 是否就绪【标准函数】
+// * 网格指向标贴图 - 是否就绪【标准函数】
 //
 //			参数：	> 无
-//			返回：	> visible 布尔
+//			返回：	> 布尔
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
@@ -763,7 +769,7 @@ Drill_MGP_GridSprite.prototype.drill_sprite_isReady = function(){
 	return true;
 }
 //##############################
-// * 贴图 - 优化策略【标准函数】
+// * 网格指向标贴图 - 优化策略【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔（是否通过）
@@ -774,26 +780,18 @@ Drill_MGP_GridSprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return true;	//（暂无策略）
 };
 //##############################
-// * 贴图 - 销毁【标准函数】
+// * 网格指向标贴图 - 销毁独立贴图【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
-//			
-//			说明：	> 如果需要重建时。
 //##############################
 Drill_MGP_GridSprite.prototype.drill_sprite_destroy = function(){
 	this.drill_sprite_destroyChild();
 	this.drill_sprite_destroySelf();
 };
-//##############################
-// * 贴图 - 初始化数据【标准默认值】
-//
-//			参数：	> 无
-//			返回：	> 无
-//			
-//			说明：	> data 动态参数对象（来自类初始化）
-//					  该对象包含 类所需的所有默认值。
-//##############################
+//==============================
+// * 网格指向标贴图 - 初始化数据『独立贴图』
+//==============================
 Drill_MGP_GridSprite.prototype.drill_sprite_initData = function() {
 	var data = this._drill_data;
 	
@@ -829,13 +827,7 @@ Drill_MGP_GridSprite.prototype.drill_sprite_initData = function() {
 	if( data['rRegion_list'] == undefined ){ data['rRegion_list'] = [] };
 };
 //==============================
-// * 贴图 - 初始化自身（私有）
-//==============================
-Drill_MGP_GridSprite.prototype.drill_sprite_initSelf = function(){
-	this._drill_curSerial = -1;				//当前序列号（由于没有控制器，所以保持-1值）
-};
-//==============================
-// * 贴图 - 初始化子功能（私有）
+// * 网格指向标贴图 - 初始化对象『独立贴图』
 //==============================
 Drill_MGP_GridSprite.prototype.drill_sprite_initChild = function() {
 	this.drill_sprite_initAttr();			//初始化对象 - A主体
@@ -844,7 +836,7 @@ Drill_MGP_GridSprite.prototype.drill_sprite_initChild = function() {
 	this.drill_sprite_initVisibleCheck();	//初始化对象 - D自动隐藏
 };
 //==============================
-// * 贴图 - 销毁子功能（私有）
+// * 网格指向标贴图 - 销毁独立贴图 - 销毁子功能（私有）
 //==============================
 Drill_MGP_GridSprite.prototype.drill_sprite_destroyChild = function(){
 	this.visible = false;
@@ -854,13 +846,13 @@ Drill_MGP_GridSprite.prototype.drill_sprite_destroyChild = function(){
 	this._drill_MGP_sprite = null;
 };
 //==============================
-// * 贴图 - 销毁自身（私有）
+// * 网格指向标贴图 - 销毁独立贴图 - 销毁自身（私有）
 //==============================
 Drill_MGP_GridSprite.prototype.drill_sprite_destroySelf = function() {
 	this._drill_curSerial = -1;				//当前序列号
 };
 //==============================
-// * 贴图 - 重设数据（私有）
+// * 网格指向标贴图 - 重设数据（私有）
 //==============================
 Drill_MGP_GridSprite.prototype.drill_sprite_resetData = function( data ){
 	this._drill_data = data;

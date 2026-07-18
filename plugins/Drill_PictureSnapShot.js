@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        图片 - 临时屏幕快照
+ * @plugindesc [v1.5]        图片 - 临时屏幕快照
  * @author Drill_up
  * 
  * 
@@ -101,6 +101,8 @@
  * 优化了内部结构。
  * [v1.4]
  * 改进了截图保存的功能。
+ * [v1.5]
+ * 修复了浏览器运行时报错的bug。
  * 
  * 
  * 
@@ -830,7 +832,7 @@ Date.prototype.drill_PSS_getDateTextByFormat = function( fmt ){
 //					> image_quality 图片质量（0~100，只jpg时有效）
 //==============================
 Game_Temp.prototype.drill_PSS_saveBitmap = function( bitmap, url_path, file_name, file_type, image_quality ){
-	if( require == undefined ){ return; }
+	if( typeof(require) === "undefined" ){ return; }
 	if( file_type != "png" && file_type != "jpg" ){ return; }
 	
 	// > 图片质量（只jpg时有效）
@@ -874,7 +876,7 @@ Game_Temp.prototype.drill_PSS_saveBitmap = function( bitmap, url_path, file_name
 // * 保存快照文件 - 『文件载体-文件路径』 - 游戏根目录（开放函数）
 //==============================
 Game_Temp.prototype.drill_PSS_parentDirectoryPath = function() {
-	if( require == undefined ){ return ""; }
+	if( typeof(require) === "undefined" ){ return ""; }
 	var path = require('path');  //『文件载体-fs』
 	var base = path.dirname(process.mainModule.filename);
 	return path.join(base, '/');
@@ -883,7 +885,7 @@ Game_Temp.prototype.drill_PSS_parentDirectoryPath = function() {
 // * 保存快照文件 - 执行打开保存的文件夹路径
 //==============================
 Game_Temp.prototype.drill_PSS_openUrl = function() {
-	if( require == undefined ){ return; }
+	if( typeof(require) === "undefined" ){ return; }
 	var fileRoot = this.drill_PSS_parentDirectoryPath();
 	var filePath = fileRoot + DrillUp.g_PSS_fileSettings['url_path'];
 	

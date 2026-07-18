@@ -136,7 +136,7 @@
  * @param 默认样式
  * @type number
  * @min 1
- * @desc 简单指令若未配置样式时，则使用默认样式。默认样式对应配置样式的编号。
+ * @desc 若未配置样式时，则使用默认样式。默认样式对应配置样式的编号。
  * @default 1
  * 
  * 
@@ -1711,7 +1711,9 @@ Scene_Map.prototype.drill_GFTP_updateTimeOut = function() {
 // **						->重设数据
 // **							->序列号
 // **						->暂停/继续
-// **						->销毁
+// **						->分配器标记销毁
+// **						->分配器是否销毁
+// **					
 // **					->A主体
 // **					->B注册
 // **						->执行注册
@@ -1764,7 +1766,7 @@ Drill_GFTP_Allocator.prototype.drill_allocator_resetData = function( data ){
 //##############################
 // * 分配器 - 暂停/继续【标准函数】
 //
-//			参数：	> enable 布尔
+//			参数：	> pause 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1774,16 +1776,16 @@ Drill_GFTP_Allocator.prototype.drill_allocator_setPause = function( pause ){
 	data['pause'] = pause;
 };
 //##############################
-// * 分配器 - 设置销毁【标准函数】
+// * 分配器 - 分配器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_GFTP_Allocator.prototype.drill_allocator_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 分配器 - 判断销毁【标准函数】
+// * 分配器 - 分配器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -2120,7 +2122,7 @@ Scene_Map.prototype.drill_GFTP_updateWindowPosition = function() {
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						x->销毁
+// **						x->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					

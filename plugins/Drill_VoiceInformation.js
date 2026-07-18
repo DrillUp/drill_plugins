@@ -6,10 +6,6 @@
  * @plugindesc [v1.0]        声音 - 声音数据获取器
  * @author Drill_up
  * 
- * @Drill_LE_param "声音-%d"
- * @Drill_LE_parentKey "---声音组%d至%d---"
- * @Drill_LE_var "DrillUp.g_VI_sound_length"
- * 
  * 
  * @help
  * =============================================================================

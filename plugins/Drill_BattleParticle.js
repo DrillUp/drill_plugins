@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        战斗 - 多层战斗粒子
+ * @plugindesc [v1.4]        战斗 - 多层战斗粒子
  * @author Drill_up
  * 
  * @Drill_LE_param "粒子样式-%d"
@@ -24,8 +24,8 @@
  * ----插件扩展
  * 该插件 不能 单独使用。
  * 基于：
- *   - Drill_CoreOfParticle        系统-粒子核心
  *   - Drill_CoreOfBallistics      数学模型-弹道核心★★v2.2及以上★★
+ *   - Drill_CoreOfParticle        系统-粒子核心★★v1.2及以上★★
  *
  * -----------------------------------------------------------------------------
  * ----设定注意事项
@@ -67,8 +67,6 @@
  * 粒子2 资源-粒子
  * 粒子3 资源-粒子
  * ……
- *
- * 所有素材都放在Battle__layer文件夹下。
  * 
  * -----------------------------------------------------------------------------
  * ----激活条件
@@ -109,21 +107,26 @@
  * 插件指令：>战斗粒子 : 粒子[11] : 暂停(延迟) : 延迟执行时间[20]
  * 插件指令：>战斗粒子 : 粒子[11] : 继续(延迟) : 延迟执行时间[20]
  * 插件指令：>战斗粒子 : 粒子[11] : 切换混合模式(延迟)[0] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 还原混合模式(延迟) : 延迟执行时间[20]
  * 插件指令：>战斗粒子 : 粒子[11] : 切换战斗层级(延迟)[下层] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 还原战斗层级(延迟) : 延迟执行时间[20]
  * 插件指令：>战斗粒子 : 粒子[11] : 切换图片层级(延迟)[10] : 延迟执行时间[20]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 透明度[255] : 时间[60] : 延迟执行时间[20]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 透明度变量[21] : 时间[60] : 延迟执行时间[20]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 旋转[90] : 时间[60] : 延迟执行时间[20]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 旋转变量[21] : 时间[60] : 延迟执行时间[20]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 缩放X[1.2] : 时间[60] : 延迟执行时间[20]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 缩放X变量%[21] : 时间[60] : 延迟执行时间[20]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 缩放Y[1.2] : 时间[60] : 延迟执行时间[20]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 缩放Y变量%[21] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 还原图片层级(延迟) : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 整体透明度[255] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 整体透明度变量[21] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 整体旋转[90] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 整体旋转变量[21] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 粒子缩放X[1.2] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 粒子缩放X变量%[21] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 粒子缩放Y[1.2] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 粒子缩放Y变量%[21] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 粒子旋转[90] : 时间[60] : 延迟执行时间[20]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性(延迟) : 粒子旋转变量[21] : 时间[60] : 延迟执行时间[20]
  * 插件指令：>战斗粒子 : 粒子[11] : 还原所有单属性(延迟) : 延迟执行时间[20]
  * 插件指令：>战斗粒子 : 粒子[11] : 立即取消全部延迟指令
  * 
  * 1.前半部分（粒子变量[21]）和 后半部分（隐藏(延迟) : 延迟执行时间[20]）
- *   的参数可以随意组合。一共有5*17种组合方式。
+ *   的参数可以随意组合。一共有5*20种组合方式。
  * 2.设置延迟指令后，指令会被暂存到延迟队列中，等待延迟时间结束之后，执行指令。
  *   "立即取消全部延迟指令"可以清空排在队列中的所有延迟指令。
  * 3.此功能可以简化 并行事件 的设计，你可以在串行事件中执行延迟，延迟后并行变化贴图。
@@ -178,20 +181,25 @@
  * 插件指令：>战斗粒子 : 粒子[11] : 暂停
  * 插件指令：>战斗粒子 : 粒子[11] : 继续
  * 插件指令：>战斗粒子 : 粒子[11] : 切换混合模式[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 还原混合模式
  * 插件指令：>战斗粒子 : 粒子[11] : 切换战斗层级[下层]
+ * 插件指令：>战斗粒子 : 粒子[11] : 还原战斗层级
  * 插件指令：>战斗粒子 : 粒子[11] : 切换图片层级[10]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 透明度[255] : 时间[60]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 透明度变量[21] : 时间[60]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 旋转[90] : 时间[60]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 旋转变量[21] : 时间[60]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 缩放X[1.2] : 时间[60]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 缩放X变量%[21] : 时间[60]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 缩放Y[1.2] : 时间[60]
- * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 缩放Y变量%[21] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 还原图片层级
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 整体透明度[255] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 整体透明度变量[21] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 整体旋转[90] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 整体旋转变量[21] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 粒子缩放X[1.2] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 粒子缩放X变量%[21] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 粒子缩放Y[1.2] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 粒子缩放Y变量%[21] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 粒子旋转[90] : 时间[60]
+ * 插件指令：>战斗粒子 : 粒子[11] : 修改单属性 : 粒子旋转变量[21] : 时间[60]
  * 插件指令：>战斗粒子 : 粒子[11] : 立即还原所有单属性
  * 
  * 1.前半部分（粒子变量[21]）和 后半部分（显示）
- *   的参数可以随意组合。一共有5*16种组合方式。
+ *   的参数可以随意组合。一共有5*19种组合方式。
  * 2.插件指令的变化是永久性的。
  *   修改后的变化能与 配置的自变化效果 叠加，但是实际效果一般都不太好。
  * 3."切换战斗层级["能切换的层级为：下层、上层、图片层、最顶层。
@@ -227,23 +235,28 @@
  * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-暂停(周期) : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-继续(周期) : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-切换混合模式(周期)[0] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-还原混合模式(周期) : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-切换战斗层级(周期)[下层] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-还原战斗层级(周期) : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-切换图片层级(周期)[10] : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 透明度[255] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 透明度变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 旋转[90] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 旋转变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 缩放X[1.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 缩放X变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 缩放Y[1.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
- * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 缩放Y变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-还原图片层级(周期) : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 整体透明度[255] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 整体透明度变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 整体旋转[90] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 整体旋转变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 粒子缩放X[1.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 粒子缩放X变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 粒子缩放Y[1.2] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 粒子缩放Y变量%[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 粒子旋转[90] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
+ * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-修改单属性(周期) : 粒子旋转变量[21] : 时间[60] : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>战斗粒子 : 粒子[11] : 添加周期-还原所有单属性(周期) : 周期时长[90] : 周期内开始时间[0]
  * 插件指令：>战斗粒子 : 粒子[11] : 暂停周期指令
  * 插件指令：>战斗粒子 : 粒子[11] : 继续周期指令
  * 插件指令：>战斗粒子 : 粒子[11] : 清空周期指令(立刻)
  * 
  * 1.前半部分（粒子[11]）和 后半部分（ 添加周期-隐藏(周期) ）
- *   的参数可以随意组合。一共有5*19种组合方式。
+ *   的参数可以随意组合。一共有5*22种组合方式。
  * 2."添加周期"后，指令会根据"周期时长"和"开始时间"，持续循环执行。
  *   "清空周期指令"可以清空添加的指令。
  * 3.你可以塞入多条周期指令，每个周期指令控制不同的属性，实现复杂的变换效果。
@@ -314,7 +327,7 @@
  * 工作类型：   持续执行
  * 时间复杂度： o(n^2)*o(贴图处理) 每帧
  * 测试方法：   在战斗中放置20个粒子，进行性能测试。
- * 测试结果：   战斗界面中，平均消耗为：【51.60ms】
+ * 测试结果：   战斗界面中，平均消耗为：【51.62ms】
  *
  * 1.插件只在自己作用域下工作消耗性能，在其它作用域下是不工作的。
  *   测试结果并不是精确值，范围在给定值的10ms范围内波动。
@@ -332,6 +345,8 @@
  * 整理改进了内部结构，并添加了周期指令。
  * [v1.3]
  * 再次改进了结构。
+ * [v1.4]
+ * 翻新并兼容了新的粒子底层。
  * 
  * 
  * 
@@ -1592,6 +1607,22 @@
  * @desc true - 开启，false - 关闭，预加载详细介绍去看看："1.系统 > 关于预加载.docx"。
  * @default false
  *
+ * @param 图像-色调值
+ * @parent ---贴图---
+ * @type number
+ * @min 0
+ * @max 360
+ * @desc 资源图像的色调值。
+ * @default 0
+ *
+ * @param 图像-模糊边缘
+ * @parent ---贴图---
+ * @type boolean
+ * @on 模糊
+ * @off 关闭
+ * @desc 此参数可以看看："0.基本定义 > 缩放模式.docx"。设置模糊后，缩放时可以模糊资源图像的边缘，防止出现像素锯齿。
+ * @default false
+ *
  * @param 透明度
  * @parent ---贴图---
  * @type number
@@ -1650,6 +1681,16 @@
  * 
  * @param ---粒子效果---
  * @desc 
+ *
+ * @param 粒子类型
+ * @parent ---粒子效果---
+ * @type select
+ * @option 基础粒子
+ * @value 基础粒子
+ * @option 复杂粒子
+ * @value 复杂粒子
+ * @desc 基础粒子低消耗,复杂粒子高消耗,若游戏画面出现100以上该粒子,则建议用基础粒子。去看文档"1.系统 > 大家族-粒子效果.docx"。
+ * @default 基础粒子
  *
  * @param 粒子数量
  * @parent ---粒子效果---
@@ -1971,6 +2012,8 @@
 //		★性能测试因素	战斗场景-雪地示例
 //		★性能测试消耗	2024/6/15：
 //							》51.6ms、18.2ms（drill_sprite_refreshBallistics）37.9ms、28.2ms（drill_sprite_updateTransform）
+//						2026/7/17：
+//							》29.7ms（Drill_BFBPa_Sprite.update）7.6ms（Drill_BFBPa_Sprite.drill_sprite_updateTransform_Position）
 //		★最坏情况		暂无
 //		★备注			暂无
 //		
@@ -2003,23 +2046,17 @@
 //			->☆控制器与贴图
 //				->界面创建
 //				->实时创建
-//				->控制器与镜头
+//				->帧刷新 控制器
+//				->帧刷新 镜头
 //					> 位移比
-//					->控制器帧刷新
-//				->基础特性
-//				->销毁
+//				->帧刷新 基础特性
+//				->帧刷新 自动销毁
 //			
 //			->粒子控制器【Drill_BPa_Controller】
 //				->贴图长宽赋值
-//				->2A指令叠加变化
-//				->2B延迟指令
-//				->2C周期指令
 //				->2Z镜头参数
 //					->位移比
 //			->粒子贴图【Drill_BPa_Sprite】
-//				->2A指令叠加变化-控制器用
-//				->2B延迟指令
-//				->2C周期指令
 //			->粒子贴图（第二层）【Drill_BPa_SecSprite】
 //
 //
@@ -2037,8 +2074,6 @@
 //		★必要注意事项：
 //			1.插件继承至 粒子核心。
 //			  核心与所有子插件功能介绍去看看："1.系统 > 大家族-粒子效果（脚本）.docx"
-//			2.指令叠加变化的 移动到，被上提到 边界取余 中执行。
-//			  这是因为战斗界面的镜头不参与实际位移，所以只能移动粒子。
 //
 //		★其它说明细节：
 //			1.这里空间很大，感觉应该放点什么……那就给所有 界面装饰插件 编个号吧。
@@ -2098,17 +2133,17 @@
 	//==============================
 	// * 提示信息 - 报错 - 强制更新提示
 	//==============================
-	DrillUp.drill_BPa_getPluginTip_NeedUpdate_Camera = function(){
-		return "【" + DrillUp.g_BPa_PluginTip_curName + "】\n活动战斗镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
-	};
-	//==============================
-	// * 提示信息 - 报错 - 强制更新提示
-	//==============================
 	DrillUp.drill_BPa_getPluginTip_NeedUpdate_Ballistics = function(){
 		return "【" + DrillUp.g_BPa_PluginTip_curName + "】\n弹道核心插件版本过低，你需要更新 弹道核心 至少v2.2及以上版本。";
 	};
 	//==============================
-	// * 提示信息 - 报错 - 控制器的非数字参数
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_BPa_getPluginTip_NeedUpdate_Particle = function(){
+		return "【" + DrillUp.g_BPa_PluginTip_curName + "】\n粒子核心插件版本过低，你需要更新 粒子核心 至少v1.2及以上版本。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 控制器的非数字参数（核心会提示）
 	//==============================
 	DrillUp.drill_BPa_getPluginTip_controllerData_NotId = function( class_name ){
 		return "【" + DrillUp.g_BPa_PluginTip_curName + "】\n错误，类对象 "+class_name+" 获取到了非数字参数，数据初始化失败。";
@@ -2127,24 +2162,49 @@
 	// * 静态数据 - 粒子
 	//				（~struct~BPaParticle）
 	//==============================
-	DrillUp.drill_BPa_circleInit = function( dataFrom ){
+	DrillUp.drill_BPa_particleInit = function( dataFrom ){
 		var data = {};
 		
-		// > 控制器
-		data['visible'] = true;
-		data['pause'] = false;
+		// > 预加载
+		data['preload'] = String( dataFrom["是否预加载"] || "false") == "true";
 		
-		// > 贴图
+		
+		// > A主体 - 基础特性
 		data['src_img'] = String( dataFrom["资源-粒子"] || "");
 		data['src_img_file'] = "img/Battle__layer/";
-		data['preload'] = String( dataFrom["是否预加载"] || "false") == "true";
-		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['tint'] = Number( dataFrom["图像-色调值"] || 0);
+		data['smooth'] = String( dataFrom["图像-模糊边缘"] || "false") == "true";
+		
+		data['visible'] = true;
+		data['pause'] = false;
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['layerIndex'] = String( dataFrom["战斗层级"] || "下层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
 		
-		// > 粒子效果
-		//		（详细需要参考 drill_controller_initData，以及粒子核心的样式数据）
+		// > A主体 - 其它特性（2Z镜头参数）
+		data['XPer'] = Number( dataFrom["位移比X"] || 0);
+		data['YPer'] = Number( dataFrom["位移比Y"] || 0);
+		
+		
+		// > B变换特性
+		data['opacity'] = Number( dataFrom["透明度"] || 255);
+		data['parentRotate'] = 0;
+		data['par_x'] = 0;
+		data['par_y'] = 0;
+		data['par_scale_x'] = 1.0;
+		data['par_scale_y'] = 1.0;
+		data['par_rotate'] = 0;
+		
+		// > C校验值（无）
+		
+		// > D指令叠加变化（无）
+		
+		// > E延迟指令（无）
+		
+		// > F周期指令（无）
+		
+		
+		// > H粒子群弹道
 		data['par_count'] = Number( dataFrom["粒子数量"] || 0);
 		data['par_life'] = Number( dataFrom["粒子生命周期"] || 180);
 		data['par_backrun'] = String( dataFrom["粒子弹道是否倒放"] || "false") == "true";
@@ -2172,23 +2232,36 @@
 		data['par_scaleBase'] = Number( dataFrom["粒子缩放值"] || 1.0);
 		data['par_scaleRandom'] = Number( dataFrom["粒子缩放随机波动量"] || 0.2);
 		
-		// > 双层效果
-		data['second_enable'] = String( dataFrom["是否开启双层效果"] || "false") == "true";
-		data['second_src_img'] = String( dataFrom["资源-第二层粒子"] || "");
-		data['second_layerIndex'] = String( dataFrom["第二层粒子战斗层级"] || "上层");
-		data['second_zIndex'] = Number( dataFrom["第二层粒子图片层级"] || 7);
-		
-		// > 随机种子
+		// > I随机因子
 		data['seed_enable'] = String( dataFrom["是否固定随机种子"] || "false") == "true";
 		data['seed_value'] = Number( dataFrom["固定随机种子"] || 0.20221002);
 		
-		// > 直线拖尾贴图
+		// > J粒子变化（无）
+		
+		// > K粒子重设（无）
+		
+		// > L粒子生命周期（无）
+		
+		
+		// > O贴图加载（无）
+		
+		// > P直线拖尾贴图
 		data['trailing_enable'] = String( dataFrom["是否开启直线拖尾效果"] || "false") == "true";
 		data['trailing_centerAnchor'] = String( dataFrom["是否固定拖尾在粒子中心"] || "false") == "true";
 		data['trailing_src_img'] = String( dataFrom["资源-直线拖尾"] || "");
 		data['trailing_src_img_file'] = "img/Battle__layer/";
 		
-		// > 彩虹化
+		// > Q双层效果
+		data['second_enable'] = String( dataFrom["是否开启双层效果"] || "false") == "true";
+		data['second_src_img'] = String( dataFrom["资源-第二层粒子"] || "");
+		data['second_layerIndex'] = String( dataFrom["第二层粒子战斗层级"] || "上层");
+		data['second_zIndex'] = Number( dataFrom["第二层粒子图片层级"] || 7);
+		
+		
+		// > 2A粒子类型
+		data['parType_type'] = String( dataFrom["粒子类型"] || "基础粒子");
+		
+		// > 2B彩虹化
 		data['rainbow_enable'] = String( dataFrom["是否开启彩虹化-粒子"] || "false") == "true";
 		data['rainbow_enableSecond'] = String( dataFrom["是否开启彩虹化-第二层粒子"] || "false") == "true";
 		data['rainbow_enableTrailing'] = String( dataFrom["是否开启彩虹化-直线拖尾"] || "false") == "true";
@@ -2201,23 +2274,33 @@
 			data['rainbow_tintList'] = [];
 		}
 		
-		
-		// > 位移比
-		data['XPer'] = Number( dataFrom["位移比X"] || 0);
-		data['YPer'] = Number( dataFrom["位移比Y"] || 0);
+		// > 控制器 - 『控制器与贴图的样式-静态数据-指针初始化』
+		Drill_BPa_Controller.drill_controller_initData( data );
 		
 		return data;
 	}
-
+	//==============================
+	// * 静态数据 - 最后继承1级
+	//==============================
+	var _drill_BPa_scene_initialize = SceneManager.initialize;
+	SceneManager.initialize = function() {
+		_drill_BPa_scene_initialize.call(this);
+		
+		/*-----------------粒子------------------*/
+		for( var i = 0; i < DrillUp.g_BPa_style.length; i++ ){
+			var temp = DrillUp.g_BPa_style[i];
+			if( temp != undefined ){
+				DrillUp.g_BPa_style[i] = DrillUp.drill_BPa_particleInit( temp );
+			}
+		}
+	}
 	/*-----------------粒子------------------*/
 	DrillUp.g_BPa_style_length = 200;
 	DrillUp.g_BPa_style = [];
 	for (var i = 0; i < DrillUp.g_BPa_style_length; i++) {
 		if( DrillUp.parameters["粒子样式-" + String(i+1) ] != undefined &&
 			DrillUp.parameters["粒子样式-" + String(i+1) ] != "" ){
-			var temp = JSON.parse(DrillUp.parameters["粒子样式-" + String(i+1) ]);
-			DrillUp.g_BPa_style[i] = DrillUp.drill_BPa_circleInit( temp );
-			DrillUp.g_BPa_style[i]['id'] = Number(i);
+			DrillUp.g_BPa_style[i] = JSON.parse(DrillUp.parameters["粒子样式-" + String(i+1) ]);
 		}else{
 			DrillUp.g_BPa_style[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
@@ -2233,6 +2316,9 @@ if( Imported.Drill_CoreOfParticle &&
 	
 	if( typeof(Drill_COBa_ExtendTool) == "undefined" ){	//（弹道核心版本检测）
 		alert( DrillUp.drill_BPa_getPluginTip_NeedUpdate_Ballistics() );
+	}
+	if( typeof(Drill_COPa_ComplexPar_Controller) == "undefined" ){	//（粒子核心版本检测）
+		alert( DrillUp.drill_BPa_getPluginTip_NeedUpdate_Particle() );
 	}
 
 
@@ -2409,6 +2495,21 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					controllers[k].drill_controller_setZIndex( Number(type) );
 				}
 			}
+			if( type == "还原混合模式" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_restoreBlendMode();
+				}
+			}
+			if( type == "还原战斗层级" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_restoreLayerIndex();
+				}
+			}
+			if( type == "还原图片层级" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_restoreZIndex();
+				}
+			}
 		}
 		if( args.length == 10 ){
 			var type = String(args[3]);
@@ -2426,12 +2527,11 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				if( temp3_arr.length >= 2 ){
 					for( var k=0; k < controllers.length; k++ ){
 						var controller = controllers[k];
-						var temp_data = controller._drill_data;
-						temp_data['layerIndex'] = temp1;
-						temp_data['zIndex'] = Number(temp2);
-						temp_data['XPer'] = Number(temp3_arr[0]);
-						temp_data['YPer'] = Number(temp3_arr[1]);
-						controller.drill_controller_resetData( temp_data );
+						controller.drill_controller_resetData( controller._drill_data_id );
+						
+						controller.drill_controller_setLayerIndex( temp1 );
+						controller.drill_controller_setZIndex( Number(temp2) );
+						controller.drill_controller_setPer( Number(temp3_arr[0]), Number(temp3_arr[1]) );
 					}
 				}
 			}
@@ -2468,7 +2568,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 		}
 		*/
 		
-		/*-----------------2A指令叠加变化------------------*/
+		/*-----------------D指令叠加变化------------------*/
 		if( args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "立即还原所有单属性" ){
@@ -2490,8 +2590,8 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				temp2 = temp2.replace("时间[","");
 				temp2 = temp2.replace("]","");
 				
-				if( temp1.indexOf("透明度[") != -1 ||
-					temp1.indexOf("透明度变量[") != -1 ){
+				if( temp1.indexOf("整体透明度[") != -1 ||
+					temp1.indexOf("整体透明度变量[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setOpacity(
@@ -2499,8 +2599,8 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 						);
 					}
 				}
-				if( temp1.indexOf("旋转[") != -1 ||
-					temp1.indexOf("旋转变量[") != -1 ){
+				if( temp1.indexOf("整体旋转[") != -1 ||
+					temp1.indexOf("整体旋转变量[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_commandChange_setRotate(
@@ -2508,20 +2608,29 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 						);
 					}
 				}
-				if( temp1.indexOf("缩放X[") != -1 ||
-					temp1.indexOf("缩放X变量%[") != -1 ){
+				if( temp1.indexOf("粒子缩放X[") != -1 ||
+					temp1.indexOf("粒子缩放X变量%[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
-						controllers[k].drill_controller_commandChange_setScaleX(
+						controllers[k].drill_controller_commandChange_setParScaleX(
 							"匀速变化", num_list[0], Number(temp2)
 						);
 					}
 				}
-				if( temp1.indexOf("缩放Y[") != -1 ||
-					temp1.indexOf("缩放Y变量%[") != -1 ){
+				if( temp1.indexOf("粒子缩放Y[") != -1 ||
+					temp1.indexOf("粒子缩放Y变量%[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
-						controllers[k].drill_controller_commandChange_setScaleY(
+						controllers[k].drill_controller_commandChange_setParScaleY(
+							"匀速变化", num_list[0], Number(temp2)
+						);
+					}
+				}
+				if( temp1.indexOf("粒子旋转[") != -1 ||
+					temp1.indexOf("粒子旋转变量[") != -1 ){
+					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_commandChange_setParRotate(
 							"匀速变化", num_list[0], Number(temp2)
 						);
 					}
@@ -2534,7 +2643,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					temp1.indexOf("位置变量[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
-						controllers[k].drill_controller_commandChange_setMove(
+						controllers[k].drill_controller_commandChange_setParMove(	//（该插件只考虑 粒子平移 情况）
 							"匀速变化", num_list[0], num_list[1], Number(temp2)
 						);
 					}
@@ -2547,7 +2656,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					temp1.indexOf("位置变量[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
-						controllers[k].drill_controller_commandChange_setMove(
+						controllers[k].drill_controller_commandChange_setParMove(	//（该插件只考虑 粒子平移 情况）
 							"弹性变化", num_list[0], num_list[1], Number(temp2)
 						);
 					}
@@ -2560,7 +2669,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					temp1.indexOf("位置变量[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
-						controllers[k].drill_controller_commandChange_setMove(
+						controllers[k].drill_controller_commandChange_setParMove(	//（该插件只考虑 粒子平移 情况）
 							"增减速变化", num_list[0], num_list[1], Number(temp2)
 						);
 					}
@@ -2568,7 +2677,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 			}
 		}
 		
-		/*-----------------2B延迟指令------------------*/
+		/*-----------------E延迟指令------------------*/
 		if( args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "立即取消全部延迟指令" ){
@@ -2604,7 +2713,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setVisible, [true], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setVisible, [true], delay_time
 					);
 				}
 			}
@@ -2614,7 +2723,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setVisible, [false], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setVisible, [false], delay_time
 					);
 				}
 			}
@@ -2624,7 +2733,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setPause, [true], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setPause, [true], delay_time
 					);
 				}
 			}
@@ -2634,7 +2743,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setPause, [false], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setPause, [false], delay_time
 					);
 				}
 			}
@@ -2644,7 +2753,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_periodizeCommand_setPause, [true], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_periodizeCommand_setPause, [true], delay_time
 					);
 				}
 			}
@@ -2654,7 +2763,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_periodizeCommand_setPause, [false], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_periodizeCommand_setPause, [false], delay_time
 					);
 				}
 			}
@@ -2664,7 +2773,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_periodizeCommand_clear, [], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_periodizeCommand_clear, [], delay_time
 					);
 				}
 			}
@@ -2677,7 +2786,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setBlendMode, [Number(type)], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setBlendMode, [Number(type)], delay_time
 					);
 				}
 			}
@@ -2689,7 +2798,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setLayerIndex, [String(type)], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setLayerIndex, [String(type)], delay_time
 					);
 				}
 			}
@@ -2701,7 +2810,37 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setZIndex, [Number(type)], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setZIndex, [Number(type)], delay_time
+					);
+				}
+			}
+			if( type == "还原混合模式(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_restoreBlendMode, [], delay_time
+					);
+				}
+			}
+			if( type == "还原战斗层级(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_restoreLayerIndex, [], delay_time
+					);
+				}
+			}
+			if( type == "还原图片层级(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_restoreZIndex, [], delay_time
 					);
 				}
 			}
@@ -2711,7 +2850,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreAttr, [], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_restoreAttr, [], delay_time
 					);
 				}
 			}
@@ -2721,7 +2860,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = Number( delay_time );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setDelayingCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreMove, [], delay_time
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_restoreMove, [], delay_time
 					);
 				}
 			}
@@ -2738,42 +2877,52 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				delay_time = delay_time.replace("]","");
 				delay_time = Number( delay_time );
 				
-				if( temp1.indexOf("透明度[") != -1 ||
-					temp1.indexOf("透明度变量[") != -1 ){
+				if( temp1.indexOf("整体透明度[") != -1 ||
+					temp1.indexOf("整体透明度变量[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setOpacity, 
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setOpacity, 
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
-				if( temp1.indexOf("旋转[") != -1 ||
-					temp1.indexOf("旋转变量[") != -1 ){
+				if( temp1.indexOf("整体旋转[") != -1 ||
+					temp1.indexOf("整体旋转变量[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setRotate,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setRotate,
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
-				if( temp1.indexOf("缩放X[") != -1 ||
-					temp1.indexOf("缩放X变量%[") != -1 ){
+				if( temp1.indexOf("粒子缩放X[") != -1 ||
+					temp1.indexOf("粒子缩放X变量%[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleX,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParScaleX,
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
 				}
-				if( temp1.indexOf("缩放Y[") != -1 ||
-					temp1.indexOf("缩放Y变量%[") != -1 ){
+				if( temp1.indexOf("粒子缩放Y[") != -1 ||
+					temp1.indexOf("粒子缩放Y变量%[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleY,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParScaleY,
+							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
+						);
+					}
+				}
+				if( temp1.indexOf("粒子旋转[") != -1 ||
+					temp1.indexOf("粒子旋转变量[") != -1 ){
+					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setDelayingCommand(
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParRotate,
 							[ "匀速变化", num_list[0], Number(temp2) ], delay_time
 						);
 					}
@@ -2790,7 +2939,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParMove,	//（该插件只考虑 粒子平移 情况）
 							[ "匀速变化", num_list[0], num_list[1], Number(temp2) ], delay_time
 						);
 					}
@@ -2807,7 +2956,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParMove,	//（该插件只考虑 粒子平移 情况）
 							[ "弹性变化", num_list[0], num_list[1], Number(temp2) ], delay_time
 						);
 					}
@@ -2824,7 +2973,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setDelayingCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParMove,	//（该插件只考虑 粒子平移 情况）
 							[ "增减速变化", num_list[0], num_list[1], Number(temp2) ], delay_time
 						);
 					}
@@ -2832,7 +2981,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 			}
 		}
 		
-		/*-----------------2C周期指令------------------*/
+		/*-----------------F周期指令------------------*/
 		if( args.length == 4 ){
 			var type = String(args[3]);
 			if( type == "暂停周期指令" ){
@@ -2882,7 +3031,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setVisible, [true], time_period, time_start
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setVisible, [true], time_period, time_start
 					);
 				}
 			}
@@ -2895,7 +3044,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setVisible, [false], time_period, time_start
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setVisible, [false], time_period, time_start
 					);
 				}
 			}
@@ -2908,7 +3057,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setPause, [true], time_period, time_start
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setPause, [true], time_period, time_start
 					);
 				}
 			}
@@ -2921,7 +3070,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setPause, [false], time_period, time_start
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setPause, [false], time_period, time_start
 					);
 				}
 			}
@@ -2936,7 +3085,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setBlendMode, [Number(type)], time_period, time_start
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setBlendMode, [Number(type)], time_period, time_start
 					);
 				}
 			}
@@ -2951,7 +3100,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setLayerIndex, [String(type)], time_period, time_start
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setLayerIndex, [String(type)], time_period, time_start
 					);
 				}
 			}
@@ -2966,7 +3115,46 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_setZIndex, [Number(type)], time_period, time_start
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_setZIndex, [Number(type)], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-还原混合模式(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_restoreBlendMode, [], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-还原战斗层级(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_restoreLayerIndex, [], time_period, time_start
+					);
+				}
+			}
+			if( type == "添加周期-还原图片层级(周期)" ){
+				time_period = time_period.replace("周期时长[","");
+				time_period = time_period.replace("]","");
+				time_period = Number( time_period );
+				time_start = time_start.replace("周期内开始时间[","");
+				time_start = time_start.replace("]","");
+				time_start = Number( time_start );
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setPeriodizeCommand(
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_restoreZIndex, [], time_period, time_start
 					);
 				}
 			}
@@ -2979,7 +3167,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreAttr, [], time_period, time_start
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_restoreAttr, [], time_period, time_start
 					);
 				}
 			}
@@ -2992,7 +3180,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = Number( time_start );
 				for( var k=0; k < controllers.length; k++ ){
 					controllers[k].drill_controller_setPeriodizeCommand(
-						Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreMove, [], time_period, time_start
+						Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_restoreMove, [], time_period, time_start
 					);
 				}
 			}
@@ -3013,42 +3201,52 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 				time_start = time_start.replace("]","");
 				time_start = Number( time_start );
 				
-				if( temp1.indexOf("透明度[") != -1 ||
-					temp1.indexOf("透明度变量[") != -1 ){
+				if( temp1.indexOf("整体透明度[") != -1 ||
+					temp1.indexOf("整体透明度变量[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setOpacity, 
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setOpacity, 
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
-				if( temp1.indexOf("旋转[") != -1 ||
-					temp1.indexOf("旋转变量[") != -1 ){
+				if( temp1.indexOf("整体旋转[") != -1 ||
+					temp1.indexOf("整体旋转变量[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setRotate,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setRotate,
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
-				if( temp1.indexOf("缩放X[") != -1 ||
-					temp1.indexOf("缩放X变量%[") != -1 ){
+				if( temp1.indexOf("粒子缩放X[") != -1 ||
+					temp1.indexOf("粒子缩放X变量%[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleX,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParScaleX,
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
 				}
-				if( temp1.indexOf("缩放Y[") != -1 ||
-					temp1.indexOf("缩放Y变量%[") != -1 ){
+				if( temp1.indexOf("粒子缩放Y[") != -1 ||
+					temp1.indexOf("粒子缩放Y变量%[") != -1 ){
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleY,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParScaleY,
+							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
+						);
+					}
+				}
+				if( temp1.indexOf("粒子旋转[") != -1 ||
+					temp1.indexOf("粒子旋转变量[") != -1 ){
+					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
+					for( var k=0; k < controllers.length; k++ ){
+						controllers[k].drill_controller_setPeriodizeCommand(
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParRotate,
 							[ "匀速变化", num_list[0], Number(temp2) ], time_period, time_start
 						);
 					}
@@ -3068,7 +3266,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParMove,	//（该插件只考虑 粒子平移 情况）
 							[ "匀速变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
 						);
 					}
@@ -3088,7 +3286,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParMove,	//（该插件只考虑 粒子平移 情况）
 							[ "弹性变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
 						);
 					}
@@ -3108,7 +3306,7 @@ DrillUp.drill_BPa_globalPluginCommand = function( command, args, gameInterpreter
 					var num_list = DrillUp.drill_BPa_getArgNumList(temp1);
 					for( var k=0; k < controllers.length; k++ ){
 						controllers[k].drill_controller_setPeriodizeCommand(
-							Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove,
+							Drill_COPa_ComplexPar_Controller.METHOD__drill_controller_commandChange_setParMove,	//（该插件只考虑 粒子平移 情况）
 							[ "增减速变化", num_list[0], num_list[1], Number(temp2) ], time_period, time_start
 						);
 					}
@@ -3187,14 +3385,18 @@ Game_Temp.prototype.drill_BPa_preloadInit = function(){
 		if( temp_data['preload'] != true ){ continue; }
 		
 		this._drill_BPa_preloadTank.push( 
-			ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['src_img'], 0, true, this._drill_BPa_cacheId ) 
+			ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['src_img'], data['tint'], data['smooth'], this._drill_BPa_cacheId ) 
 		);
-		this._drill_BPa_preloadTank.push( 
-			ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['second_src_img'], 0, true, this._drill_BPa_cacheId ) 
-		);
-		this._drill_BPa_preloadTank.push( 
-			ImageManager.reserveBitmap( temp_data['trailing_src_img_file'], temp_data['trailing_src_img'], 0, true, this._drill_BPa_cacheId ) 
-		);
+		if( temp_data['second_enable'] == true ){
+			this._drill_BPa_preloadTank.push( 
+				ImageManager.reserveBitmap( temp_data['src_img_file'], temp_data['second_src_img'], data['tint'], data['smooth'], this._drill_BPa_cacheId ) 
+			);
+		}
+		if( temp_data['trailing_enable'] == true ){
+			this._drill_BPa_preloadTank.push( 
+				ImageManager.reserveBitmap( temp_data['trailing_src_img_file'], temp_data['trailing_src_img'], data['tint'], data['smooth'], this._drill_BPa_cacheId ) 
+			);
+		}
 	}
 }
 
@@ -3281,6 +3483,7 @@ Game_System.prototype.drill_BPa_checkSysData_Private = function(){
 	
 	// > 容器的 空数据 检查
 	//	（容器一直就是空数据，战斗前才赋值，且只在战斗时用到）
+	
 };
 //==============================
 // * 存储数据 - 创建控制器（开放函数）
@@ -3293,17 +3496,8 @@ Game_System.prototype.drill_BPa_createController = function( slot_id, style_id )
 	// > 销毁原来的
 	this.drill_BPa_removeController( slot_id );
 	
-	// > 『控制器与贴图的样式-』 - 校验+提示信息
-	var cur_styleId   = style_id +1;
-	var cur_styleData = DrillUp.g_BPa_style[ style_id ];
-	if( cur_styleData == undefined || 
-		cur_styleData['inited'] == false ){
-		alert( DrillUp.drill_BPa_getPluginTip_StyleNotFind(cur_styleId) );
-		return;
-	}
-	
-	// > 『控制器与贴图的样式-』 - 创建控制器
-	var temp_controller = new Drill_BPa_Controller( cur_styleData );
+	// > 创建控制器
+	var temp_controller = new Drill_BPa_Controller( style_id );
 	this._drill_BPa_controllerTank[ slot_id ] = temp_controller;
 	
 	// > 刷新统计
@@ -3529,15 +3723,17 @@ Scene_Battle.prototype.drill_BPa_layerCameraMoving_Private = function( xx, yy, l
 var _drill_BPa_temp_initialize2 = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function(){
 	_drill_BPa_temp_initialize2.call(this);
-	this._drill_BPa_spriteTank = [];			//贴图容器
+	this._drill_BPa_spriteTankOrg = [];			//贴图容器
+	this._drill_BPa_spriteTankSec = [];			//贴图容器
 };
 //==============================
 // * 控制器与贴图 - 销毁时（战斗界面）
 //==============================
-var _drill_BPa_smap_terminate = Scene_Battle.prototype.terminate;
+var _drill_BPa_sbattle_terminate = Scene_Battle.prototype.terminate;
 Scene_Battle.prototype.terminate = function(){
-	_drill_BPa_smap_terminate.call(this);
-	$gameTemp._drill_BPa_spriteTank = [];		//贴图容器
+	_drill_BPa_sbattle_terminate.call(this);
+	$gameTemp._drill_BPa_spriteTankOrg = [];	//贴图容器
+	$gameTemp._drill_BPa_spriteTankSec = [];	//贴图容器
 };
 //==============================
 // * 控制器与贴图 - 帧刷新（战斗界面）
@@ -3546,9 +3742,10 @@ var _drill_BPa_smap_update = Scene_Battle.prototype.update;
 Scene_Battle.prototype.update = function(){
 	_drill_BPa_smap_update.call(this);
 	this.drill_BPa_updateRestatisticsCreate();	//帧刷新 - 实时创建
-	this.drill_BPa_updateControllerCamera();	//帧刷新 - 控制器与镜头
+	this.drill_BPa_updateController();			//帧刷新 - 控制器
+	this.drill_BPa_updateCamera();				//帧刷新 - 镜头
 	this.drill_BPa_updateAttr();				//帧刷新 - 基础特性
-	this.drill_BPa_updateDestroy();				//帧刷新 - 销毁
+	this.drill_BPa_updateDestroy();				//帧刷新 - 自动销毁
 };
 //==============================
 // * 控制器与贴图 - 界面创建时（战斗界面）
@@ -3562,12 +3759,12 @@ Scene_Battle.prototype.createAllWindows = function(){
 // * 控制器与贴图 - 界面创建
 //==============================
 Scene_Battle.prototype.drill_BPa_create = function(){
-	$gameTemp._drill_BPa_spriteTank = [];			//贴图容器（不允许出现null值）
+	$gameTemp._drill_BPa_spriteTankOrg = [];			//贴图容器（不允许出现null值）
+	$gameTemp._drill_BPa_spriteTankSec = [];			//贴图容器（不允许出现null值）
 	
 	for(var i=0; i< $gameSystem._drill_BPa_controllerTank.length; i++){
 		var temp_controller = $gameSystem._drill_BPa_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
-		var data = temp_controller._drill_data;
 		
 		
 		// > 创建贴图
@@ -3575,10 +3772,21 @@ Scene_Battle.prototype.drill_BPa_create = function(){
 		temp_sprite.drill_sprite_setController( temp_controller );
 		temp_sprite.drill_sprite_initChild();
 		
+		// > 双层效果
+		var temp_data = temp_controller.drill_data();
+		if( temp_data['second_enable'] == true ){
+			
+			// > 双层效果 - 创建贴图
+			var temp_secSprite = new Drill_BPa_SecSprite( temp_sprite );
+			
+			// > 双层效果 - 添加贴图到层级
+			$gameTemp._drill_BPa_spriteTankSec.push( temp_secSprite );
+			this.drill_BPa_layerAddSprite( temp_secSprite, temp_data['second_layerIndex'] );
+		}
 		
 		// > 添加贴图到层级
-		$gameTemp._drill_BPa_spriteTank.push( temp_sprite );
-		this.drill_BPa_layerAddSprite( temp_sprite, data['layerIndex'] );
+		$gameTemp._drill_BPa_spriteTankOrg.push( temp_sprite );
+		this.drill_BPa_layerAddSprite( temp_sprite, temp_controller._drill_layerIndex );
 		
 	}
 	
@@ -3597,7 +3805,6 @@ Scene_Battle.prototype.drill_BPa_updateRestatisticsCreate = function(){
 	for( var i=0; i < $gameSystem._drill_BPa_controllerTank.length; i++ ){
 		var temp_controller = $gameSystem._drill_BPa_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
-		var temp_data = temp_controller._drill_data;
 		
 		// > 过滤生命周期结束情况
 		if( temp_controller.drill_controller_isDead() == true ){ continue; }
@@ -3611,9 +3818,22 @@ Scene_Battle.prototype.drill_BPa_updateRestatisticsCreate = function(){
 		temp_sprite.drill_sprite_setController( temp_controller );
 		temp_sprite.drill_sprite_initChild();
 		
+		// > 创建贴图（双层效果）
+		var temp_data = temp_controller.drill_data();
+		if( temp_data['second_enable'] == true ){
+			
+			// > 双层效果 - 创建贴图
+			var temp_secSprite = new Drill_BPa_SecSprite( temp_sprite );
+			
+			// > 双层效果 - 添加贴图到层级
+			$gameTemp._drill_BPa_spriteTankSec.push( temp_secSprite );
+			this.drill_BPa_layerAddSprite( temp_secSprite, temp_data['second_layerIndex'] );
+		}
+		
 		// > 添加贴图到层级
-		$gameTemp._drill_BPa_spriteTank.push( temp_sprite );
-		this.drill_BPa_layerAddSprite( temp_sprite, temp_data['layerIndex'] );
+		$gameTemp._drill_BPa_spriteTankOrg.push( temp_sprite );
+		this.drill_BPa_layerAddSprite( temp_sprite, temp_controller._drill_layerIndex );
+		
 	}
 	
 	// > 层级排序
@@ -3623,8 +3843,13 @@ Scene_Battle.prototype.drill_BPa_updateRestatisticsCreate = function(){
 // * 控制器与贴图 - 实时创建 - 是否含有绑定控制器的贴图
 //==============================
 Scene_Battle.prototype.drill_BPa_hasSpriteBinding = function( serial ){
-	for( var i=0; i < $gameTemp._drill_BPa_spriteTank.length; i++){
-		if( $gameTemp._drill_BPa_spriteTank[i]._drill_curSerial == serial ){
+	for( var i=0; i < $gameTemp._drill_BPa_spriteTankOrg.length; i++){
+		if( $gameTemp._drill_BPa_spriteTankOrg[i]._drill_curSerial == serial ){
+			return true;
+		}
+	}
+	for( var i=0; i < $gameTemp._drill_BPa_spriteTankSec.length; i++){
+		if( $gameTemp._drill_BPa_spriteTankSec[i]._drill_curSerial == serial ){
 			return true;
 		}
 	}
@@ -3632,30 +3857,35 @@ Scene_Battle.prototype.drill_BPa_hasSpriteBinding = function( serial ){
 }
 
 //==============================
-// * 控制器与贴图 - 帧刷新 控制器与镜头
+// * 控制器与贴图 - 帧刷新 控制器
 //==============================
-Scene_Battle.prototype.drill_BPa_updateControllerCamera = function(){
+Scene_Battle.prototype.drill_BPa_updateController = function(){
+	for(var i = 0; i < $gameSystem._drill_BPa_controllerTank.length; i++ ){
+		var temp_controller = $gameSystem._drill_BPa_controllerTank[i];
+		if( temp_controller == undefined ){ continue; }
+		temp_controller.drill_controller_update();
+	}
+}
+//==============================
+// * 控制器与贴图 - 帧刷新 镜头
+//==============================
+Scene_Battle.prototype.drill_BPa_updateCamera = function(){
 	for(var i = 0; i < $gameSystem._drill_BPa_controllerTank.length; i++ ){
 		var temp_controller = $gameSystem._drill_BPa_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
 		
-		// > 控制器帧刷新
-		temp_controller.drill_controller_update();
-		
-		
 		// > 镜头位移结果（战斗参照）
-		var s_data = temp_controller._drill_data;
 		var xx = 0;
 		var yy = 0;
 		
 		// > 镜头位移结果 - 层级与镜头的位移
 		var option = {
-			"XPer": s_data['XPer'],
-			"YPer": s_data['YPer'],
+			"XPer": temp_controller._drill_XPer,
+			"YPer": temp_controller._drill_YPer,
 		};
-		var pos = this.drill_BPa_layerCameraMoving(xx, yy, s_data['layerIndex'], option );
-		xx = pos['x'];
-		yy = pos['y'];
+		var pos = this.drill_BPa_layerCameraMoving(xx, yy, temp_controller._drill_layerIndex, option );
+		xx = pos.x;
+		yy = pos.y;
 		
 		// > 镜头位移结果 - 镜头缩放与位移（此处是场景装饰，不需要考虑缩放）
 		//	（无）
@@ -3671,28 +3901,21 @@ Scene_Battle.prototype.drill_BPa_updateControllerCamera = function(){
 //==============================
 Scene_Battle.prototype.drill_BPa_updateAttr = function(){
 	var has_layerChange = false;
-	for(var i = 0; i < $gameTemp._drill_BPa_spriteTank.length; i++){
-		var temp_sprite = $gameTemp._drill_BPa_spriteTank[i];
+	for(var i = 0; i < $gameTemp._drill_BPa_spriteTankOrg.length; i++){
+		var temp_sprite = $gameTemp._drill_BPa_spriteTankOrg[i];
 		if( temp_sprite == undefined ){ continue; }
 		var temp_controller = temp_sprite._drill_controller;
 		if( temp_controller == undefined ){ continue; }
-		var temp_data = temp_controller._drill_data;
-		
-		// > 基础特性 - 显示/隐藏（无）
-		
-		// > 基础特性 - 暂停/继续（无）
-		
-		// > 基础特性 - 混合模式（无）
 		
 		// > 基础特性 - 战斗层级
-		if( temp_sprite.layerIndex != temp_data['layerIndex'] ){
-			temp_sprite.layerIndex =  temp_data['layerIndex'];
-			this.drill_BPa_layerAddSprite( temp_sprite, temp_data['layerIndex'] );
+		if( temp_sprite.layerIndex != temp_controller._drill_layerIndex ){
+			temp_sprite.layerIndex =  temp_controller._drill_layerIndex;
+			this.drill_BPa_layerAddSprite( temp_sprite, temp_controller._drill_layerIndex );
 			has_layerChange = true;
 		}
 		// > 基础特性 - 图片层级
-		if( temp_sprite.zIndex != temp_data['zIndex'] ){
-			temp_sprite.zIndex =  temp_data['zIndex'];
+		if( temp_sprite.zIndex != temp_controller._drill_zIndex ){
+			temp_sprite.zIndex =  temp_controller._drill_zIndex;
 			has_layerChange = true;
 		}
 	};
@@ -3703,7 +3926,7 @@ Scene_Battle.prototype.drill_BPa_updateAttr = function(){
 	}
 }
 //==============================
-// * 控制器与贴图 - 帧刷新 销毁
+// * 控制器与贴图 - 帧刷新 自动销毁
 //==============================
 Scene_Battle.prototype.drill_BPa_updateDestroy = function(){
 	
@@ -3718,11 +3941,21 @@ Scene_Battle.prototype.drill_BPa_updateDestroy = function(){
 	}
 	
 	// > 自动销毁 - 贴图
-	for(var i = $gameTemp._drill_BPa_spriteTank.length-1; i >= 0; i--){
-		var temp_sprite = $gameTemp._drill_BPa_spriteTank[i];
+	for(var i = $gameTemp._drill_BPa_spriteTankOrg.length-1; i >= 0; i--){
+		var temp_sprite = $gameTemp._drill_BPa_spriteTankOrg[i];
 		if( temp_sprite.drill_sprite_isNeedDestroy() ){
 			this.drill_BPa_layerRemoveSprite( temp_sprite );		//（销毁贴图）
-			$gameTemp._drill_BPa_spriteTank.splice(i,1);
+			$gameTemp._drill_BPa_spriteTankOrg.splice(i,1);
+			temp_sprite.drill_sprite_destroy();
+		}
+	}
+	
+	// > 自动销毁 - 贴图（第二层）
+	for(var i = $gameTemp._drill_BPa_spriteTankSec.length-1; i >= 0; i--){
+		var temp_sprite = $gameTemp._drill_BPa_spriteTankSec[i];
+		if( temp_sprite.drill_sprite_isNeedDestroy() ){
+			this.drill_BPa_layerRemoveSprite( temp_sprite );		//（销毁贴图）
+			$gameTemp._drill_BPa_spriteTankSec.splice(i,1);
 			temp_sprite.drill_sprite_destroy();
 		}
 	}
@@ -3742,28 +3975,38 @@ Scene_Battle.prototype.drill_BPa_updateDestroy = function(){
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体
-// **					->B粒子群弹道
-// **					->C随机因子
-// **					->D粒子变化
-// **					->E粒子重设
-// **					->F双层效果
-// **					->G直线拖尾贴图
-// **					->H贴图高宽
-// **					->I粒子生命周期
+// **					->B变换特性
+// **					->C校验值
+// **					->D指令叠加变化『变换特性-粒子贴图』
+// **						x> 主体贴图-整体移动到
+// **						> 主体贴图-整体透明度
+// **						> 主体贴图-整体旋转
+// **						> 粒子贴图组-粒子移动到
+// **						> 粒子贴图组-粒子缩放X
+// **						> 粒子贴图组-粒子缩放Y
+// **						> 粒子贴图组-粒子旋转
+// **					->E延迟指令
+// **					->F周期指令
 // **					
-// **					->2A指令叠加变化『变换特性-粒子贴图』
-// **						> 主体贴图-移动到
-// **						> 主体贴图-透明度
-// **						> 粒子贴图组-旋转
-// **						> 粒子贴图组-缩放X
-// **						> 粒子贴图组-缩放Y
-// **					->2B延迟指令
-// **					->2C周期指令
+// **					->H粒子群弹道
+// **					->I随机因子
+// **					->J粒子变化
+// **					->K粒子重设
+// **					->L粒子生命周期
 // **					
+// **					->O贴图加载
+// **					->P直线拖尾贴图
+// **					->Q双层效果
+// **					
+// **					->2A粒子类型
+// **					->2B彩虹化
 // **					->2Z镜头参数
+// **					
+// **					->3A粒子私有属性（无）
 // **					
 // **		说明：	> 注意，该类不能放 物体指针、贴图指针 。
 //=============================================================================
@@ -3773,14 +4016,13 @@ Scene_Battle.prototype.drill_BPa_updateDestroy = function(){
 function Drill_BPa_Controller(){
     this.initialize.apply(this, arguments);
 };
-Drill_BPa_Controller.prototype = Object.create(Drill_COPa_Controller.prototype);
+Drill_BPa_Controller.prototype = Object.create(Drill_COPa_ComplexPar_Controller.prototype);
 Drill_BPa_Controller.prototype.constructor = Drill_BPa_Controller;
 //==============================
 // * 控制器 - 初始化
 //==============================
-Drill_BPa_Controller.prototype.initialize = function( data ){
-    Drill_COPa_Controller.prototype.initialize.call( this, data );
-	this._drill_data_id = data['id'];							//样式ID（控制器与样式 多对一 或 一对一）
+Drill_BPa_Controller.prototype.initialize = function( data_id ){
+    Drill_COPa_ComplexPar_Controller.prototype.initialize.call( this, data_id );
 }
 //##############################
 // * 控制器 - 帧刷新【标准函数】
@@ -3791,176 +4033,150 @@ Drill_BPa_Controller.prototype.initialize = function( data ){
 //			说明：	> 此函数必须在 帧刷新 中手动调用执行。
 //##############################
 Drill_BPa_Controller.prototype.drill_controller_update = function(){
-	this.drill_controller_updateDelayingCommandImportant();		//帧刷新 - 2B延迟指令 - 时间流逝
-	this.drill_controller_updatePeriodizeCommandImportant();	//帧刷新 - 2C周期指令 - 时间流逝
-    Drill_COPa_Controller.prototype.drill_controller_update.call( this );
-	this.drill_controller_updateCommandChange();				//帧刷新 - 2A指令叠加变化
-	this.drill_controller_updateDelayingCommand();				//帧刷新 - 2B延迟指令 - 执行延迟指令
-	this.drill_controller_updatePeriodizeCommand();				//帧刷新 - 2C周期指令 - 执行延迟指令
-	
-																//帧刷新 - 2Z镜头参数（无）
+    Drill_COPa_ComplexPar_Controller.prototype.drill_controller_update.call( this );
+														//帧刷新 - 2Z镜头参数（无）
 }
 //##############################
 // * 控制器 - 重设数据【标准函数】
-//			
-//			参数：	> data 动态参数对象
-//			返回：	> 无
-//			
-//			说明：	> 通过此函数，你不需要再重新创建一个数据对象，并且贴图能直接根据此数据来变化。
-//					> 参数对象中的参数【可以缺项】，只要的参数项不一样，就刷新；参数项一样，则不变化。
-//##############################
-Drill_BPa_Controller.prototype.drill_controller_resetData = function( data ){
-    Drill_COPa_Controller.prototype.drill_controller_resetData.call( this, data );
-};
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
-//
-//			参数：	> visible 布尔（是否显示）
-//			返回：	> 无
-//			
-//			说明：	> 可放在帧刷新函数中实时调用。
-//##############################
-Drill_BPa_Controller.prototype.drill_controller_setVisible = function( visible ){
-    Drill_COPa_Controller.prototype.drill_controller_setVisible.call( this, visible );
-};
 //##############################
 // * 控制器 - 暂停/继续【标准函数】
+//##############################
+// * 控制器 - 控制器标记销毁【标准函数】
+//##############################
+// * 控制器 - 控制器是否销毁【标准函数】
+//##############################
+
+//==============================
+// * A主体 - 切换混合模式（开放函数）
+//==============================
+// * A主体 - 切换层级（开放函数）
+//==============================
+// * A主体 - 切换堆叠级（开放函数）
+//==============================
+// * A主体 - 还原混合模式（开放函数）
+//==============================
+// * A主体 - 还原层级（开放函数）
+//==============================
+// * A主体 - 还原堆叠级（开放函数）
+//==============================
+
+//==============================
+// * A主体 - 修改位移比（开放函数）
 //
-//			参数：	> pause 布尔
+//			参数：	> xPer,yPer 数字
 //			返回：	> 无
+//==============================
+Drill_BPa_Controller.prototype.drill_controller_setPer = function( xPer, yPer ){
+	this._drill_XPer = xPer;
+	this._drill_YPer = yPer;
+};
+
+
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
+//##############################
+DrillUp.g_BPa_notFindStyleAlertOnce = true;
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』获取数据指针【标准函数】（覆写）
 //			
-//			说明：	> 可放在帧刷新函数中实时调用。
-//##############################
-Drill_BPa_Controller.prototype.drill_controller_setPause = function( pause ){
-    Drill_COPa_Controller.prototype.drill_controller_setPause.call( this, pause );
-};
-//##############################
-// * 控制器 - 设置销毁【标准函数】
-//
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，所以只读静态数据。不要存储到存档中，也不要挂载到控制器身上。
+//					> 该函数直接获取指针，可以放在帧刷新中使用。
+//					> 该函数覆写了粒子核心的函数。
 //##############################
-Drill_BPa_Controller.prototype.drill_controller_destroy = function(){
-    Drill_COPa_Controller.prototype.drill_controller_destroy.call( this );
+Drill_BPa_Controller.prototype.drill_data = function(){
+	var cur_styleId   = this._drill_data_id +1;
+	var cur_styleData = DrillUp.g_BPa_style[ this._drill_data_id ];
+	if( cur_styleData == undefined ){
+		
+		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
+		if( DrillUp.g_BPa_notFindStyleAlertOnce == true ){
+			DrillUp.g_BPa_notFindStyleAlertOnce = false;
+			alert( DrillUp.drill_BPa_getPluginTip_StyleNotFind(cur_styleId) );
+		}
+		return {};
+	}
+	return cur_styleData;
 };
-//##############################
-// * 控制器 - 判断销毁【标准函数】
-//
-//			参数：	> 无
-//			返回：	> 布尔
-//##############################
-Drill_BPa_Controller.prototype.drill_controller_isDead = function(){
-	return Drill_COPa_Controller.prototype.drill_controller_isDead.call( this );
-};
-//==============================
-// * 控制器 - 函数枚举
-//
-//			说明：	> 使用枚举要比字符串比较快很多，适用于大量 延迟指令、周期指令 。
-//==============================
-Drill_BPa_Controller.METHOD__drill_controller_setVisible                   = 11;
-Drill_BPa_Controller.METHOD__drill_controller_setPause                     = 12;
-Drill_BPa_Controller.METHOD__drill_controller_periodizeCommand_setPause    = 13;
-Drill_BPa_Controller.METHOD__drill_controller_periodizeCommand_clear       = 14;
-
-Drill_BPa_Controller.METHOD__drill_controller_setBlendMode                 = 21;
-Drill_BPa_Controller.METHOD__drill_controller_setLayerIndex                = 22;
-Drill_BPa_Controller.METHOD__drill_controller_setZIndex                    = 23;
-
-Drill_BPa_Controller.METHOD__drill_controller_commandChange_setOpacity     = 31;
-Drill_BPa_Controller.METHOD__drill_controller_commandChange_setRotate      = 34;
-
-Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleX      = 41;
-Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleY      = 42;
-Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreAttr    = 45;
-
-Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove        = 51;
-Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreMove    = 52;
-
-//##############################
-// * A主体 - 切换混合模式【标准函数】
-//
-//			参数：	> blendMode 数字
-//			返回：	> 无
-//##############################
-Drill_BPa_Controller.prototype.drill_controller_setBlendMode = function( blendMode ){
-	var data = this._drill_data;
-	data['blendMode'] = blendMode;
-};
-//##############################
-// * A主体 - 切换战斗层级【标准函数】
-//
-//			参数：	> layerIndex 字符串
-//			返回：	> 无
-//##############################
-Drill_BPa_Controller.prototype.drill_controller_setLayerIndex = function( layerIndex ){
-	var data = this._drill_data;
-	data['layerIndex'] = layerIndex;
-};
-//##############################
-// * A主体 - 切换图片层级【标准函数】
-//
-//			参数：	> zIndex 数字
-//			返回：	> 无
-//##############################
-Drill_BPa_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
-	var data = this._drill_data;
-	data['zIndex'] = zIndex;
-};
-
-
 //##############################
 // * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
-//			参数：	> 无
+//			参数：	> data 对象
 //			返回：	> 无
 //			
-//			说明：	> data 动态参数对象（来自类初始化）
-//					  该对象包含 类所需的所有默认值。
+//			说明：	> 该对象初始化 静态数据，提供所需的所有默认值。
 //##############################
-Drill_BPa_Controller.prototype.drill_controller_initData = function(){
-	Drill_COPa_Controller.prototype.drill_controller_initData.call( this );
-	var data = this._drill_data;
+Drill_BPa_Controller.drill_controller_initData = function( data ){
+	//	（该函数是静态函数，直接修改 静态数据 的指针值）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 @注释定义 的参数）
 	
-	// > 贴图
+	Drill_COPa_ComplexPar_Controller.drill_controller_initData( data );
+	
+	// > A主体 - 基础特性
 	data['src_img_file'] = "img/Battle__layer/";
 	data['trailing_src_img_file'] = "img/Battle__layer/";
-	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "图片层" };								//贴图 - 所在层级（贴图用）
-	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };											//贴图 - 图片层级（贴图用）
 	
-	// > D粒子变化
-	data['par_holdingBirthPosition'] = false;															//D粒子变化 - 粒子是否滞留
+	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "图片层" };					//A主体 - 所在层级（贴图用）
+	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };								//A主体 - 图片层级（贴图用）
 	
-	// > E粒子重设
-	if( data['par_birthMode'] == undefined ){ data['par_birthMode'] = "随机出现" };						//E粒子重设 - 粒子出现模式
-	if( data['par_birthX'] == undefined ){ data['par_birthX'] = 0 };									//E粒子重设 - 粒子固定点 X
-	if( data['par_birthY'] == undefined ){ data['par_birthY'] = 0 };									//E粒子重设 - 粒子固定点 Y
-	if( data['par_birthRange'] == undefined ){ data['par_birthRange'] = 40 };							//E粒子重设 - 粒子出现范围
+	// > A主体 - 其它特性
+	if( data['XPer'] == undefined ){ data['XPer'] = 0 };									//A主体 - 位移比X
+	if( data['YPer'] == undefined ){ data['YPer'] = 0 };									//A主体 - 位移比Y
 	
-	// > F双层效果
-	if( data['second_layerIndex'] == undefined ){ data['second_layerIndex'] = "上层" };					//F双层效果 - 第二层粒子层级
-	if( data['second_zIndex'] == undefined ){ data['second_zIndex'] = 3 };								//F双层效果 - 第二层粒子图片层级
+	// > B变换特性（无）
 	
-	// > I粒子生命周期
+	// > C校验值（无）
+	
+	// > D指令叠加变化（无）
+	
+	// > E延迟指令（无）
+	
+	// > F周期指令（无）
+	
+	
+	// > H粒子群弹道（无）
+	
+	// > I随机因子（无）
+	
+	// > J粒子变化
+	data['par_holdingBirthPosition'] = false;												//J粒子变化 - 粒子是否滞留
+	
+	// > K粒子重设
+	if( data['par_birthMode'] == undefined ){ data['par_birthMode'] = "随机出现" };			//K粒子重设 - 粒子出现模式
+	if( data['par_birthX'] == undefined ){ data['par_birthX'] = 0 };						//K粒子重设 - 粒子固定点 X
+	if( data['par_birthY'] == undefined ){ data['par_birthY'] = 0 };						//K粒子重设 - 粒子固定点 Y
+	if( data['par_birthRange'] == undefined ){ data['par_birthRange'] = 40 };				//K粒子重设 - 粒子出现范围
+	
+	// > L粒子生命周期
 	data['par_lifeType'] = "跳过产生过程";
 	
-	// > 2A指令叠加变化（无）
 	
-	// > 2B延迟指令（无）
+	// > O贴图加载（无）
 	
-	// > 2C周期指令（无）
+	// > P直线拖尾贴图（无）
+	
+	// > Q双层效果
+	if( data['second_layerIndex'] == undefined ){ data['second_layerIndex'] = "上层" };		//Q双层效果 - 第二层粒子层级
+	if( data['second_zIndex'] == undefined ){ data['second_zIndex'] = 3 };					//Q双层效果 - 第二层粒子图片层级
+	
+	
+	// > 2A粒子类型
+	if( data['parType_type'] == undefined ){ data['parType_type'] = "基础粒子" };			//2A粒子类型 - 粒子类型
+	
+	// > 2B彩虹化（无）
 	
 	// > 2Z镜头参数（无）
-	
 }
 //==============================
 // * 控制器 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_BPa_Controller.prototype.drill_controller_initChild = function(){
-	Drill_COPa_Controller.prototype.drill_controller_initChild.call( this );
+	Drill_COPa_ComplexPar_Controller.prototype.drill_controller_initChild.call( this );
 	this.drill_controller_initCamera();				//初始化子功能 - 2Z镜头参数
-	this.drill_controller_initCommandChange();		//初始化子功能 - 2A指令叠加变化
-	this.drill_controller_initDelayingCommand();	//初始化子功能 - 2B延迟指令
-	this.drill_controller_initPeriodizeCommand();	//初始化子功能 - 2C周期指令
 }
 
 
@@ -3968,62 +4184,75 @@ Drill_BPa_Controller.prototype.drill_controller_initChild = function(){
 // * A主体 - 初始化子功能
 //==============================
 Drill_BPa_Controller.prototype.drill_controller_initAttr = function(){
-	Drill_COPa_Controller.prototype.drill_controller_initAttr.call( this );
+	Drill_COPa_ComplexPar_Controller.prototype.drill_controller_initAttr.call( this );
+	var data = this.drill_data();
+	
+	// > A主体 - 其它特性
+	this._drill_XPer = data['XPer'];
+	this._drill_YPer = data['YPer'];
+	
 	// > 常规
 	this._drill_curPluginTipName = DrillUp.g_BPa_PluginTip_curName;	//常规 - 当前插件名（提示信息）
 }
 //==============================
-// * B粒子群弹道 - 初始化子功能
+// * B变换特性 - 初始化子功能
 //==============================
-Drill_BPa_Controller.prototype.drill_controller_initBallistics = function(){
-	Drill_COPa_Controller.prototype.drill_controller_initBallistics.call( this );
+Drill_BPa_Controller.prototype.drill_controller_initChange = function(){
+	Drill_COPa_ComplexPar_Controller.prototype.drill_controller_initChange.call( this );
+}
+//##############################
+// * B变换特性 - 数据最终变换值 - 粒子平移X（继承）
+//##############################
+Drill_BPa_Controller.prototype.drill_controller_finalTransform_par_x = function(){
+	var xx = Drill_COPa_ComplexPar_Controller.prototype.drill_controller_finalTransform_par_x.call( this );
+	xx += this._drill_cameraResultSpriteX;  //（镜头位移结果，见函数 drill_BPa_updateCamera ）
+	return xx;
+}
+//##############################
+// * B变换特性 - 数据最终变换值 - 粒子平移Y（继承）
+//##############################
+Drill_BPa_Controller.prototype.drill_controller_finalTransform_par_y = function(){
+	var yy = Drill_COPa_ComplexPar_Controller.prototype.drill_controller_finalTransform_par_y.call( this );
+	yy += this._drill_cameraResultSpriteY;  //（镜头位移结果，见函数 drill_BPa_updateCamera ）
+	return yy;
 }
 //==============================
-// * C随机因子 - 初始化子功能
+// * C校验值 - 初始化子功能
 //==============================
-Drill_BPa_Controller.prototype.drill_controller_initRandom = function(){
-	Drill_COPa_Controller.prototype.drill_controller_initRandom.call( this );
-}
+// * D指令叠加变化 - 初始化子功能
 //==============================
-// * D粒子变化 - 初始化子功能
+// * E延迟指令 - 初始化子功能
+//==============================
+// * F周期指令 - 初始化子功能
+//==============================
+
+//==============================
+// * H粒子群弹道 - 初始化子功能
+//==============================
+// * I随机因子 - 初始化子功能
+//==============================
+//==============================
+// * J粒子变化 - 初始化子功能
 //==============================
 Drill_BPa_Controller.prototype.drill_controller_initTransform = function(){
-	Drill_COPa_Controller.prototype.drill_controller_initTransform.call( this );
+	Drill_COPa_ComplexPar_Controller.prototype.drill_controller_initTransform.call( this );
 	//（注意，控制器不存 弹道值 ，因此这里的 x、y、opacity 都不含弹道的影响）
 	//（如果需要弹道影响后的值，去贴图中进行控制）
 }
-//==============================
-// * E粒子重设 - 初始化子功能
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_initReset = function(){
-	Drill_COPa_Controller.prototype.drill_controller_initReset.call( this );
-}
-//==============================
-// * E粒子重设 - 帧刷新
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_updateReset = function(){
-	Drill_COPa_Controller.prototype.drill_controller_updateReset.call( this );
-}
-//==============================
-// * E粒子重设 - 判断粒子死亡
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_isParticleDead = function( i ){
-	return Drill_COPa_Controller.prototype.drill_controller_isParticleDead.call( this, i );
-}
-//==============================
-// * E粒子重设 - 执行重设 - 位置
+//##############################
+// * K粒子重设 - 执行重设 - 粒子平移【标准函数】（继承）
 //
 //			说明：	> 起始点为 一个矩形内随机出现 。
-//==============================	
+//##############################
 Drill_BPa_Controller.prototype.drill_controller_resetParticles_Position = function( i ){
-	Drill_COPa_Controller.prototype.drill_controller_resetParticles_Position.call( this, i );
-	var data = this._drill_data;
+	Drill_COPa_ComplexPar_Controller.prototype.drill_controller_resetParticles_Position.call( this, i );
+	
+	var data = this.drill_data();
 	var cur_iteration = this._drill_parList_randomIteration[i];
 	var xx = 0;
 	var yy = 0;
-	var margin = this.drill_controller_getBitmapMargin();
-	var ww = margin['ww'];
-	var hh = margin['hh'];
+	var mww = this.drill_controller_getBitmapMargin_Width();
+	var mhh = this.drill_controller_getBitmapMargin_Height();
 	var ran1 = this.drill_controller_curRandom( cur_iteration*i +41*i );
 	var ran2 = this.drill_controller_curRandom( cur_iteration*i +43*i +1000 );
 	
@@ -4032,20 +4261,20 @@ Drill_BPa_Controller.prototype.drill_controller_resetParticles_Position = functi
 		yy = Graphics.boxHeight * ran2;
 	}
 	if( data['par_birthMode'] == "左侧出现" ){
-		xx = 0 - ww*0.5;
+		xx = 0 - mww*0.5;
 		yy = Graphics.boxHeight * ran2;
 	}
 	if( data['par_birthMode'] == "右侧出现" ){
-		xx = Graphics.boxWidth + ww*0.5;
+		xx = Graphics.boxWidth + mww*0.5;
 		yy = Graphics.boxHeight * ran2;
 	}
 	if( data['par_birthMode'] == "顶部出现" ){
 		xx = Graphics.boxWidth * ran1;
-		yy = 0 - hh*0.5;
+		yy = 0 - mhh*0.5;
 	}
 	if( data['par_birthMode'] == "底部出现" ){
 		xx = Graphics.boxWidth * ran1;
-		yy = Graphics.boxHeight + hh*0.5;
+		yy = Graphics.boxHeight + mhh*0.5;
 	}
 	if( data['par_birthMode'] == "固定点范围出现" ){
 		angle = 360 * ran1;
@@ -4057,488 +4286,26 @@ Drill_BPa_Controller.prototype.drill_controller_resetParticles_Position = functi
 	this._drill_parList_x[i] = xx;
 	this._drill_parList_y[i] = yy;
 }
+//##############################
+// * K粒子重设 - 执行重设 - 粒子缩放【标准函数】
+//##############################
+// * K粒子重设 - 执行重设 - 粒子透明度【标准函数】
+//##############################
+// * K粒子重设 - 执行重设 - 粒子旋转【标准函数】
+//##############################
 //==============================
-// * F双层效果 - 初始化子功能
+// * L粒子生命周期 - 初始化子功能
 //==============================
-// * G直线拖尾贴图 - 初始化子功能
+// * O贴图加载 - 初始化子功能
 //==============================
-// * H贴图高宽 - 初始化子功能
+// * P直线拖尾贴图 - 初始化子功能
 //==============================
-// * I粒子生命周期 - 初始化子功能
+// * Q双层效果 - 初始化子功能
 //==============================
-
+// * 2A粒子类型 - 初始化子功能
 //==============================
-// * 2A指令叠加变化 - 初始化子功能
-//
-//			说明：	> 此处使用弹道核心提供的 弹道扩展工具-A叠加变化宏定义 控制器部分。
-//					> 参数使用字符串进行控制，默认为 null 值。
+// * 2B彩虹化 - 初始化子功能
 //==============================
-Drill_BPa_Controller.prototype.drill_controller_initCommandChange = function(){
-	
-	// > 控制器参数 - 移动到
-	this["_drill_command_move_data"] = undefined;
-	
-	// > 控制器参数 - 透明度
-	this["_drill_command_opacity_data"] = undefined;
-	
-	// > 控制器参数 - 旋转
-	this["_drill_command_rotate_data"] = undefined;
-	
-	// > 控制器参数 - 缩放X
-	this["_drill_command_scaleX_data"] = undefined;
-	// > 控制器参数 - 缩放Y
-	this["_drill_command_scaleY_data"] = undefined;
-	
-}
-//==============================
-// * 2A指令叠加变化 - 帧刷新
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_updateCommandChange = function(){
-	
-	// > 帧刷新 - 移动到（二维弹道）
-	Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_update( this, "_drill_command_move_data" );
-	
-	// > 帧刷新 - 透明度
-	Drill_COBa_ExtendTool.drill_COBa_Common_controller_update( this, "_drill_command_opacity_data" );
-	
-	// > 帧刷新 - 旋转
-	Drill_COBa_ExtendTool.drill_COBa_Common_controller_update( this, "_drill_command_rotate_data" );
-	
-	// > 帧刷新 - 缩放X
-	Drill_COBa_ExtendTool.drill_COBa_Common_controller_update( this, "_drill_command_scaleX_data" );
-	// > 帧刷新 - 缩放Y
-	Drill_COBa_ExtendTool.drill_COBa_Common_controller_update( this, "_drill_command_scaleY_data" );
-	
-}
-//==============================
-// * 2A指令叠加变化 - 立即还原所有单属性
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_commandChange_restoreAttr = function(){
-	
-	// > 控制器参数 - 移动到
-	//	（这里不含）
-	
-	// > 控制器参数 - 透明度
-	this["_drill_command_opacity_data"] = undefined;
-	
-	// > 控制器参数 - 旋转
-	this["_drill_command_rotate_data"] = undefined;
-	
-	// > 控制器参数 - 缩放X
-	this["_drill_command_scaleX_data"] = undefined;
-	// > 控制器参数 - 缩放Y
-	this["_drill_command_scaleY_data"] = undefined;
-}
-//==============================
-// * 2A指令叠加变化 - 立即归位
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_commandChange_restoreMove = function(){
-	this["_drill_command_move_data"] = undefined;
-}
-//==============================
-// * 2A指令叠加变化 - 修改单属性 - 移动到
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_commandChange_setMove = function( change_type, tar_valueA, tar_valueB, tar_time ){
-	var data = this._drill_data;
-	Drill_COBa_ExtendTool.drill_COBa_Planimetry_controller_setTarget(
-		this, "_drill_command_move_data", 0, 0,		//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
-		change_type, tar_valueA, tar_valueB, tar_time
-	);
-}
-//==============================
-// * 2A指令叠加变化 - 修改单属性 - 透明度
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_commandChange_setOpacity = function( change_type, tar_value, tar_time ){
-	var data = this._drill_data;
-	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
-		this, "_drill_command_opacity_data", data['opacity'],	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
-		change_type, tar_value, tar_time
-	);
-}
-//==============================
-// * 2A指令叠加变化 - 修改单属性 - 旋转
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_commandChange_setRotate = function( change_type, tar_value, tar_time ){
-	var data = this._drill_data;
-	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
-		this, "_drill_command_rotate_data", 0,	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
-		change_type, tar_value, tar_time
-	);
-}
-//==============================
-// * 2A指令叠加变化 - 修改单属性 - 缩放X
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_commandChange_setScaleX = function( change_type, tar_value, tar_time ){
-	var data = this._drill_data;
-	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
-		this, "_drill_command_scaleX_data", 1,	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
-		change_type, tar_value, tar_time
-	);
-}
-//==============================
-// * 2A指令叠加变化 - 修改单属性 - 缩放Y
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_commandChange_setScaleY = function( change_type, tar_value, tar_time ){
-	var data = this._drill_data;
-	Drill_COBa_ExtendTool.drill_COBa_Common_controller_setTarget(
-		this, "_drill_command_scaleY_data", 1,	//（调用时要给定 初始值，虽然初始值只在第一次调用指令时有效，但必须要给）
-		change_type, tar_value, tar_time
-	);
-}
-
-//==============================
-// * 2B延迟指令 - 初始化子功能
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_initDelayingCommand = function(){
-	this._drill_curDelayingCommandTank = [];
-}
-//==============================
-// * 2B延迟指令 - 帧刷新 - 时间流逝
-//
-//			说明：	> 此处的时间流逝不会因为 暂停 而停止流逝。
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_updateDelayingCommandImportant = function(){
-	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
-	
-	// > 帧刷新 时间流逝
-	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
-		var dc_data = this._drill_curDelayingCommandTank[i];
-		
-		// > 时间-1
-		dc_data['left_time'] -= 1;
-		
-	}
-	
-	// > 执行延迟指令（暂停/继续）
-	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
-		var dc_data = this._drill_curDelayingCommandTank[i];
-		if( dc_data['left_time'] < 0 ){
-			var method = dc_data['method'];
-			var paramList = dc_data['paramList'];
-			
-			if( method == Drill_BPa_Controller.METHOD__drill_controller_setPause ){
-				this.drill_controller_setPause( paramList[0] );
-			}else if( method == Drill_BPa_Controller.METHOD__drill_controller_periodizeCommand_setPause ){  //暂停周期指令(延迟)
-				this.drill_controller_periodizeCommand_setPause( paramList[0] );
-			}else if( method == Drill_BPa_Controller.METHOD__drill_controller_periodizeCommand_clear ){  //清空周期指令(延迟)
-				this.drill_controller_periodizeCommand_clear();
-			}
-		}
-	}
-}
-//==============================
-// * 2B延迟指令 - 帧刷新 - 执行延迟指令
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_updateDelayingCommand = function(){
-	if( this._drill_curDelayingCommandTank.length == 0 ){ return; }
-	
-	// > 执行延迟指令
-	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
-		var dc_data = this._drill_curDelayingCommandTank[i];
-		if( dc_data['left_time'] < 0 ){
-			var method = dc_data['method'];
-			var paramList = dc_data['paramList'];
-			
-			switch( method ){
-				case Drill_BPa_Controller.METHOD__drill_controller_setVisible:
-					this.drill_controller_setVisible( paramList[0] );
-					break;
-				
-				case Drill_BPa_Controller.METHOD__drill_controller_setBlendMode:
-					this.drill_controller_setBlendMode( paramList[0] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_setLayerIndex:
-					this.drill_controller_setLayerIndex( paramList[0] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_setZIndex:
-					this.drill_controller_setZIndex( paramList[0] );
-					break;
-				
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setOpacity:
-					this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setRotate:
-					this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
-					break;
-					
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleX:
-					this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleY:
-					this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreAttr:
-					this.drill_controller_commandChange_restoreAttr();
-					break;
-				
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove:
-					this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreMove:
-					this.drill_controller_commandChange_restoreMove();
-					break;
-				
-				default:
-					break;
-			}
-		}
-	}
-	
-	// > 销毁延迟指令
-	for(var i = this._drill_curDelayingCommandTank.length-1; i >= 0; i-- ){
-		var dc_data = this._drill_curDelayingCommandTank[i];
-		if( dc_data['left_time'] < 0 ){
-			this._drill_curDelayingCommandTank.splice( i, 1 );
-		}
-	}
-}
-//==============================
-// * 2B延迟指令 - 设置指令（开放函数）
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_setDelayingCommand = function( method, paramList, delay_time ){
-	var enable = false;
-	switch( method ){
-		case Drill_BPa_Controller.METHOD__drill_controller_setVisible:
-		case Drill_BPa_Controller.METHOD__drill_controller_setPause:
-		case Drill_BPa_Controller.METHOD__drill_controller_periodizeCommand_setPause:
-		case Drill_BPa_Controller.METHOD__drill_controller_periodizeCommand_clear:
-		
-		case Drill_BPa_Controller.METHOD__drill_controller_setBlendMode:
-		case Drill_BPa_Controller.METHOD__drill_controller_setLayerIndex:
-		case Drill_BPa_Controller.METHOD__drill_controller_setZIndex:
-		
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setOpacity:
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setRotate:
-		
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleX:
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleY:
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreAttr:
-		
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove:
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreMove:
-			enable = true;
-			break;
-		
-		default:
-			break;
-	}
-	if( enable == false ){ return; }
-	
-	var dc_data = {};
-	dc_data['method'] = method;
-	dc_data['paramList'] = paramList;
-	dc_data['left_time'] = delay_time;
-	this._drill_curDelayingCommandTank.push( dc_data );
-}
-//==============================
-// * 2B延迟指令 - 增加延迟（开放函数）
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_addDelayingTime = function( time ){
-	if( isNaN(time) ){ return; }
-	for(var i = 0; i < this._drill_curDelayingCommandTank.length; i++ ){
-		var dc_data = this._drill_curDelayingCommandTank[i];
-		dc_data['left_time'] += Number( time );
-	}
-}
-//==============================
-// * 2B延迟指令 - 清空全部（开放函数）
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_clearDelayingCommand = function(){
-	this._drill_curDelayingCommandTank = [];
-}
-
-
-//==============================
-// * 2C周期指令 - 初始化子功能
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_initPeriodizeCommand = function(){
-	this._drill_curPeriodizeCommandTank = [];
-	this._drill_periodizeCommand_pause = undefined;				//暂停周期指令
-	this._drill_periodizeCommand_waitAndPauseTime = undefined;	//一次性计时器（暂停周期指令-周期末尾时）
-	this._drill_periodizeCommand_waitAndClearTime = undefined;	//一次性计时器（清空周期指令-周期末尾时）
-}
-//==============================
-// * 2C周期指令 - 帧刷新 - 时间流逝
-//
-//			说明：	> 此处的时间流逝不会因为 暂停 而停止流逝。
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_updatePeriodizeCommandImportant = function(){
-	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return; }
-	
-	// > 暂停周期指令
-	if( this._drill_periodizeCommand_pause == true ){ return; }
-	
-	// > 周期剩余时间
-	if( this._drill_periodizeCommand_waitAndPauseTime !== undefined ){
-		this._drill_periodizeCommand_waitAndPauseTime -= 1;
-		if( this._drill_periodizeCommand_waitAndPauseTime == 0 ){
-			this.drill_controller_periodizeCommand_setPause(true);  //（暂停周期指令-周期末尾时）
-		}
-	}
-	if( this._drill_periodizeCommand_waitAndClearTime !== undefined ){
-		this._drill_periodizeCommand_waitAndClearTime -= 1;
-		if( this._drill_periodizeCommand_waitAndClearTime == 0 ){
-			this.drill_controller_periodizeCommand_clear();  //（清空周期指令-周期末尾时）
-		}
-	}
-	
-	
-	// > 帧刷新 时间流逝
-	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
-		var pc_data = this._drill_curPeriodizeCommandTank[i];
-		
-		// > 时间-1
-		pc_data['cur_time'] += 1;
-	}
-	
-	// > 执行周期指令（暂停/继续）
-	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
-		var pc_data = this._drill_curPeriodizeCommandTank[i];
-		var time =  pc_data['cur_time'] % pc_data['time_period'];
-		if( time == pc_data['time_start'] ){
-			var method = pc_data['method'];
-			var paramList = pc_data['paramList'];
-			
-			if( method == Drill_BPa_Controller.METHOD__drill_controller_setPause ){
-				this.drill_controller_setPause( paramList[0] );
-			}
-		}
-	}
-}
-//==============================
-// * 2C周期指令 - 帧刷新 - 执行周期指令
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_updatePeriodizeCommand = function(){
-	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return; }
-	
-	// > 执行周期指令
-	for(var i = 0; i < this._drill_curPeriodizeCommandTank.length; i++ ){
-		var pc_data = this._drill_curPeriodizeCommandTank[i];
-		var time =  pc_data['cur_time'] % pc_data['time_period'];
-		if( time == pc_data['time_start'] ){
-			var method = pc_data['method'];
-			var paramList = pc_data['paramList'];
-			
-			switch( method ){
-				case Drill_BPa_Controller.METHOD__drill_controller_setVisible:
-					this.drill_controller_setVisible( paramList[0] );
-					break;
-				
-				case Drill_BPa_Controller.METHOD__drill_controller_setBlendMode:
-					this.drill_controller_setBlendMode( paramList[0] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_setLayerIndex:
-					this.drill_controller_setLayerIndex( paramList[0] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_setZIndex:
-					this.drill_controller_setZIndex( paramList[0] );
-					break;
-				
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setOpacity:
-					this.drill_controller_commandChange_setOpacity( paramList[0], paramList[1], paramList[2] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setRotate:
-					this.drill_controller_commandChange_setRotate( paramList[0], paramList[1], paramList[2] );
-					break;
-					
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleX:
-					this.drill_controller_commandChange_setScaleX( paramList[0], paramList[1], paramList[2] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleY:
-					this.drill_controller_commandChange_setScaleY( paramList[0], paramList[1], paramList[2] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreAttr:
-					this.drill_controller_commandChange_restoreAttr();
-					break;
-				
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove:
-					this.drill_controller_commandChange_setMove( paramList[0], paramList[1], paramList[2], paramList[3] );
-					break;
-				case Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreMove:
-					this.drill_controller_commandChange_restoreMove();
-					break;
-				
-				default:
-					break;
-			}
-		}
-	}
-	
-}
-//==============================
-// * 2C周期指令 - 设置指令（开放函数）
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_setPeriodizeCommand = function( method, paramList, time_period, time_start ){
-	var enable = false;
-	switch( method ){
-		case Drill_BPa_Controller.METHOD__drill_controller_setVisible:
-		case Drill_BPa_Controller.METHOD__drill_controller_setPause:
-		
-		case Drill_BPa_Controller.METHOD__drill_controller_setBlendMode:
-		case Drill_BPa_Controller.METHOD__drill_controller_setLayerIndex:
-		case Drill_BPa_Controller.METHOD__drill_controller_setZIndex:
-		
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setOpacity:
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setRotate:
-		
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleX:
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setScaleY:
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreAttr:
-		
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_setMove:
-		case Drill_BPa_Controller.METHOD__drill_controller_commandChange_restoreMove:
-			enable = true;
-			break;
-		
-		default:
-			break;
-	}
-	if( enable == false ){ return; }
-	
-	var pc_data = {};
-	pc_data['method'] = method;
-	pc_data['paramList'] = paramList;
-	pc_data['time_period'] = time_period;
-	pc_data['time_start'] = time_start;
-	pc_data['cur_time'] = -1;			//（时间先+1后判断，所以取-1）
-	this._drill_curPeriodizeCommandTank.push( pc_data );
-}
-//==============================
-// * F周期指令 - 获取 周期剩余时间（开放函数）
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_periodizeCommand_getWaitAndClearTime = function(){
-	if( this._drill_curPeriodizeCommandTank.length == 0 ){ return 0; }
-	var pc_data = this._drill_curPeriodizeCommandTank[0];				//（只取第一个周期指令的时间）
-	var cur_period_time = pc_data['cur_time'] % pc_data['time_period'];	//（周期内的当前时间）
-	return pc_data['time_period'] - cur_period_time;					//（周期内的剩余时间）
-}
-//==============================
-// * F周期指令 - 暂停周期指令-立刻（开放函数）
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_periodizeCommand_setPause = function( enabled ){
-	this._drill_periodizeCommand_pause = enabled;				//（暂停周期指令）
-	this.drill_controller_setPause( enabled );					//（暂停变换）
-	this._drill_periodizeCommand_waitAndPauseTime = undefined;	//（删除 一次性计时器）
-}
-//==============================
-// * F周期指令 - 暂停周期指令-周期末尾时（开放函数）
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_periodizeCommand_waitAndPause = function(){
-	this._drill_periodizeCommand_waitAndPauseTime = this.drill_controller_periodizeCommand_getWaitAndClearTime();
-}
-//==============================
-// * F周期指令 - 清空周期指令-立刻（开放函数）
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_periodizeCommand_clear = function(){
-	this._drill_curPeriodizeCommandTank = [];
-	this._drill_periodizeCommand_waitAndClearTime = undefined;	//（删除 一次性计时器）
-}
-//==============================
-// * F周期指令 - 清空周期指令-周期末尾时（开放函数）
-//==============================
-Drill_BPa_Controller.prototype.drill_controller_periodizeCommand_waitAndClear = function(){
-	this._drill_periodizeCommand_waitAndClearTime = this.drill_controller_periodizeCommand_getWaitAndClearTime();
-}
 
 
 //==============================
@@ -4562,23 +4329,10 @@ Drill_BPa_Controller.prototype.drill_controller_initCamera = function(){
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁
-// **						->销毁
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
-// **					->A主体
-// **						->层级位置修正
-// **					->B粒子群弹道
-// **					->C对象绑定
-// **					->D粒子变化
-// **					->E粒子重设
-// **					->F双层效果
-// **					->G直线拖尾贴图
-// **					->H贴图高宽
-// **					->I粒子生命周期
-// **					
-// **					->2A指令叠加变化-控制器用
-// **					->2B延迟指令
-// **					->2C周期指令
+// **					->3A粒子私有属性（无）
 // **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
@@ -4586,7 +4340,7 @@ Drill_BPa_Controller.prototype.drill_controller_initCamera = function(){
 // **				> 结构 - [合并/ ●分离 /混乱] 使用 控制器-贴图 结构。
 // **				> 数量 - [单个/ ●多个] 
 // **				> 创建 - [ ●一次性 /自延迟/外部延迟] 先创建控制器，再创建此贴图，通过 C对象绑定 进行连接。
-// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 通过 控制器与贴图 模块来销毁。
+// **				> 销毁 - [不考虑/自销毁/ ●外部销毁 ] 
 // **				> 样式 - [ ●不可修改 /自变化/外部变化] 
 //=============================================================================
 //==============================
@@ -4595,28 +4349,26 @@ Drill_BPa_Controller.prototype.drill_controller_initCamera = function(){
 function Drill_BPa_Sprite() {
     this.initialize.apply(this, arguments);
 };
-Drill_BPa_Sprite.prototype = Object.create(Drill_COPa_Sprite.prototype);
+Drill_BPa_Sprite.prototype = Object.create(Drill_COPa_ComplexPar_Sprite.prototype);
 Drill_BPa_Sprite.prototype.constructor = Drill_BPa_Sprite;
 //==============================
 // * 粒子贴图 - 初始化
 //==============================
 Drill_BPa_Sprite.prototype.initialize = function(){
-    Drill_COPa_Sprite.prototype.initialize.call( this );
+    Drill_COPa_ComplexPar_Sprite.prototype.initialize.call( this );
 };
 //==============================
 // * 粒子贴图 - 帧刷新
 //==============================
 Drill_BPa_Sprite.prototype.update = function(){
-	Drill_COPa_Sprite.prototype.update.call(this);
-	if( this.drill_sprite_isReady() == false ){ return; }
-	if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
-	this.drill_sprite_updateCommandChange();		//帧刷新 - 2A指令叠加变化-控制器用
-													//帧刷新 - 2B延迟指令（无）
-													//帧刷新 - 2C周期指令（无）
+	Drill_COPa_ComplexPar_Sprite.prototype.update.call(this);
+	//if( this.drill_sprite_isReady() == false ){ return; }
+	//if( this.drill_sprite_isOptimizationPassed() == false ){ return; }
+												//帧刷新 - （无）
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -4624,10 +4376,10 @@ Drill_BPa_Sprite.prototype.update = function(){
 //			说明：	> 由于贴图与数据分离，贴图必须依赖一个数据对象。
 //##############################
 Drill_BPa_Sprite.prototype.drill_sprite_setController = function( controller ){
-    Drill_COPa_Sprite.prototype.drill_sprite_setController.call( this, controller );
+    Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_setController.call( this, controller );
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -4635,22 +4387,20 @@ Drill_BPa_Sprite.prototype.drill_sprite_setController = function( controller ){
 //			说明：	> 需要设置 控制器 之后，才能进行手动初始化。
 //##############################
 Drill_BPa_Sprite.prototype.drill_sprite_initChild = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_initChild.call( this );
-	this.drill_sprite_initCommandChange();		//初始化子功能 - 2A指令叠加变化-控制器用
-	this.drill_sprite_initDelayingCommand();	//初始化子功能 - 2B延迟指令
-	this.drill_sprite_initPeriodizeCommand();	//初始化子功能 - 2C周期指令
+    Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_initChild.call( this );
+												//初始化子功能 - （无）
 };
 
 //##############################
 // * 粒子贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
 Drill_BPa_Sprite.prototype.drill_sprite_isReady = function(){
-    return Drill_COPa_Sprite.prototype.drill_sprite_isReady.call( this );
+    return Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_isReady.call( this );
 };
 //##############################
 // * 粒子贴图 - 优化策略【标准函数】
@@ -4661,21 +4411,21 @@ Drill_BPa_Sprite.prototype.drill_sprite_isReady = function(){
 //			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
 //##############################
 Drill_BPa_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
-    return Drill_COPa_Sprite.prototype.drill_sprite_isOptimizationPassed.call( this );
+    return Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_isOptimizationPassed.call( this );
 };
 //##############################
-// * 粒子贴图 - 是否需要销毁【标准函数】
+// * 粒子贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
 Drill_BPa_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
-    return Drill_COPa_Sprite.prototype.drill_sprite_isNeedDestroy.call( this );
+    return Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_isNeedDestroy.call( this );
 };
 //##############################
-// * 粒子贴图 - 销毁【标准函数】
+// * 粒子贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -4683,260 +4433,109 @@ Drill_BPa_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
 //			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
 //##############################
 Drill_BPa_Sprite.prototype.drill_sprite_destroy = function(){
-	Drill_COPa_Sprite.prototype.drill_sprite_destroy.call( this );
+	Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_destroy.call( this );
 };
 //==============================
 // * 粒子贴图 - 初始化自身『控制器与贴图』
 //==============================
 Drill_BPa_Sprite.prototype.drill_sprite_initSelf = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_initSelf.call( this );
+    Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_initSelf.call( this );
 };
 //==============================
 // * 粒子贴图 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_BPa_Sprite.prototype.drill_sprite_destroyChild = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_destroyChild.call( this );
+    Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_destroyChild.call( this );
 };
 //==============================
 // * 粒子贴图 - 销毁自身『控制器与贴图』
 //==============================
 Drill_BPa_Sprite.prototype.drill_sprite_destroySelf = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_destroySelf.call( this );
-};
-//==============================
-// * 优化策略 - 判断通过（私有）
-//==============================
-Drill_BPa_Sprite.prototype.drill_sprite_isOptimizationPassed_Private = function(){
-	return Drill_COPa_Sprite.prototype.drill_sprite_isOptimizationPassed_Private.call( this );
+    Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_destroySelf.call( this );
 };
 
 
 //==============================
-// * A主体 - 初始化子功能
+// * A贴图主体 - 初始化子功能
 //==============================
 Drill_BPa_Sprite.prototype.drill_sprite_initAttr = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_initAttr.call( this );
+    Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_initAttr.call( this );
 	/*
 		贴图的层级如下：
 			- 主体贴图（this）
-			- - 粒子贴图组（_drill_COPa_parSpriteTank）
-			- - 直线拖尾贴图组（_drill_COPa_trailingSpriteTank）
+			- - 粒子层（_drill_COPa_parSpriteLayer）
+			- - - 粒子贴图组（_drill_COPa_parSpriteTank）
+			- - 直线拖尾层（_drill_COPa_trailingSpriteLayer）
+			- - - 直线拖尾贴图组（_drill_COPa_trailingSpriteTank）
 	*/
 	
 	// > 常规
 	this._drill_curPluginTipName = DrillUp.g_BPa_PluginTip_curName;	//常规 - 当前插件名（提示信息）
-	
-	this.layerIndex = this._drill_controller._drill_data['layerIndex'];
-	this.zIndex = this._drill_controller._drill_data['zIndex'];
 };
 //==============================
-// * A主体 - 帧刷新 - 位置
+// * B变换特性 - 初始化子功能
 //==============================
-Drill_BPa_Sprite.prototype.drill_sprite_updateAttr_Position = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_updateAttr_Position.call( this );
-	var xx = 0;
-	var yy = 0;
-	
-	// > 层级位置修正
-	//		（镜头位移结果，见函数 drill_BPa_updateControllerCamera ）
-	xx += this._drill_controller._drill_cameraResultSpriteX;
-	yy += this._drill_controller._drill_cameraResultSpriteY;
-	
-	this._drill_x += xx;
-	this._drill_y += yy;
+Drill_BPa_Sprite.prototype.drill_sprite_initChange = function(){
+    Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_initChange.call( this );
 };
 //==============================
-// * A主体 - 帧刷新 - 显示/隐藏
+// * C对象绑定 - 初始化子功能
 //==============================
-Drill_BPa_Sprite.prototype.drill_sprite_updateAttr_Visible = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_updateAttr_Visible.call( this );
-};
+// * D指令叠加变化-控制器用 - 初始化子功能
 //==============================
-// * B粒子群弹道 - 初始化子功能
+// * E延迟指令 - 初始化子功能
 //==============================
-Drill_BPa_Sprite.prototype.drill_sprite_initBallistics = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_initBallistics.call( this );
-}
+// * F周期指令 - 初始化子功能
 //==============================
-// * B粒子群弹道 - 推演弹道
+
 //==============================
-Drill_BPa_Sprite.prototype.drill_sprite_refreshBallistics = function( i ){
-    Drill_COPa_Sprite.prototype.drill_sprite_refreshBallistics.call( this, i );
-}
+// * H粒子群弹道 - 初始化子功能
 //==============================
-// * D粒子变化 - 初始化子功能
+// * I随机因子 - 初始化子功能
 //==============================
-Drill_BPa_Sprite.prototype.drill_sprite_initTransform = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_initTransform.call( this );
-}
-//==============================
-// * D粒子变化 - 帧刷新
-//==============================
-Drill_BPa_Sprite.prototype.drill_sprite_updateTransform = function(){
-	var controller = this._drill_controller;
-	
-	// > 移动到 - 帧刷新
-	//		（提前执行，确保雪花能被 边界取余）
-	var CDataName = "_drill_command_move_data";
-	var SDataName = "_drill_command_move_spriteData";
-	Drill_COBa_ExtendTool.drill_COBa_Planimetry_sprite_update( this, SDataName, controller, CDataName );
-	
-	// > 移动到 - 贴图赋值
-	//		（赋值 偏移量 ，是为了减少执行次数，优化性能）
-	if( controller[CDataName] != undefined ){
-		this._drill_offset_x = controller[CDataName]['cur_valueA'];
-		this._drill_offset_y = controller[CDataName]['cur_valueB'];
-	}else{
-		this._drill_offset_x = 0;
-		this._drill_offset_y = 0;
-	}
-	
-    Drill_COPa_Sprite.prototype.drill_sprite_updateTransform.call( this );
-}
-//==============================
-// * D粒子变化 - 帧刷新 - 位置
-//==============================
+//##############################
+// * J粒子变化 - 帧刷新 - 粒子平移【标准函数】
+//##############################
 Drill_BPa_Sprite.prototype.drill_sprite_updateTransform_Position = function( i, time ){
-    Drill_COPa_Sprite.prototype.drill_sprite_updateTransform_Position.call( this, i, time );
-	
-	// > 移动到 的偏移量
-	this._drill_par_x += this._drill_offset_x;
-	this._drill_par_y += this._drill_offset_y;
+    Drill_COPa_ComplexPar_Sprite.prototype.drill_sprite_updateTransform_Position.call( this, i, time );
 	
 	
-	// > 粒子过边界时（直接取余，不要重置）
-	var margin = this._drill_controller.drill_controller_getBitmapMargin();
-	var ww = margin['ww'];
-	var hh = margin['hh'];
-	var bww = Graphics.boxWidth + ww*2;
-	var bhh = Graphics.boxHeight + hh*2;
+	// > 粒子过边界时（取余，不要重置粒子）（该函数执行次数非常多，尽量减少计算次数）
+	var mww = this._drill_controller.drill_controller_getBitmapMargin_Width();
+	var mhh = this._drill_controller.drill_controller_getBitmapMargin_Height();
+	var ww = Graphics.boxWidth  + mww*2;
+	var hh = Graphics.boxHeight + mhh*2;
 	
-	// > 边界取余
-	this._drill_par_x %= bww;
-	this._drill_par_x += bww;
-	this._drill_par_x %= bww;
-	this._drill_par_x -= ww;
-	this._drill_par_y %= bww;
-	this._drill_par_y += bww;
-	this._drill_par_y %= bww;
-	this._drill_par_y -= hh;
+	// > 边界取余（取余有负数值情况）
+	this._drill_par_x %= ww;
+	if( this._drill_par_x < 0 ){ this._drill_par_x += ww; }
+	this._drill_par_x -= mww;
+	this._drill_par_y %= hh;
+	if( this._drill_par_y < 0 ){ this._drill_par_y += hh; }
+	this._drill_par_y -= mhh;
 }
+//##############################
+// * J粒子变化 - 帧刷新 - 粒子缩放【标准函数】
+//##############################
+// * J粒子变化 - 帧刷新 - 粒子透明度【标准函数】
+//##############################
+// * J粒子变化 - 帧刷新 - 粒子旋转【标准函数】
+//##############################
 //==============================
-// * E粒子重设 - 初始化子功能
+// * K粒子重设 - 初始化子功能
 //==============================
-Drill_BPa_Sprite.prototype.drill_sprite_initReset = function(){
-    Drill_COPa_Sprite.prototype.drill_sprite_initReset.call( this );
-}
+// * L粒子生命周期 - 初始化子功能
 //==============================
-// * F双层效果 - 初始化子功能
+// * O贴图加载 - 初始化子功能
 //==============================
-// * G直线拖尾贴图 - 初始化子功能
+// * P直线拖尾贴图 - 初始化子功能
 //==============================
-// * H贴图高宽 - 初始化子功能
+// * Q双层效果 - 初始化子功能
 //==============================
-// * I粒子生命周期 - 初始化子功能
+// * 2A粒子类型 - 初始化子功能
 //==============================
-
+// * 2B彩虹化 - 初始化子功能
 //==============================
-// * 2A指令叠加变化-控制器用 - 初始化子功能
-//
-//			说明：	> 此处使用弹道核心提供的 弹道扩展工具-A叠加变化宏定义 贴图部分。
-//					> 之所以把代码放这里，是因为 控制器-贴图 一对一，且可以节约弹道计算的存储空间。
-//					> 参数使用字符串进行控制，默认为 null 值。
-//==============================
-Drill_BPa_Sprite.prototype.drill_sprite_initCommandChange = function(){
-	
-	// > 贴图参数 - 移动到
-	this["_drill_command_move_spriteData"] = undefined;
-	
-	// > 贴图参数 - 透明度
-	this["_drill_command_opacity_spriteData"] = undefined;
-	
-	// > 贴图参数 - 旋转
-	this["_drill_command_rotate_spriteData"] = undefined;
-	
-	// > 贴图参数 - 缩放X
-	this["_drill_command_scaleX_spriteData"] = undefined;
-	// > 贴图参数 - 缩放Y
-	this["_drill_command_scaleY_spriteData"] = undefined;
-}
-//==============================
-// * 2A指令叠加变化-控制器用 - 帧刷新
-//==============================
-Drill_BPa_Sprite.prototype.drill_sprite_updateCommandChange = function(){
-	var data = this._drill_controller._drill_data;
-	var controller = this._drill_controller;
-	
-	// > 移动到
-	//	（上提到 D粒子变化 执行）
-	
-	
-	// > 透明度 - 帧刷新
-	var CDataName = "_drill_command_opacity_data";
-	var SDataName = "_drill_command_opacity_spriteData";
-	Drill_COBa_ExtendTool.drill_COBa_Common_sprite_update( this, SDataName, controller, CDataName );
-	
-	// > 透明度 - 贴图赋值（覆盖）
-	if( controller[CDataName] != undefined ){
-		this.opacity = controller[CDataName]['cur_value'];
-	}
-	
-	
-	// > 旋转 - 帧刷新
-	var CDataName = "_drill_command_rotate_data";
-	var SDataName = "_drill_command_rotate_spriteData";
-	Drill_COBa_ExtendTool.drill_COBa_Common_sprite_update( this, SDataName, controller, CDataName );
-	
-	// > 旋转 - 控制器赋值
-	if( controller[CDataName] != undefined ){
-		for(var i = 0; i < data['par_count']; i++ ){
-			var par_sprite = this._drill_COPa_parSpriteTank[i];	//（修改所有粒子的旋转）
-			par_sprite.rotation += controller[CDataName]['cur_value'] *Math.PI /180;
-		}
-	}
-	
-	
-	// > 缩放X - 帧刷新
-	var CDataName = "_drill_command_scaleX_data";
-	var SDataName = "_drill_command_scaleX_spriteData";
-	Drill_COBa_ExtendTool.drill_COBa_Common_sprite_update( this, SDataName, controller, CDataName );
-	
-	// > 缩放X - 控制器赋值（覆盖）
-	if( controller[CDataName] != undefined ){
-		for(var i = 0; i < data['par_count']; i++ ){
-			var par_sprite = this._drill_COPa_parSpriteTank[i];	//（修改所有粒子的缩放）
-			par_sprite.scale.x *= controller[CDataName]['cur_value'];
-		}
-	}
-	
-	
-	// > 缩放Y - 帧刷新
-	var CDataName = "_drill_command_scaleY_data";
-	var SDataName = "_drill_command_scaleY_spriteData";
-	Drill_COBa_ExtendTool.drill_COBa_Common_sprite_update( this, SDataName, controller, CDataName );
-	
-	// > 缩放Y - 控制器赋值（覆盖）
-	if( controller[CDataName] != undefined ){
-		for(var i = 0; i < data['par_count']; i++ ){
-			var par_sprite = this._drill_COPa_parSpriteTank[i];	//（修改所有粒子的缩放）
-			par_sprite.scale.y *= controller[CDataName]['cur_value'];
-		}
-	}
-}
-
-//==============================
-// * 2B延迟指令 - 初始化子功能
-//==============================
-Drill_BPa_Sprite.prototype.drill_sprite_initDelayingCommand = function(){
-	//（无）
-}
-
-//==============================
-// * 2C周期指令 - 初始化子功能
-//==============================
-Drill_BPa_Sprite.prototype.drill_sprite_initPeriodizeCommand = function(){
-	//（无）
-}
 
 
 
@@ -4949,20 +4548,12 @@ Drill_BPa_Sprite.prototype.drill_sprite_initPeriodizeCommand = function(){
 // **					->贴图（第二层）『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁
-// **						->销毁
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
-// **					->A主体
-// **					->B粒子群弹道（无）
-// **					->C对象绑定（无）
-// **					->D粒子变化
-// **					->E粒子重设（无）
-// **					->F双层效果（无）
-// **					->G直线拖尾贴图（无）
-// **					->H贴图高宽（无）
-// **					->I粒子生命周期（无）
+// **					->3A粒子私有属性（无）
 // **					
-// **		说明：	> 第二层粒子与 父贴图 的 D粒子变化 保持一致。
+// **		说明：	> 第二层粒子与 父贴图 的 J粒子变化 保持一致。
 //=============================================================================
 //==============================
 // * 第二层粒子 - 定义
@@ -4970,30 +4561,30 @@ Drill_BPa_Sprite.prototype.drill_sprite_initPeriodizeCommand = function(){
 function Drill_BPa_SecSprite() {
     this.initialize.apply(this, arguments);
 };
-Drill_BPa_SecSprite.prototype = Object.create(Drill_COPa_SecSprite.prototype);
+Drill_BPa_SecSprite.prototype = Object.create(Drill_COPa_ComplexPar_SecSprite.prototype);
 Drill_BPa_SecSprite.prototype.constructor = Drill_BPa_SecSprite;
 //==============================
 // * 第二层粒子 - 初始化
 //==============================
 Drill_BPa_SecSprite.prototype.initialize = function( parentSprite ){
-	Drill_COPa_SecSprite.prototype.initialize.call( this, parentSprite );
+	Drill_COPa_ComplexPar_SecSprite.prototype.initialize.call( this, parentSprite );
 }
 //==============================
 // * 第二层粒子 - 帧刷新
 //==============================
 Drill_BPa_SecSprite.prototype.update = function(){
-	Drill_COPa_SecSprite.prototype.update.call(this);
+	Drill_COPa_ComplexPar_SecSprite.prototype.update.call(this);
 }
 //##############################
 // * 第二层粒子 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
 Drill_BPa_SecSprite.prototype.drill_spriteSec_isReady = function(){
-    return Drill_COPa_SecSprite.prototype.drill_spriteSec_isReady.call(this);
+    return Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_isReady.call(this);
 };
 //##############################
 // * 第二层粒子 - 优化策略【标准函数】
@@ -5004,21 +4595,21 @@ Drill_BPa_SecSprite.prototype.drill_spriteSec_isReady = function(){
 //			说明：	> 通过时，正常帧刷新；未通过时，不执行帧刷新。
 //##############################
 Drill_BPa_SecSprite.prototype.drill_spriteSec_isOptimizationPassed = function(){
-    return Drill_COPa_SecSprite.prototype.drill_spriteSec_isOptimizationPassed.call(this);
+    return Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_isOptimizationPassed.call(this);
 };
 //##############################
-// * 第二层粒子 - 是否需要销毁【标准函数】
+// * 第二层粒子 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
 Drill_BPa_SecSprite.prototype.drill_spriteSec_isNeedDestroy = function(){
-    return Drill_COPa_SecSprite.prototype.drill_spriteSec_isNeedDestroy.call(this);
+    return Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_isNeedDestroy.call(this);
 };
 //##############################
-// * 第二层粒子 - 销毁【标准函数】
+// * 第二层粒子 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -5026,98 +4617,96 @@ Drill_BPa_SecSprite.prototype.drill_spriteSec_isNeedDestroy = function(){
 //			说明：	> 销毁不是必要的，但最好随时留意给 旧贴图 执行销毁函数。
 //##############################
 Drill_BPa_SecSprite.prototype.drill_spriteSec_destroy = function(){
-    return Drill_COPa_SecSprite.prototype.drill_spriteSec_destroy.call(this);
+    return Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_destroy.call(this);
 };
 //==============================
 // * 第二层粒子 - 初始化子功能『控制器与贴图』
 //==============================
 Drill_BPa_SecSprite.prototype.drill_spriteSec_initChild = function(){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_initChild.call( this );
+	Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_initChild.call( this );
 };
 //==============================
 // * 第二层粒子 - 初始化自身『控制器与贴图』
 //==============================
 Drill_BPa_SecSprite.prototype.drill_spriteSec_initSelf = function( parentSprite ){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_initSelf.call( this, parentSprite );
+	Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_initSelf.call( this, parentSprite );
 };
 //==============================
 // * 第二层粒子 - 销毁子功能『控制器与贴图』
 //==============================
 Drill_BPa_SecSprite.prototype.drill_spriteSec_destroyChild = function(){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroyChild.call( this );
+	Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_destroyChild.call( this );
 };
 //==============================
 // * 第二层粒子 - 销毁自身『控制器与贴图』
 //==============================
 Drill_BPa_SecSprite.prototype.drill_spriteSec_destroySelf = function(){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_destroySelf.call( this );
+	Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_destroySelf.call( this );
 };
-//==============================
-// * 优化策略 - 判断通过（私有）
-//==============================
-Drill_BPa_SecSprite.prototype.drill_spriteSec_isOptimizationPassed_Private = function(){
-	return Drill_COPa_SecSprite.prototype.drill_spriteSec_isOptimizationPassed_Private.call( this );
-}
 
 //==============================
-// * A主体（第二层） - 初始化子功能
+// * A贴图主体（第二层） - 初始化子功能
 //==============================
 Drill_BPa_SecSprite.prototype.drill_spriteSec_initAttr = function(){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_initAttr.call( this );
-	this.zIndex = this._drill_controller._drill_data['second_zIndex'];
+	Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_initAttr.call( this );
+	this.zIndex = this._drill_controller.drill_data()['second_zIndex'];
 };
 //==============================
-// * B粒子群弹道（第二层） - 初始化子功能
+// * B变换特性（第二层） - 初始化子功能
 //==============================
-Drill_BPa_SecSprite.prototype.drill_spriteSec_initBallistics = function(){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_initBallistics.call( this );
+Drill_BPa_SecSprite.prototype.drill_spriteSec_initChange = function(){
+	Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_initChange.call( this );
 };
+
 //==============================
-// * D粒子变化（第二层） - 初始化子功能
+// * H粒子群弹道（第二层） - 初始化子功能
 //==============================
-Drill_BPa_SecSprite.prototype.drill_spriteSec_initTransform = function(){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_initTransform.call( this );
-}
+// * I随机因子（第二层） - 初始化子功能
 //==============================
-// * D粒子变化（第二层） - 帧刷新 - 位置
-//==============================
+//##############################
+// * J粒子变化（第二层） - 帧刷新 - 粒子平移【标准函数】
+//##############################
 Drill_BPa_SecSprite.prototype.drill_spriteSec_updateTransform_Position = function( i, time ) {
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_updateTransform_Position.call( this, i, time );
+	Drill_COPa_ComplexPar_SecSprite.prototype.drill_spriteSec_updateTransform_Position.call( this, i, time );
 	
 	
-	// > 粒子过边界时（直接取余，不要重置）
-	var margin = this._drill_controller.drill_controller_getBitmapMargin();
-	var ww = margin['ww'];
-	var hh = margin['hh'];
-	var bww = Graphics.boxWidth + ww*2;
-	var bhh = Graphics.boxHeight + hh*2;
+	// > 粒子过边界时（取余，不要重置粒子）（该函数执行次数非常多，尽量减少计算次数）
+	var mww = this._drill_controller.drill_controller_getBitmapMargin_Width();
+	var mhh = this._drill_controller.drill_controller_getBitmapMargin_Height();
+	var ww = Graphics.boxWidth  + mww*2;
+	var hh = Graphics.boxHeight + mhh*2;
 	
-	// > 边界取余
-	this._drill_parSec_x %= bww;
-	this._drill_parSec_x += bww;
-	this._drill_parSec_x %= bww;
-	this._drill_parSec_x -= ww;
-	this._drill_parSec_y %= bww;
-	this._drill_parSec_y += bww;
-	this._drill_parSec_y %= bww;
-	this._drill_parSec_y -= hh;
-	
+	// > 边界取余（取余有负数值情况）
+	this._drill_parSec_x %= ww;
+	if( this._drill_parSec_x < 0 ){ this._drill_parSec_x += ww; }
+	this._drill_parSec_x -= mww;
+	this._drill_parSec_y %= hh;
+	if( this._drill_parSec_y < 0 ){ this._drill_parSec_y += hh; }
+	this._drill_parSec_y -= mhh;
 }
+//##############################
+// * J粒子变化（第二层） - 帧刷新 - 粒子缩放【标准函数】
+//##############################
+// * J粒子变化（第二层） - 帧刷新 - 粒子透明度【标准函数】
+//##############################
+// * J粒子变化（第二层） - 帧刷新 - 粒子旋转【标准函数】
+//##############################
 //==============================
-// * E粒子重设（第二层） - 初始化子功能
+// * K粒子重设（第二层） - 初始化子功能
 //==============================
-Drill_BPa_SecSprite.prototype.drill_spriteSec_initReset = function(){
-	Drill_COPa_SecSprite.prototype.drill_spriteSec_initReset.call( this );
-};
+// * L粒子生命周期（第二层） - 初始化子功能
 //==============================
-// * F双层效果（第二层） - 初始化子功能
+// * O贴图加载（第二层） - 初始化子功能
 //==============================
-// * G直线拖尾贴图（第二层） - 初始化子功能
+// * P直线拖尾贴图（第二层） - 初始化子功能
 //==============================
-// * H贴图高宽（第二层） - 初始化子功能
+// * Q双层效果（第二层） - 初始化子功能
 //==============================
-// * I粒子生命周期（第二层） - 初始化子功能
+// * 2A粒子类型（第二层） - 初始化子功能
 //==============================
+// * 2B彩虹化（第二层） - 初始化子功能
+//==============================
+
 
 
 //=============================================================================

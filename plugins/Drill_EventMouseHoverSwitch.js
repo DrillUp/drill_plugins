@@ -392,12 +392,6 @@
 	DrillUp.drill_EMoHS_getPluginTip_EventNotFind = function( e_id ){
 		return "【" + DrillUp.g_EMoHS_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
 	};
-	//==============================
-	// * 提示信息 - 报错 - 强制更新提示
-	//==============================
-	DrillUp.drill_EMoHS_getPluginTip_NeedUpdate_Camera = function(){
-		return "【" + DrillUp.g_EMoHS_PluginTip_curName + "】\n活动地图镜头插件版本过低，你需要更新 镜头插件 至少v2.2及以上版本。";
-	};
 	
 	
 //=============================================================================

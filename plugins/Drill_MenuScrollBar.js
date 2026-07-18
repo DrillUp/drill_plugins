@@ -126,115 +126,474 @@
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-3
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-4
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-5
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-6
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-7
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-8
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-9
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-10
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-11
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-12
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-13
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-14
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-15
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-16
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-17
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-18
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-19
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
- *
+ * 
  * @param 滚动条样式-20
  * @parent ---滚动条样式集---
  * @type struct<DrillMSBStyle>
  * @desc 菜单滚动条的详细配置信息。
  * @default 
  * 
+ * @param 滚动条样式-21
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-22
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-23
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-24
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-25
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-26
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-27
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-28
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-29
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-30
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-31
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-32
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-33
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-34
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-35
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-36
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-37
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-38
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-39
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-40
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-41
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-42
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-43
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-44
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-45
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-46
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-47
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-48
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-49
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-50
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-51
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-52
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-53
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-54
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-55
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-56
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-57
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-58
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-59
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-60
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-61
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-62
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-63
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-64
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-65
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-66
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-67
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-68
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-69
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-70
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-71
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-72
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-73
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-74
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-75
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-76
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-77
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-78
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-79
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default 
+ * 
+ * @param 滚动条样式-80
+ * @parent ---滚动条样式集---
+ * @type struct<DrillMSBStyle>
+ * @desc 菜单滚动条的详细配置信息。
+ * @default
  * 
  */
 /*~struct~DrillMSBStyle:
@@ -497,7 +856,7 @@
 	DrillUp.g_MSB_defaultStyle = Number(DrillUp.parameters["默认滚动条样式"] || 1); 
 	
 	/*-----------------样式集------------------*/
-	DrillUp.g_MSB_list_length = 20;
+	DrillUp.g_MSB_list_length = 80;
 	DrillUp.g_MSB_list = [];
 	for( var i = 0; i < DrillUp.g_MSB_list_length; i++ ){
 		if( DrillUp.parameters["滚动条样式-" + String(i+1) ] != undefined &&

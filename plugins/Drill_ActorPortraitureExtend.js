@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.7]        战斗UI - 高级角色肖像
+ * @plugindesc [v1.8]        战斗UI - 高级角色肖像
  * @author Drill_up
  * 
  * @Drill_LE_param "角色肖像-%d"
@@ -109,6 +109,8 @@
  * 进一步优化了动画序列底层，该插件重新兼容。
  * [v1.7]
  * 优化了动画序列存储底层。
+ * [v1.8]
+ * 修复了只配置前视图而没有背景图会报错的bug。
  * 
  * 
  *
@@ -1549,7 +1551,7 @@ Spriteset_Battle.prototype.drill_APEx_clearTank = function(){
 // **						x->显示贴图/隐藏贴图
 // **						->是否就绪
 // **						->优化策略
-// **						x->销毁
+// **						x->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					
@@ -1641,7 +1643,7 @@ Drill_APEx_Sprite.prototype.drill_APEx_deactive = function(){
 // * 角色肖像贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -1760,16 +1762,21 @@ Drill_APEx_Sprite.prototype.drill_sprite_updateAttr = function() {
 //==============================
 Drill_APEx_Sprite.prototype.drill_sprite_initPController = function() {
 	var data = this._drill_data;
-	this._drill_p_controller = new Drill_COAS_MainController( data['p_actionSeq']-1 );
+	var data_index = data['p_actionSeq']-1;
+	if( data_index < 0 ){ return; }
+	this._drill_p_controller = new Drill_COAS_MainController( data_index );
 	this._drill_p_decorator = new Drill_COAS_SpriteDecorator( this._drill_p_sprite, this._drill_p_controller );
 }
 //==============================
 // * B前视图的动画序列 - 帧刷新
 //==============================
 Drill_APEx_Sprite.prototype.drill_sprite_updatePController = function() {
-	
-	this._drill_p_controller.drill_COAS_update();		//（COAS核心控制刷新bitmap部分）
-	this._drill_p_decorator.drill_COAS_update();
+	if( this._drill_p_controller != undefined ){
+		this._drill_p_controller.drill_COAS_update();		//（COAS核心控制刷新bitmap部分）
+	}
+	if( this._drill_p_decorator != undefined ){
+		this._drill_p_decorator.drill_COAS_update();
+	}
 }
 //==============================
 // * B前视图的动画序列 - 播放默认的状态元集合（开放函数）
@@ -1789,7 +1796,9 @@ Drill_APEx_Sprite.prototype.drill_APEx_p_setStateNode = function( node_name ){
 	if( this._drill_APEx_p_lastName == node_name ){ return; }
 	this._drill_APEx_p_lastName = node_name;
 	
-	this._drill_p_controller.drill_COAS_setStateNode( node_name );
+	if( this._drill_p_controller != undefined ){
+		this._drill_p_controller.drill_COAS_setStateNode( node_name );
+	}
 }
 //==============================
 // * B前视图的动画序列 - 播放简单状态元集合（开放函数）
@@ -1799,13 +1808,17 @@ Drill_APEx_Sprite.prototype.drill_APEx_p_setStateNode = function( node_name ){
 // * B前视图的动画序列 - 播放动作元（开放函数）
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_p_setAct = function( act_name ){
-	this._drill_p_controller.drill_COAS_setAct( act_name );
+	if( this._drill_p_controller != undefined ){
+		this._drill_p_controller.drill_COAS_setAct( act_name );
+	}
 }
 //==============================
 // * B前视图的动画序列 - 立刻终止动作（开放函数）
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_p_stopAct = function(){
-	this._drill_p_controller.drill_COAS_stopAct();
+	if( this._drill_p_controller != undefined ){
+		this._drill_p_controller.drill_COAS_stopAct();
+	}
 }
 
 
@@ -1814,16 +1827,21 @@ Drill_APEx_Sprite.prototype.drill_APEx_p_stopAct = function(){
 //==============================
 Drill_APEx_Sprite.prototype.drill_sprite_initBController = function() {
 	var data = this._drill_data;
-	this._drill_b_controller = new Drill_COAS_MainController( data['b_actionSeq']-1 );
+	var data_index = data['b_actionSeq']-1;
+	if( data_index < 0 ){ return; }
+	this._drill_b_controller = new Drill_COAS_MainController( data_index );
 	this._drill_b_decorator = new Drill_COAS_SpriteDecorator( this._drill_b_sprite, this._drill_b_controller );
 }
 //==============================
 // * C背景图的动画序列 - 帧刷新
 //==============================
 Drill_APEx_Sprite.prototype.drill_sprite_updateBController = function() {
-	
-	this._drill_b_controller.drill_COAS_update();
-	this._drill_b_decorator.drill_COAS_update();
+	if( this._drill_b_controller != undefined ){
+		this._drill_b_controller.drill_COAS_update();
+	}
+	if( this._drill_b_decorator != undefined ){
+		this._drill_b_decorator.drill_COAS_update();
+	}
 }
 //==============================
 // * C背景图的动画序列 - 播放默认的状态元集合（开放函数）
@@ -1843,7 +1861,9 @@ Drill_APEx_Sprite.prototype.drill_APEx_b_setStateNode = function( node_name ){
 	if( this._drill_APEx_b_lastName == node_name ){ return; }
 	this._drill_APEx_b_lastName = node_name;
 	
-	this._drill_b_controller.drill_COAS_setStateNode( node_name );
+	if( this._drill_b_controller != undefined ){
+		this._drill_b_controller.drill_COAS_setStateNode( node_name );
+	}
 }
 //==============================
 // * C背景图的动画序列 - 播放简单状态元集合（开放函数）
@@ -1853,13 +1873,17 @@ Drill_APEx_Sprite.prototype.drill_APEx_b_setStateNode = function( node_name ){
 // * C背景图的动画序列 - 设置动作元（开放函数）
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_b_setAct = function( act_name ){
-	this._drill_b_controller.drill_COAS_setAct( act_name );
+	if( this._drill_b_controller != undefined ){
+		this._drill_b_controller.drill_COAS_setAct( act_name );
+	}
 }
 //==============================
 // * C背景图的动画序列 - 立刻终止动作（开放函数）
 //==============================
 Drill_APEx_Sprite.prototype.drill_APEx_b_stopAct = function(){
-	this._drill_b_controller.drill_COAS_stopAct();
+	if( this._drill_b_controller != undefined ){
+		this._drill_b_controller.drill_COAS_stopAct();
+	}
 }
 
 

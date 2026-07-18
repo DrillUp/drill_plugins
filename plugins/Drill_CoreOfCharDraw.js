@@ -2162,7 +2162,7 @@ Drill_COCD_TextBlock.prototype.initialize = function(){
     this.drill_textBlock_initData();		//私有数据初始化
 };
 //##############################
-// * 字符块 - 设置文本和配置【开放函数】
+// * 字符块 - 设置文本和配置【标准函数】
 //			
 //			参数：	> text 字符串
 //					> baseParam  动态参数对象
@@ -2185,7 +2185,7 @@ Drill_COCD_TextBlock.prototype.drill_textBlock_setTextAndParam = function( text,
 	this.drill_textBlock_setText( text );
 };
 //##############################
-// * 字符块 - 设置文本【开放函数】
+// * 字符块 - 设置文本【标准函数】
 //			
 //			参数：	> text 字符串
 //			返回：	> 无
@@ -2201,7 +2201,7 @@ Drill_COCD_TextBlock.prototype.drill_textBlock_setText = function( text ){
 	this.drill_textBlock_refreshWidthAndHeight();
 };
 //##############################
-// * 字符块 - 刷新高宽值【开放函数】
+// * 字符块 - 刷新高宽值【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2213,7 +2213,7 @@ Drill_COCD_TextBlock.prototype.drill_textBlock_refreshWidthAndHeight = function(
 	this._drill_tb_height = $gameTemp.drill_COCD_measureBaseTextHeight( this._drill_tb_text, this._drill_tb_baseParam );
 };
 //##############################
-// * 字符块 - 设置单行配置【开放函数】
+// * 字符块 - 设置单行配置【标准函数】
 //			
 //			参数：	> rowParam 动态参数对象
 //			返回：	> 无
@@ -2224,7 +2224,7 @@ Drill_COCD_TextBlock.prototype.drill_textBlock_setRowParam = function( rowParam 
 	this._drill_tb_rowParam = JSON.parse(JSON.stringify( rowParam ));  //『深拷贝-核心自定义数据』
 };
 //##############################
-// * 字符块 - 设置位置X【开放函数】
+// * 字符块 - 设置位置X【标准函数】
 //			
 //			参数：	> x 数字
 //			返回：	> 无
@@ -2233,7 +2233,7 @@ Drill_COCD_TextBlock.prototype.drill_textBlock_setX = function( x ){
 	this._drill_tb_x = x;
 };
 //##############################
-// * 字符块 - 设置位置Y【开放函数】
+// * 字符块 - 设置位置Y【标准函数】
 //			
 //			参数：	> y 数字
 //			返回：	> 无
@@ -2334,7 +2334,7 @@ Drill_COCD_RowBlock.prototype.initialize = function(){
     this.drill_rowBlock_initData();				//私有数据初始化
 };
 //##############################
-// * 单行块 - 添加字符块【开放函数】
+// * 单行块 - 添加字符块【标准函数】
 //			
 //			参数：	> textBlock 对象  （字符块）
 //			返回：	> 无
@@ -2353,7 +2353,7 @@ Drill_COCD_RowBlock.prototype.drill_rowBlock_addTextBlock = function( textBlock 
 	this._drill_rb_maxCharacterHeight = Math.max( this._drill_rb_maxCharacterHeight, height );
 };
 //##############################
-// * 单行块 - 添加字符块列表【开放函数】
+// * 单行块 - 添加字符块列表【标准函数】
 //			
 //			参数：	> textBlock_list 对象列表  （字符块列表）
 //			返回：	> 无
@@ -2364,7 +2364,7 @@ Drill_COCD_RowBlock.prototype.drill_rowBlock_addTextBlockList = function( textBl
 	}
 };
 //##############################
-// * 单行块 - 清空字符块【开放函数】
+// * 单行块 - 清空字符块【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2381,7 +2381,7 @@ Drill_COCD_RowBlock.prototype.drill_rowBlock_clearTextBlock = function(){
 	this._drill_rb_maxCharacterHeight = 0;
 };
 //##############################
-// * 单行块 - 刷新单行配置【开放函数】
+// * 单行块 - 刷新单行配置【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -2403,7 +2403,7 @@ Drill_COCD_RowBlock.prototype.drill_rowBlock_refreshRowParam = function(){
 	this._drill_rb_rowParam = rowParam;
 };
 //##############################
-// * 单行块 - 设置行起始位置X【开放函数】
+// * 单行块 - 设置行起始位置X【标准函数】
 //			
 //			参数：	> rowStartX 数字
 //			返回：	> 无
@@ -2414,7 +2414,7 @@ Drill_COCD_RowBlock.prototype.drill_rowBlock_setRowStartX = function( rowStartX 
 	this._drill_rb_rowStartX = rowStartX;
 };
 //##############################
-// * 单行块 - 设置行起始位置Y【开放函数】
+// * 单行块 - 设置行起始位置Y【标准函数】
 //			
 //			参数：	> rowStartY 数字
 //			返回：	> 无
@@ -2425,7 +2425,7 @@ Drill_COCD_RowBlock.prototype.drill_rowBlock_setRowStartY = function( rowStartY 
 	this._drill_rb_rowStartY = rowStartY;
 };
 //##############################
-// * 单行块 - 设置默认字符高度【开放函数】
+// * 单行块 - 设置默认字符高度【标准函数】
 //			
 //			参数：	> specialRowHeight 数字
 //			返回：	> 无

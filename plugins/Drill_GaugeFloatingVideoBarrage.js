@@ -66,62 +66,62 @@
  * ……
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件 - 简单指令
+ * ----激活条件 - 简单临时配置
  * 你可以通过插件指令快速生成对象：
  * 
  * 插件指令：>地图临时漂浮视频弹幕 : 立刻清除全部弹幕
  * 
- * 插件指令：>地图临时漂浮视频弹幕 : 简单临时对象 : 常规弹幕 : 文本[一段文字]
- * 插件指令：>地图临时漂浮视频弹幕 : 简单临时对象 : 常规弹幕 : 文本[一段文字] : 样式[1]
+ * 插件指令：>地图临时漂浮视频弹幕 : 简单临时配置 : 常规弹幕 : 文本[一段文字]
+ * 插件指令：>地图临时漂浮视频弹幕 : 简单临时配置 : 常规弹幕 : 文本[一段文字] : 样式[1]
  * 
- * 插件指令：>地图临时漂浮视频弹幕 : 简单临时对象 : 正上方弹幕 : 文本[一段文字]
- * 插件指令：>地图临时漂浮视频弹幕 : 简单临时对象 : 正上方弹幕 : 文本[一段文字] : 样式[1]
- * 插件指令：>地图临时漂浮视频弹幕 : 简单临时对象 : 正上方弹幕 : 文本[一段文字] : 样式[1] : 持续时间[60]
+ * 插件指令：>地图临时漂浮视频弹幕 : 简单临时配置 : 正上方弹幕 : 文本[一段文字]
+ * 插件指令：>地图临时漂浮视频弹幕 : 简单临时配置 : 正上方弹幕 : 文本[一段文字] : 样式[1]
+ * 插件指令：>地图临时漂浮视频弹幕 : 简单临时配置 : 正上方弹幕 : 文本[一段文字] : 样式[1] : 持续时间[60]
  * 
- * 插件指令：>地图临时漂浮视频弹幕 : 简单临时对象 : 正下方弹幕 : 文本[一段文字]
- * 插件指令：>地图临时漂浮视频弹幕 : 简单临时对象 : 正下方弹幕 : 文本[一段文字] : 样式[1]
- * 插件指令：>地图临时漂浮视频弹幕 : 简单临时对象 : 正下方弹幕 : 文本[一段文字] : 样式[1] : 持续时间[60]
+ * 插件指令：>地图临时漂浮视频弹幕 : 简单临时配置 : 正下方弹幕 : 文本[一段文字]
+ * 插件指令：>地图临时漂浮视频弹幕 : 简单临时配置 : 正下方弹幕 : 文本[一段文字] : 样式[1]
+ * 插件指令：>地图临时漂浮视频弹幕 : 简单临时配置 : 正下方弹幕 : 文本[一段文字] : 样式[1] : 持续时间[60]
  * 
  * 1.前半部分（常规弹幕）和 后半部分（文本[一段文字]）
  *   的参数可以随意组合。一共有2*3种组合方式。
- * 2.临时对象创建后，持续时间结束会自动清掉，你也可以手动用插件指令清。
+ * 2.临时配置创建视频弹幕后，持续时间结束会自动清掉，你也可以手动用插件指令清。
  *   切换菜单或离开地图也会清掉当前视频弹幕。
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件 - 高级指令
- * 你可以通过插件指令控制临时对象的具体参数：
+ * ----激活条件 - 高级临时配置
+ * 你可以通过插件指令控制临时配置的具体参数：
  * 
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 初始化 : 样式[1]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 初始化 : 样式[1]
  * 
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-内容文本 : 文本[一段文字]
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-内容文本 : 字符串[21]
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-额外位置偏移 : 偏移[-10,20]
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-UI基准 : 相对于地图
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-UI基准 : 相对于镜头
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-地图层级 : 下层
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-地图层级 : 中层
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-地图层级 : 上层
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-地图层级 : 图片层
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-地图层级 : 最顶层
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-图片层级 : 图片层级[4]
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-布局透明度 : 透明度[255]
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-布局透明度 : 透明度变量[21]
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-锁定窗口色调 : 开启锁定
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-锁定窗口色调 : 关闭锁定
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-窗口色调 : 色调[0,0,0]
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-窗口附加宽度 : 值[+5]
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-窗口附加高度 : 值[+5]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-内容文本 : 文本[一段文字]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-内容文本 : 字符串[21]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-额外位置偏移 : 偏移[-10,20]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-UI基准 : 相对于地图
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-UI基准 : 相对于镜头
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-地图层级 : 下层
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-地图层级 : 中层
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-地图层级 : 上层
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-地图层级 : 图片层
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-地图层级 : 最顶层
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-图片层级 : 图片层级[4]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-布局透明度 : 透明度[255]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-布局透明度 : 透明度变量[21]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-锁定窗口色调 : 开启锁定
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-锁定窗口色调 : 关闭锁定
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-窗口色调 : 色调[0,0,0]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-窗口附加宽度 : 值[+5]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-窗口附加高度 : 值[+5]
  * 
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 创建 : 常规弹幕
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 创建 : 正上方弹幕
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 创建 : 正上方弹幕 : 持续时间[120]
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 创建 : 正下方弹幕
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 创建 : 正下方弹幕 : 持续时间[120]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 创建 : 常规弹幕
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 创建 : 正上方弹幕
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 创建 : 正上方弹幕 : 持续时间[120]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 创建 : 正下方弹幕
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 创建 : 正下方弹幕 : 持续时间[120]
  * 
  * 1.插件指令需要先后执行： 初始化、修改样式属性、创建 。
  *   如果 样式属性 不需要变化，直接先后执行： 初始化、创建 即可。
- *   临时对象创建之后，将不再受控制。
- * 2.临时对象创建后，持续时间结束会自动清掉。
+ *   临时配置创建视频弹幕后，将不再受控制。
+ * 2.临时配置创建视频弹幕后，持续时间结束会自动清掉。
  *   切换菜单或离开地图也会清掉漂浮文字。
  * 3."修改样式属性-内容文本"中的"字符串"对应字符串核心中指定编号的自定义文本。
  * 
@@ -129,9 +129,9 @@
  * ----可选设定 - 空格支持
  * 插件指令下面的写法也是有效的：
  * 
- * 插件指令：>地图临时漂浮视频弹幕 : 临时对象 : 修改样式属性-内容文本 : 文本[面包 + 奶酪]
+ * 插件指令：>地图临时漂浮视频弹幕 : 临时配置 : 修改样式属性-内容文本 : 文本[面包 + 奶酪]
  * 
- * 1.你可以在该插件指令中的文本使用空格。注意只上述的 高级指令 有效，简单指令 不行。
+ * 1.你可以在该插件指令中的文本使用空格。注意只上述的 高级临时配置 有效，简单临时配置 不行。
  *   从原则上来说，脚本会将插件指令的空格分开，所以含空格的写法是不推荐的。
  * 2.建议使用 字符串 来控制，字符串不仅支持空格，还支持 换行符 。
  * 
@@ -171,10 +171,10 @@
  *
  *
  *
- * @param 简单指令的默认样式
+ * @param 简单临时配置的默认样式
  * @type number
  * @min 1
- * @desc 简单指令若未配置样式时，则使用默认样式。默认样式对应配置样式的编号。
+ * @desc 简单临时配置若未配置样式时，则使用默认样式。默认样式对应配置样式的编号。
  * @default 2
  * 
  * @param 常规弹幕持续时间
@@ -543,8 +543,8 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
-//				->简单指令
-//				->高级指令
+//				->简单临时配置
+//				->高级临时配置
 //			->☆预加载
 //			->☆地图层级
 //				->添加贴图到层级【标准函数】
@@ -552,9 +552,9 @@
 //				->图片层级排序【标准函数】
 //				->层级与镜头的位移【标准函数】
 //			
-//			->☆临时对象
-//				->高级指令 初始化
-//				->高级指令 创建
+//			->☆临时配置
+//				->高级临时配置 初始化
+//				->高级临时配置 创建
 //				->修改样式属性
 //			
 //			->☆占位排队控制
@@ -645,16 +645,22 @@
 		return "【" + DrillUp.g_GFVB_PluginTip_curName + "】\n插件指令错误，当前地图并不存在id为"+e_id+"的事件。";
 	};
 	//==============================
-	// * 提示信息 - 报错 - 临时对象 内容文本为空
+	// * 提示信息 - 报错 - 找不到样式
 	//==============================
-	DrillUp.drill_GFVB_getPluginTip_DataIsEmpty = function(){
-		return "【" + DrillUp.g_GFVB_PluginTip_curName + "】\n插件指令错误，你使用高级指令时，内容文本为空，将不显示任何文本。";
+	DrillUp.drill_GFVB_getPluginTip_StyleNotFind = function( style_id ){
+		return "【" + DrillUp.g_GFVB_PluginTip_curName + "】\n对象创建失败，id为"+style_id+"的样式配置为空或不存在。";
 	};
 	//==============================
-	// * 提示信息 - 报错 - 临时对象 未初始化
+	// * 提示信息 - 报错 - 临时配置 内容文本为空
+	//==============================
+	DrillUp.drill_GFVB_getPluginTip_DataIsEmpty = function(){
+		return "【" + DrillUp.g_GFVB_PluginTip_curName + "】\n插件指令错误，你使用高级临时配置时，内容文本为空，将不显示任何文本。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 临时配置 未初始化
 	//==============================
 	DrillUp.drill_GFVB_getPluginTip_BufferIsNull = function(){
-		return "【" + DrillUp.g_GFVB_PluginTip_curName + "】\n插件指令错误，你使用高级指令时，未执行临时对象的初始化指令。";
+		return "【" + DrillUp.g_GFVB_PluginTip_curName + "】\n插件指令错误，你使用高级临时配置时，未执行临时配置的初始化指令。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 窗口字符底层校验
@@ -719,7 +725,7 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_GFVB_simple_defaultStyleId = Number(DrillUp.parameters["简单指令的默认样式"] || 1); 
+	DrillUp.g_GFVB_simple_defaultStyleId = Number(DrillUp.parameters["简单临时配置的默认样式"] || 1); 
 	DrillUp.g_GFVB_simple_lane_time = Number(DrillUp.parameters["常规弹幕持续时间"] || 1200); 
 	DrillUp.g_GFVB_simple_seatUpper_time = Number(DrillUp.parameters["正上方弹幕持续时间"] || 120); 
 	DrillUp.g_GFVB_simple_seatLower_time = Number(DrillUp.parameters["正下方弹幕持续时间"] || 120); 
@@ -740,7 +746,7 @@
 			var temp = JSON.parse(DrillUp.parameters["视频弹幕样式-" + String(i+1) ]);
 			DrillUp.g_GFVB_style[i] = DrillUp.drill_GFVB_initContext( temp );
 		}else{
-			DrillUp.g_GFVB_style[i] = DrillUp.drill_GFVB_initContext( {} );
+			DrillUp.g_GFVB_style[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 
@@ -779,12 +785,12 @@ Game_Interpreter.prototype.drill_GFVB_pluginCommand = function( command, args ){
 		}
 		
 		
-		/*-----------------简单指令------------------*/
+		/*-----------------简单临时配置------------------*/
 		if( args.length >= 6 ){		//（考虑变化参数数量情况，但不考虑 文本含空格 情况）
 			var unit = String(args[1]);
 			var param_type = String(args[3]);
 			var temp2 = String(args[5]);
-			if( unit == "简单临时对象" ){
+			if( unit == "简单临时配置" || unit == "简单临时对象" ){
 				if( temp2.indexOf("文本[") != -1 ){
 					temp2 = temp2.replace("文本[","");
 					temp2 = temp2.replace(/\]$/,"");	//（去掉末尾的]）
@@ -806,25 +812,27 @@ Game_Interpreter.prototype.drill_GFVB_pluginCommand = function( command, args ){
 		}
 		
 		
-		/*-----------------高级指令 - 初始化------------------*/
+		/*-----------------高级临时配置 - 初始化------------------*/
 		if( args.length == 6 ){	
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( unit == "临时对象" && type == "初始化" ){
-				temp1 = temp1.replace("样式[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1)-1;
-				$gameTemp.drill_GFVB_setBuffer( temp1 );
+			if( unit == "临时配置" || unit == "临时对象" ){
+				if( type == "初始化" ){
+					temp1 = temp1.replace("样式[","");
+					temp1 = temp1.replace("]","");
+					temp1 = Number(temp1)-1;
+					$gameTemp.drill_GFVB_setBuffer( temp1 );
+				}
 			}
 		}
 		
-		/*-----------------高级指令 - 修改样式属性------------------*/
+		/*-----------------高级临时配置 - 修改样式属性------------------*/
 		if( args.length >= 6 ){		//（考虑变化参数数量情况）
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( unit == "临时对象" ){
+			if( unit == "临时配置" || unit == "临时对象" ){
 				
 				if( type == "修改样式属性-内容文本" || type == "修改内容文本" ){
 					if( temp1.indexOf("字符串[") != -1 ){
@@ -856,7 +864,7 @@ Game_Interpreter.prototype.drill_GFVB_pluginCommand = function( command, args ){
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( unit == "临时对象" ){
+			if( unit == "临时配置" || unit == "临时对象" ){
 				
 				if( type == "修改样式属性-额外位置偏移" || type == "修改额外位置偏移" ){
 					temp1 = temp1.replace("偏移[","");
@@ -920,13 +928,15 @@ Game_Interpreter.prototype.drill_GFVB_pluginCommand = function( command, args ){
 			}
 		}
 		
-		/*-----------------高级指令 - 创建------------------*/
+		/*-----------------高级临时配置 - 创建------------------*/
 		if( args.length == 6 ){	
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var param_type = String(args[5]);
-			if( unit == "临时对象" && type == "创建" ){
-				$gameTemp.drill_GFVB_createByBuffer( param_type );
+			if( unit == "临时配置" || unit == "临时对象" ){
+				if( type == "创建" ){
+					$gameTemp.drill_GFVB_createByBuffer( param_type );
+				}
 			}
 		}
 		if( args.length == 8 ){	
@@ -934,11 +944,13 @@ Game_Interpreter.prototype.drill_GFVB_pluginCommand = function( command, args ){
 			var type = String(args[3]);
 			var param_type = String(args[5]);
 			var param_sustainTime = String(args[7]);
-			if( unit == "临时对象" && type == "创建" ){
-				param_sustainTime = param_sustainTime.replace("持续时间[","");
-				param_sustainTime = param_sustainTime.replace("]","");
-				param_sustainTime = Number(param_sustainTime);
-				$gameTemp.drill_GFVB_createByBuffer( param_type, param_sustainTime );
+			if( unit == "临时配置" || unit == "临时对象" ){
+				if( type == "创建" ){
+					param_sustainTime = param_sustainTime.replace("持续时间[","");
+					param_sustainTime = param_sustainTime.replace("]","");
+					param_sustainTime = Number(param_sustainTime);
+					$gameTemp.drill_GFVB_createByBuffer( param_type, param_sustainTime );
+				}
 			}
 		}
 		
@@ -1212,31 +1224,31 @@ Scene_Map.prototype.drill_GFVB_layerCameraMoving_Private = function( xx, yy, lay
 
 
 //=============================================================================
-// ** ☆临时对象
+// ** ☆临时配置
 //			
-//			说明：	> 此模块专门管理 插件指令控制的临时对象 。
+//			说明：	> 此模块专门管理 插件指令控制的临时配置 。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 临时对象 - 容器初始化
+// * 临时配置 - 容器初始化
 //==============================
 var _drill_GFVB_temp_initialize = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
 	_drill_GFVB_temp_initialize.call(this);
-	this._drill_GFVB_commandBuffer = null;		//临时对象
+	this._drill_GFVB_commandBuffer = null;		//临时配置
 	this._drill_GFVB_commandSeq = [];			//漂浮文字容器
 };
 //==============================
-// * 临时对象 - 容器销毁
+// * 临时配置 - 容器销毁
 //==============================
 var _drill_GFVB_temp_terminate2 = Scene_Map.prototype.terminate;
 Scene_Map.prototype.terminate = function() {
 	_drill_GFVB_temp_terminate2.call(this);
-	$gameTemp._drill_GFVB_commandBuffer = null;		//临时对象
+	$gameTemp._drill_GFVB_commandBuffer = null;		//临时配置
 	$gameTemp._drill_GFVB_commandSeq = [];			//漂浮文字容器
 };
 //==============================
-// * 『临时对象』 - 简单指令
+// * 『临时配置』 - 简单临时配置
 //==============================
 Game_Temp.prototype.drill_GFVB_createSimple = function( param_type, text, style_id, param_sustainTime ){
 	if( style_id == undefined ){ style_id = DrillUp.g_GFVB_simple_defaultStyleId -1; }
@@ -1252,12 +1264,19 @@ Game_Temp.prototype.drill_GFVB_createSimple = function( param_type, text, style_
 		}
 	}
 	
-	// > 基本参数初始化
+	// > 简单 校验
+	var style_data = DrillUp.g_GFVB_style[ style_id ];
+	if( style_data == undefined ){
+		alert( DrillUp.drill_GFVB_getPluginTip_StyleNotFind( style_id+1 ) );
+		return;
+	}
+	
+	// > 简单 参数准备
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFVB_style[ style_id ] ));  //『深拷贝-『临时对象』』
+	data['s_data'] = JSON.parse(JSON.stringify( style_data ));  //『深拷贝-『临时配置』』
 	data['b_data'] = {};	//（弹道由 弹幕发射器 负责）
 	
-	// > 临时对象设置
+	// > 简单 设置
 	data['param_type'] = param_type;
 	data['param_sustainTime'] = param_sustainTime;
 	
@@ -1267,28 +1286,32 @@ Game_Temp.prototype.drill_GFVB_createSimple = function( param_type, text, style_
 	this._drill_GFVB_commandSeq.push( data );
 };
 //==============================
-// * 『临时对象』 - 高级指令 初始化
+// * 『临时配置』 - 高级临时配置 初始化
 //==============================
 Game_Temp.prototype.drill_GFVB_setBuffer = function( style_id ){
 	
-	// > 基本参数初始化
+	// > 高级 校验
+	var style_data = DrillUp.g_GFVB_style[ style_id ];
+	if( style_data == undefined ){
+		alert( DrillUp.drill_GFVB_getPluginTip_StyleNotFind( style_id+1 ) );
+		return;
+	}
+	
+	// > 高级 参数准备
 	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_GFVB_style[ style_id ] ));  //『深拷贝-『临时对象』』
+	data['s_data'] = JSON.parse(JSON.stringify( style_data ));  //『深拷贝-『临时配置』』
 	data['b_data'] = {};	//（弹道由 弹幕发射器 负责）
 	
-	// > 临时对象设置
+	// > 高级 设置
 	data['param_type'] = "常规弹幕";
 	data['param_sustainTime'] = DrillUp.g_GFVB_simple_lane_time;
 	
 	this._drill_GFVB_commandBuffer = data;
 };
 //==============================
-// * 『临时对象』 - 高级指令 创建
+// * 『临时配置』 - 高级临时配置 创建
 //==============================
 Game_Temp.prototype.drill_GFVB_createByBuffer = function( param_type, param_sustainTime ){
-	var data = this._drill_GFVB_commandBuffer;
-	if( data == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
-	data = JSON.parse(JSON.stringify( data ));  //『深拷贝-『临时对象』』
 	if( param_sustainTime == undefined ){
 		if( param_type == "常规弹幕" ){
 			param_sustainTime = DrillUp.g_GFVB_simple_lane_time;
@@ -1301,7 +1324,14 @@ Game_Temp.prototype.drill_GFVB_createByBuffer = function( param_type, param_sust
 		}
 	}
 	
-	// > 临时对象设置
+	// > 高级 校验
+	var data = this._drill_GFVB_commandBuffer;
+	if( data == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
+	
+	// > 高级 参数准备
+	data = JSON.parse(JSON.stringify( data ));  //『深拷贝-『临时配置』』
+	
+	// > 高级 设置
 	data['param_type'] = param_type;
 	data['param_sustainTime'] = param_sustainTime;
 	
@@ -1316,14 +1346,14 @@ Game_Temp.prototype.drill_GFVB_createByBuffer = function( param_type, param_sust
 	this._drill_GFVB_commandSeq.push( data );
 };
 //==============================
-// * 临时对象 - 修改样式属性-内容文本
+// * 临时配置 - 修改样式属性-内容文本
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_context = function( context ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
 	this._drill_GFVB_commandBuffer['s_data']['context'] = context;
 };
 //==============================
-// * 临时对象 - 修改样式属性-额外位置偏移
+// * 临时配置 - 修改样式属性-额外位置偏移
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_offset = function( xx, yy ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
@@ -1331,42 +1361,42 @@ Game_Temp.prototype.drill_GFVB_setStyle_offset = function( xx, yy ){
 	this._drill_GFVB_commandBuffer['s_data']['offsetEx_y'] = yy;
 };
 //==============================
-// * 临时对象 - 修改样式属性-UI基准
+// * 临时配置 - 修改样式属性-UI基准
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_benchmark = function( benchmark ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
 	this._drill_GFVB_commandBuffer['s_data']['window_benchmark'] = benchmark;
 };
 //==============================
-// * 临时对象 - 修改样式属性-地图层级
+// * 临时配置 - 修改样式属性-地图层级
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_layer = function( layer ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
 	this._drill_GFVB_commandBuffer['s_data']['window_map_layer'] = layer;
 };
 //==============================
-// * 临时对象 - 修改样式属性-图片层级
+// * 临时配置 - 修改样式属性-图片层级
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_zIndex = function( zIndex ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
 	this._drill_GFVB_commandBuffer['s_data']['window_map_zIndex'] = zIndex;
 };
 //==============================
-// * 临时对象 - 修改样式属性-布局透明度
+// * 临时配置 - 修改样式属性-布局透明度
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_opacity = function( opacity ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
 	this._drill_GFVB_commandBuffer['s_data']['window_opacity'] = opacity;
 };
 //==============================
-// * 临时对象 - 修改样式属性-锁定窗口色调
+// * 临时配置 - 修改样式属性-锁定窗口色调
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_toneLock = function( locked ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
 	this._drill_GFVB_commandBuffer['s_data']['window_tone_lock'] = locked;
 };
 //==============================
-// * 临时对象 - 修改样式属性-窗口色调
+// * 临时配置 - 修改样式属性-窗口色调
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_tone = function( r, g, b ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
@@ -1375,14 +1405,14 @@ Game_Temp.prototype.drill_GFVB_setStyle_tone = function( r, g, b ){
 	this._drill_GFVB_commandBuffer['s_data']['window_tone_b'] = b;
 };
 //==============================
-// * 临时对象 - 修改样式属性-窗口附加宽度
+// * 临时配置 - 修改样式属性-窗口附加宽度
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_exWidth = function( width ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
 	this._drill_GFVB_commandBuffer['s_data']['window_ex_width'] = width;
 };
 //==============================
-// * 临时对象 - 修改样式属性-窗口附加高度
+// * 临时配置 - 修改样式属性-窗口附加高度
 //==============================
 Game_Temp.prototype.drill_GFVB_setStyle_exHeight = function( height ){
 	if( this._drill_GFVB_commandBuffer == undefined ){ alert( DrillUp.drill_GFVB_getPluginTip_BufferIsNull() ); return; }
@@ -1571,7 +1601,9 @@ Scene_Map.prototype.drill_GFVB_seatLower_updateTimeOut = function() {
 // **						->重设数据
 // **							->序列号
 // **						->暂停/继续
-// **						->销毁
+// **						->分配器标记销毁
+// **						->分配器是否销毁
+// **					
 // **					->A占位主体
 // **					->B占位注册
 // **						->执行注册
@@ -1626,7 +1658,7 @@ Drill_GFVB_SeatAllocator.prototype.drill_allocator_resetData = function( data ){
 //##############################
 // * 占位分配器 - 暂停/继续【标准函数】
 //
-//			参数：	> enable 布尔
+//			参数：	> pause 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1636,16 +1668,16 @@ Drill_GFVB_SeatAllocator.prototype.drill_allocator_setPause = function( pause ){
 	data['pause'] = pause;
 };
 //##############################
-// * 占位分配器 - 设置销毁【标准函数】
+// * 占位分配器 - 分配器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_GFVB_SeatAllocator.prototype.drill_allocator_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 占位分配器 - 判断销毁【标准函数】
+// * 占位分配器 - 分配器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -1954,7 +1986,9 @@ Scene_Map.prototype.drill_GFVB_lane_updateTimeOut = function() {
 // **						->重设数据
 // **							->序列号
 // **						->暂停/继续
-// **						->销毁
+// **						->分配器标记销毁
+// **						->分配器是否销毁
+// **					
 // **					->A泳道主体
 // **					->B泳道注册
 // **						->执行注册
@@ -2009,7 +2043,7 @@ Drill_GFVB_LaneAllocator.prototype.drill_allocator_resetData = function( data ){
 //##############################
 // * 泳道分配器 - 暂停/继续【标准函数】
 //
-//			参数：	> enable 布尔
+//			参数：	> pause 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -2019,16 +2053,16 @@ Drill_GFVB_LaneAllocator.prototype.drill_allocator_setPause = function( pause ){
 	data['pause'] = pause;
 };
 //##############################
-// * 泳道分配器 - 设置销毁【标准函数】
+// * 泳道分配器 - 分配器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_GFVB_LaneAllocator.prototype.drill_allocator_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 泳道分配器 - 判断销毁【标准函数】
+// * 泳道分配器 - 分配器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -2441,7 +2475,7 @@ Scene_Map.prototype.drill_GFVB_updateWindowPosition = function() {
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						x->销毁
+// **						x->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        主菜单 - 主菜单面板的动画转场
+ * @plugindesc [v1.2]        主菜单 - 主菜单面板的动画转场
  * @author Drill_up
  * 
  * 
@@ -81,6 +81,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 修复了该插件会导致存档时的截图为蓝黑色的问题。
+ * [v1.2]
+ * 改进了帧刷新的结构。
  * 
  * 
  * 
@@ -210,6 +212,12 @@
 		}
 		return message;
 	};
+	//==============================
+	// * 提示信息 - 报错 - 强制更新提示
+	//==============================
+	DrillUp.drill_MMCut_getPluginTip_NeedUpdate_DynamicSnapshot = function(){
+		return "【" + DrillUp.g_MMCut_PluginTip_curName + "】\n动态快照核心版本过低，你需要更新 动态快照核心 至少v1.2及以上版本。";
+	};
 	
 	
 //=============================================================================
@@ -236,6 +244,10 @@
 //=============================================================================
 if( Imported.Drill_CoreOfCutscenes &&
 	Imported.Drill_CoreOfDynamicSnapshot ){		//（进入菜单时要截图，所以要天窗层贴图）
+	
+	if( typeof(Graphics.drill_CODS_overstoryLayerClearAll) == "undefined" ){  //（动态快照核心版本检测）
+		alert( DrillUp.drill_MMCut_getPluginTip_NeedUpdate_DynamicSnapshot() );
+	}
 	
 	
 //#############################################################################
@@ -427,7 +439,7 @@ Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_scen
 			
 		// > 开启动画时（天窗层的贴图）
 		}else{
-			this.drill_MMCut_setFadeSprite( fade_type, $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
+			SceneManager.drill_MMCut_setFadeSprite( "淡出", $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
 			
 			this.drill_COCut_setFadeColor( "" );	//（进入菜单时要截图，此处颜色设为透明）
 			this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeStart_time );
@@ -448,7 +460,7 @@ Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_scen
 			
 		// > 开启动画时（天窗层的贴图）
 		}else{
-			this.drill_MMCut_setFadeSprite( fade_type, $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
+			SceneManager.drill_MMCut_setFadeSprite( "淡入", $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
 			
 			this.drill_COCut_setFadeColor( "" );	//（进入菜单时要截图，此处颜色设为透明）
 			this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeStart_time );
@@ -564,16 +576,23 @@ Scene_Menu.prototype.popScene = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 天窗层的贴图 - 创建贴图
-//
-//			说明：	> 临时在天窗层搭建一个贴图。
+// * 天窗层的贴图 - 容器初始化
 //==============================
-Scene_Base.prototype.drill_MMCut_setFadeSprite = function( fade_type, fade_color, fade_time ){
+var _drill_MMCut_temp_initialize2 = Game_Temp.prototype.initialize;
+Game_Temp.prototype.initialize = function(){
+	_drill_MMCut_temp_initialize2.call(this);
+	this._drill_MMCut_fadeSprite = undefined;		//贴图对象
+};
+//==============================
+// * 天窗层的贴图 - 创建贴图
+//==============================
+SceneManager.drill_MMCut_setFadeSprite = function( fade_type, fade_color, fade_time ){
+	if( $gameTemp == undefined ){ return; }
 	
 	// > 贴图初始化
 	if( $gameTemp._drill_MMCut_fadeSprite == undefined ){
 		var temp_sprite = new Sprite();
-		temp_sprite.zIndex = 0.5;
+		temp_sprite.zIndex = 20250701 + 100;
 		temp_sprite.bitmap = new Bitmap( Graphics.boxWidth, Graphics.boxHeight );
 		$gameTemp._drill_MMCut_fadeSprite = temp_sprite;
 	}
@@ -592,9 +611,27 @@ Scene_Base.prototype.drill_MMCut_setFadeSprite = function( fade_type, fade_color
 	this.drill_MMCut_updateFadeSprite();
 }
 //==============================
-// * 天窗层的贴图 - 帧刷新贴图
+// * 天窗层的贴图 - 帧刷新
+//
+//			说明：	> 直接绑定到 SceneManager 。
 //==============================
-Scene_Base.prototype.drill_MMCut_updateFadeSprite = function(){
+var _drill_MMCut_requestUpdate = SceneManager.requestUpdate;
+SceneManager.requestUpdate = function(){
+	
+    if( !this._stopped ){
+		this.drill_MMCut_updateFadeSprite();
+    }
+	
+	// > 原函数
+	_drill_MMCut_requestUpdate.call(this);
+}
+//==============================
+// * 天窗层的贴图 - 帧刷新 贴图
+//
+//			说明：	> 贴图只有一个，并且被反复使用，所以没必要考虑『天窗层的严格销毁』。
+//==============================
+SceneManager.drill_MMCut_updateFadeSprite = function(){
+	if( $gameTemp == undefined ){ return; }
 	if( $gameTemp._drill_MMCut_fadeSprite == undefined ){ return; }
 	
 	// > 透明度变化
@@ -617,54 +654,6 @@ Scene_Base.prototype.drill_MMCut_updateFadeSprite = function(){
 	$gameTemp._drill_MMCut_fadeSprite._curTime += 1;
 }
 
-//==============================
-// * 天窗层的贴图 - 容器初始化
-//==============================
-var _drill_MMCut_temp_initialize2 = Game_Temp.prototype.initialize;
-Game_Temp.prototype.initialize = function(){
-	_drill_MMCut_temp_initialize2.call(this);
-	this._drill_MMCut_fadeSprite = undefined;		//贴图对象
-	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
-};
-
-//==============================
-// * 天窗层的贴图 - 销毁时『多场景与游戏窗体-地图界面』
-//==============================
-var _drill_MMCut_smap_terminate = Scene_Map.prototype.terminate;
-Scene_Map.prototype.terminate = function(){
-	_drill_MMCut_smap_terminate.call(this);
-	$gameTemp._drill_MMCut_fadeSprite = undefined;	//贴图对象
-	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
-};
-//==============================
-// * 天窗层的贴图 - 帧刷新『多场景与游戏窗体-地图界面』
-//==============================
-var _drill_MMCut_smap_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function(){
-	_drill_MMCut_smap_update.call(this);
-	if( $gameTemp._drill_MMCut_fadeSprite == undefined ){ return; }
-	this.drill_MMCut_updateFadeSprite();
-};
-
-//==============================
-// * 天窗层的贴图 - 销毁时『多场景与游戏窗体-菜单界面』
-//==============================
-var _drill_MMCut_smenu_terminate = Scene_MenuBase.prototype.terminate;
-Scene_MenuBase.prototype.terminate = function(){
-	_drill_MMCut_smenu_terminate.call(this);
-	$gameTemp._drill_MMCut_fadeSprite = undefined;	//贴图对象
-	Graphics.drill_CODS_overstoryLayerClear();		//清空 天窗层
-};
-//==============================
-// * 天窗层的贴图 - 帧刷新『多场景与游戏窗体-菜单界面』
-//==============================
-var _drill_MMCut_smenu_update = Scene_MenuBase.prototype.update;
-Scene_MenuBase.prototype.update = function(){
-	_drill_MMCut_smenu_update.call(this);
-	if( $gameTemp._drill_MMCut_fadeSprite == undefined ){ return; }
-	this.drill_MMCut_updateFadeSprite();
-};
-		
 
 //=============================================================================
 // * <<<<基于插件检测<<<<

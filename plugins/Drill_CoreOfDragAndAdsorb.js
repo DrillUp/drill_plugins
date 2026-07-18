@@ -1681,6 +1681,13 @@ Drill_CODAA_AdsorbFactory.prototype.drill_factoryAdsorb_getBySlotId = function( 
 // **		子功能：	
 // **					->控制器
 // **						->帧刷新
+// **						->重设数据
+// **							->序列号
+// **						x->显示/隐藏
+// **						x->暂停/继续
+// **						->控制器标记销毁
+// **						->控制器是否销毁
+// **					
 // **					->A主体
 // **					->B槽吸附类型
 // **					->C吸附数量
@@ -1741,10 +1748,10 @@ Drill_CODAA_SlotController.prototype.drill_slot_resetData = function( data ){
 	this.drill_slot_resetData_Private( data );
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】（暂未用到）
+// * 控制器 - 控制器标记销毁【标准函数】（暂未用到）
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //			
 //			说明：	> 吸附槽 可能会关联贴图，所以这里保留销毁功能。
 //##############################
@@ -1752,7 +1759,7 @@ Drill_CODAA_SlotController.prototype.drill_slot_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 判断销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔

@@ -125,6 +125,13 @@
  * [v2.2]
  * 再次改进了结构。
  * 
+ * 
+ * @param 是否开启Debug模式
+ * @type boolean
+ * @on 开启
+ * @off 关闭
+ * @desc true - 开启，false - 关闭，该模式会在控制台输出视频播放的log信息。
+ * @default false
  *
  * @param ---视频组---
  * @default
@@ -249,12 +256,365 @@
  * @desc 视频的详细配置信息。
  * @default 
  * 
- * @param 是否开启Debug模式
- * @type boolean
- * @on 开启
- * @off 关闭
- * @desc true - 开启，false - 关闭，该模式会在控制台输出视频播放的log信息。
- * @default false
+ * @param 视频-21
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-22
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-23
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-24
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-25
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-26
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-27
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-28
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-29
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-30
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-31
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-32
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-33
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-34
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-35
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-36
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-37
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-38
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-39
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-40
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-41
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-42
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-43
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-44
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-45
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-46
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-47
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-48
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-49
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-50
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-51
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-52
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-53
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-54
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-55
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-56
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-57
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-58
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-59
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-60
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-61
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-62
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-63
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-64
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-65
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-66
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-67
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-68
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-69
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-70
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-71
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-72
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-73
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-74
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-75
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-76
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-77
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-78
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-79
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default 
+ * 
+ * @param 视频-80
+ * @parent ---视频组---
+ * @type struct<BattleVideo>
+ * @desc 视频的详细配置信息。
+ * @default
  * 
  */
 /*~struct~BattleVideo:
@@ -533,7 +893,7 @@
 	DrillUp.g_BVi_DEBUG = String(DrillUp.parameters["是否开启Debug模式"] || "true") === "true";
 	
 	/*-----------------视频------------------*/
-	DrillUp.g_BVi_style_length = 20;
+	DrillUp.g_BVi_style_length = 80;
 	DrillUp.g_BVi_style = [];
 	for (var i = 0; i < DrillUp.g_BVi_style_length; i++) {
 		if( DrillUp.parameters["视频-" + String(i+1) ] != undefined &&
@@ -938,7 +1298,7 @@ Scene_Battle.prototype.drill_BVi_create = function() {
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						->销毁
+// **						->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					
@@ -1024,7 +1384,7 @@ Drill_BVi_VideoSprite.prototype.drill_initSprite = function() {
 	this.drill_sprite_initVideo();			//初始化子功能 - B视频
 };
 //==============================
-// * 视频贴图 - 执行销毁
+// * 视频贴图 - 销毁独立贴图
 //==============================
 Drill_BVi_VideoSprite.prototype.drill_BVi_destroy = function() {
 	var data = this._drill_data;

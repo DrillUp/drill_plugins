@@ -10,10 +10,6 @@
  * @Drill_LE_parentKey ""
  * @Drill_LE_var "DrillUp.g_MBB_style_length"
  * 
- * @Drill_LE_param "返回按钮样式-%d"
- * @Drill_LE_parentKey ""
- * @Drill_LE_var "DrillUp.g_MBB_style_list_length"
- * 
  * 
  * @help  
  * =============================================================================
@@ -1879,6 +1875,7 @@
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['layerIndex'] = "菜单前面层";
 		data['zIndex'] = Number( dataFrom["图片层级"] || 20);
+		data['styleName'] = String( dataFrom["标签"] || "");
 		
 		// > A主体 - 其它特性
 		//	（无）
@@ -1993,7 +1990,7 @@
 		}
 		
 		
-		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		// > 控制器 - 『控制器与贴图的样式-静态数据-指针初始化』
 		Drill_MBB_Controller.drill_controller_initData( data );
 		
 		return data;
@@ -3259,17 +3256,39 @@ Scene_MenuBase.prototype.drill_MBB_sortByZIndex = function () {
 // ** 菜单层级（接口实现）
 //=============================================================================
 //==============================
-// * 菜单层级 - 最顶层
+// * 菜单层级 - 创建
+//==============================
+var _drill_MBB_menuLayer_createBackground = Scene_MenuBase.prototype.createBackground;
+Scene_MenuBase.prototype.createBackground = function(){
+	
+	// > 『菜单后面层-创建』
+	_drill_MBB_menuLayer_createBackground.call(this);
+	
+	// > 『菜单前面层-创建』
+	if( this._foregroundSprite == undefined ){
+		this._foregroundSprite = new Sprite();
+	}
+};
+//==============================
+// * 菜单层级 - 帧刷新
 //==============================
 var _drill_MBB_menuLayer_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
 	_drill_MBB_menuLayer_update.call(this);
 	
-	if(!this._backgroundSprite ){		//菜单后面层（防止覆写报错）
+	// > 菜单后面层（防止覆写报错）
+	if( this._backgroundSprite == undefined ){
 		this._backgroundSprite = new Sprite();
 	}
-	if(!this._foregroundSprite ){		//菜单前面层
+	
+	// > 菜单前面层（防止覆写报错）
+	if( this._foregroundSprite == undefined ){
 		this._foregroundSprite = new Sprite();
+	}
+	
+	// > 『菜单前面层-顺序控制』
+	if( this._foregroundSprite_hasAddChild == undefined ){
+		this._foregroundSprite_hasAddChild = true;
 		this.addChild(this._foregroundSprite);	
 	}
 };
@@ -3334,12 +3353,9 @@ var _drill_MBB_createBackground = Scene_MenuBase.prototype.createBackground;
 Scene_MenuBase.prototype.createBackground = function() {
 	
 	// > 按钮初始化
-	SceneManager._drill_MBB_created = false;	
-   	this._drill_MBB_sprites = [];
-   	this._drill_MBB_sprites_style = [];
-   	this._drill_MBB_sprites_layer = [];
-	this._drill_MBB_sprites_highlight = [];
-	this._drill_MBB_sprites_pushdown = [];
+	SceneManager._drill_MBB_created = false;
+	this._drill_MBB_spriteTank = [];
+	this._drill_MBB_controllerTank = [];
 	
 	// > 原函数
 	_drill_MBB_createBackground.call(this);
@@ -3501,8 +3517,8 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 // * 贴图控制 - 帧刷新
 //==============================
 Scene_MenuBase.prototype.drill_MBB_update = function() {
-	this.drill_MBB_updateController();
-	this.drill_MBB_updateAttr();
+	this.drill_MBB_updateController();		//帧刷新 - 控制器
+	this.drill_MBB_updateAttr();			//帧刷新 - 基础特性
 }
 //==============================
 // * 贴图控制 - 帧刷新 控制器
@@ -3511,8 +3527,6 @@ Scene_MenuBase.prototype.drill_MBB_updateController = function(){
 	for(var i = 0; i < this._drill_MBB_controllerTank.length; i++ ){
 		var temp_controller = this._drill_MBB_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
-		
-		// > 控制器帧刷新
 		temp_controller.drill_controller_update();
 	}
 }
@@ -3653,7 +3667,8 @@ Scene_MenuBase.prototype.drill_MBB_create = function() {
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
@@ -3773,7 +3788,7 @@ Drill_MBB_Controller.prototype.drill_controller_resetData = function( data_id ){
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -3793,16 +3808,16 @@ Drill_MBB_Controller.prototype.drill_controller_setPause = function( pause ){
 	this._drill_pause = pause;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 判断销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -3844,72 +3859,72 @@ Drill_MBB_Controller.METHOD__drill_controller_GIF_setLocked                = 61;
 Drill_MBB_Controller.METHOD__drill_controller_GIF_setOncePlay              = 62;
 Drill_MBB_Controller.METHOD__drill_controller_GIF_setFrame                 = 63;
 
-//##############################
-// * A主体 - 切换混合模式【标准函数】
+//==============================
+// * A主体 - 切换混合模式（开放函数）
 //
 //			参数：	> blendMode 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBB_Controller.prototype.drill_controller_setBlendMode = function( blendMode ){
 	this._drill_blendMode = blendMode;
 };
-//##############################
-// * A主体 - 切换菜单层级【标准函数】
+//==============================
+// * A主体 - 切换层级（开放函数）
 //
 //			参数：	> layerIndex 字符串
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBB_Controller.prototype.drill_controller_setLayerIndex = function( layerIndex ){
 	this._drill_layerIndex = layerIndex;
 };
-//##############################
-// * A主体 - 切换图片层级【标准函数】
+//==============================
+// * A主体 - 切换堆叠级（开放函数）
 //
 //			参数：	> zIndex 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBB_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 	this._drill_zIndex = zIndex;
 };
-//##############################
-// * A主体 - 还原混合模式【标准函数】
+//==============================
+// * A主体 - 还原混合模式（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBB_Controller.prototype.drill_controller_restoreBlendMode = function(){
 	var data = this.drill_data();
 	this._drill_blendMode = data['blendMode'];
 };
-//##############################
-// * A主体 - 还原地图层级【标准函数】
+//==============================
+// * A主体 - 还原层级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBB_Controller.prototype.drill_controller_restoreLayerIndex = function(){
 	var data = this.drill_data();
 	this._drill_layerIndex = data['layerIndex'];
 };
-//##############################
-// * A主体 - 还原图片层级【标准函数】
+//==============================
+// * A主体 - 还原堆叠级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBB_Controller.prototype.drill_controller_restoreZIndex = function(){
 	var data = this.drill_data();
 	this._drill_zIndex = data['zIndex'];
 };
 
-//##############################
-// * O播放GIF - 设置帧【标准函数】
+//==============================
+// * O播放GIF - 设置帧（开放函数）
 //
 //			参数：	> cur_frame 数字（当前帧）
 //			返回：	> 无
 //			
 //			说明：	> 从帧数0开始计数。
-//##############################
+//==============================
 Drill_MBB_Controller.prototype.drill_controller_GIF_setFrame = function( cur_frame ){
 	var data = this.drill_data();
 	
@@ -3927,22 +3942,22 @@ Drill_MBB_Controller.prototype.drill_controller_GIF_setFrame = function( cur_fra
 	}
 	this._drill_GIF_index = Math.floor(inter);
 };
-//##############################
-// * O播放GIF - 锁定帧/解锁帧【标准函数】
+//==============================
+// * O播放GIF - 锁定帧/解锁帧（开放函数）
 //
 //			参数：	> locked 布尔
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBB_Controller.prototype.drill_controller_GIF_setLocked = function( locked ){
 	this._drill_GIF_lockEnabled = locked;
 	this._drill_GIF_oncePlay = false;
 };
-//##############################
-// * O播放GIF - 单次播放【标准函数】
+//==============================
+// * O播放GIF - 单次播放（开放函数）
 //
 //			参数：	> once_type 字符串（forwardRun正向播放/backRun反向播放）
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBB_Controller.prototype.drill_controller_GIF_setOncePlay = function( once_type ){
 	var data = this.drill_data();
 	this._drill_GIF_oncePlay = true;
@@ -3951,6 +3966,33 @@ Drill_MBB_Controller.prototype.drill_controller_GIF_setOncePlay = function( once
 	this._drill_GIF_onceTarTime = data['src_img_gif'].length * data['interval'];
 };
 
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
+//##############################
+DrillUp.g_MBB_notFindStyleAlertOnce = true;
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』获取数据指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，所以只读静态数据。不要存储到存档中，也不要挂载到控制器身上。
+//					> 该函数直接获取指针，可以放在帧刷新中使用。
+//##############################
+Drill_MBB_Controller.prototype.drill_data = function(){
+	var cur_styleId   = this._drill_data_id +1;
+	var cur_styleData = DrillUp.g_MBB_style[ this._drill_data_id ];
+	if( cur_styleData == undefined ){
+		
+		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
+		if( DrillUp.g_MBB_notFindStyleAlertOnce == true ){
+			DrillUp.g_MBB_notFindStyleAlertOnce = false;
+			alert( DrillUp.drill_MBB_getPluginTip_StyleNotFind(cur_styleId) );
+		}
+		return {};
+	}
+	return cur_styleData;
+};
 //##############################
 // * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
@@ -3961,7 +4003,7 @@ Drill_MBB_Controller.prototype.drill_controller_GIF_setOncePlay = function( once
 //##############################
 Drill_MBB_Controller.drill_controller_initData = function( data ){
 	//	（该函数是静态函数，直接修改 静态数据 的指针值）
-	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 @注释定义 的参数）
 	
 	// > A主体 - 基础特性
 	if( data['src_img_gif'] == undefined ){ data['src_img_gif'] = [] };								//A主体 - 资源
@@ -3977,6 +4019,7 @@ Drill_MBB_Controller.drill_controller_initData = function( data ){
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };									//A主体 - 混合模式
 	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "菜单前面层" };						//A主体 - 菜单层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };										//A主体 - 图片层级
+	if( data['styleName'] == undefined ){ data['styleName'] = "" };									//A主体 - 标签
 	
 	// > A主体 - 其它特性
 	if( data['src_img_mask'] == undefined ){ data['src_img_mask'] = "" };							//A主体 - 遮罩资源
@@ -4123,40 +4166,6 @@ Drill_MBB_Controller.prototype.drill_controller_resetData_Private = function( da
 	//this.drill_controller_initData();										//初始化数据
 	this.drill_controller_initChild();										//初始化子功能
 }
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
-//##############################
-DrillUp.g_MBB_notFindStyleAlertOnce = true;
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』空的静态数据
-//			
-//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
-//##############################
-Drill_MBB_Controller.emptyData = {};
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』获取静态数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 对象指针
-//			
-//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
-//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
-//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
-//##############################
-Drill_MBB_Controller.prototype.drill_data = function(){
-	var cur_styleId   = this._drill_data_id +1;
-	var cur_styleData = DrillUp.g_MBB_style[ this._drill_data_id ];
-	if( cur_styleData == undefined ){
-		
-		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
-		if( DrillUp.g_MBB_notFindStyleAlertOnce == true ){
-			DrillUp.g_MBB_notFindStyleAlertOnce = false;
-			alert( DrillUp.drill_MBB_getPluginTip_StyleNotFind(cur_styleId) );
-		}
-		return Drill_MBB_Controller.emptyData;
-	}
-	return cur_styleData;
-};
 
 
 //==============================
@@ -4255,55 +4264,55 @@ Drill_MBB_Controller.prototype.drill_controller_updateChange_Rotation = function
 	this._drill_childGIF_rotation += this._drill_childGIF_rotateSpeed;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置X【标准函数】
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_finalTransform_x = function(){
 	return this._drill_change_x + this._drill_slideAnim_x;	//（叠加 2B自移动效果）
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置Y【标准函数】
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_finalTransform_y = function(){
 	return this._drill_change_y + this._drill_slideAnim_y;	//（叠加 2B自移动效果）
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放X【标准函数】
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_finalTransform_scaleX = function(){
 	return this._drill_change_scaleX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放Y【标准函数】
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_finalTransform_scaleY = function(){
 	return this._drill_change_scaleY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 透明度（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 透明度【标准函数】
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_finalTransform_opacity = function(){
 	return this._drill_change_opacity;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切X【标准函数】
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_finalTransform_skewX = function(){
 	return this._drill_change_skewX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切Y【标准函数】
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_finalTransform_skewY = function(){
 	return this._drill_change_skewY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 旋转（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 旋转【标准函数】
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_finalTransform_rotate = function(){
 	return this._drill_change_rotate;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 转速（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 转速【标准函数】
 //##############################
 Drill_MBB_Controller.prototype.drill_controller_finalTransform_rotateSpeed = function(){
 	return this._drill_childGIF_rotateSpeed;
@@ -5428,8 +5437,8 @@ Drill_MBB_Controller.prototype.drill_controller_buttonExecute = function(){
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁（未使用）
-// **						->销毁（手动）
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
 // **					->A贴图主体
 // **					->B变换特性
@@ -5505,7 +5514,7 @@ Drill_MBB_Sprite.prototype.update = function(){
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -5517,7 +5526,7 @@ Drill_MBB_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -5549,7 +5558,7 @@ Drill_MBB_Sprite.prototype.drill_sprite_initChild = function(){
 // * 返回按钮贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -5569,10 +5578,10 @@ Drill_MBB_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
 	return true;
 };
 //##############################
-// * 返回按钮贴图 - 是否需要销毁【标准函数】
+// * 返回按钮贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -5582,7 +5591,7 @@ Drill_MBB_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * 返回按钮贴图 - 销毁【标准函数】
+// * 返回按钮贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -6476,8 +6485,8 @@ Drill_MBB_Sprite.prototype.drill_sprite_initButtonExecute = function(){
 // **					->子贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						x->是否需要销毁
-// **						x->销毁
+// **						x->贴图是否销毁
+// **						x->贴图执行销毁
 // **					
 // **					->2C碰撞体-控制器用『按钮的控制器与贴图』
 // **					

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        管理器 - 累计游戏计时器
+ * @plugindesc [v1.5]        管理器 - 累计游戏计时器
  * @author Drill_up
  * 
  * @Drill_LE_param "定时开关-%d"
@@ -142,6 +142,8 @@
  * 优化了内部结构。
  * [v1.4]
  * 改进了内部结构，防止在手机端报错。
+ * [v1.5]
+ * 修复了浏览器运行时报错的bug。
  * 
  * 
  *
@@ -812,7 +814,7 @@ StorageManager.drill_GGT_load = function(){
 // * 存档管理器 - B文件载体 - 保存
 //==============================
 StorageManager.drill_GGT_saveToLocalFile = function( json_str ){
-	if( require == undefined ){ return; }
+	if( typeof(require) === "undefined" ){ return; }
 	var fs = require('fs');  //『文件载体-fs』
 	var dirPath = this.localFileDirectoryPath();
 	var filePath = this.drill_GGT_localFilePath();
@@ -832,7 +834,7 @@ StorageManager.drill_GGT_saveToLocalFile = function( json_str ){
 // * 存档管理器 - B文件载体 - 载入
 //==============================
 StorageManager.drill_GGT_loadFromLocalFile = function(){
-	if( require == undefined ){ return; }
+	if( typeof(require) === "undefined" ){ return; }
 	var fs = require('fs');  //『文件载体-fs』
 	var filePath = this.drill_GGT_localFilePath();
 	var data = null;

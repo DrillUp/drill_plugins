@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        游戏窗体 - 天窗层的多层魔法圈
+ * @plugindesc [v1.5]        游戏窗体 - 天窗层的多层魔法圈
  * @author Drill_up
  * 
  * @Drill_LE_param "魔法圈层-%d"
@@ -367,6 +367,8 @@
  * 整理改进了内部结构，并添加了周期指令。
  * [v1.4]
  * 再次改进了结构。
+ * [v1.5]
+ * 改进了天窗层帧刷新的结构。
  * 
  * 
  * 
@@ -378,497 +380,1235 @@
  * @default false
  * 
  * @param ---魔法圈层组 1至20---
- * @default
- *
+ * @default 
+ * 
  * @param 魔法圈层-1
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-2
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-3
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-4
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-5
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-6
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-7
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-8
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-9
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-10
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-11
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-12
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-13
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-14
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-15
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-16
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-17
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-18
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-19
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-20
  * @parent ---魔法圈层组 1至20---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param ---魔法圈层组21至40---
- * @default
- *
+ * @default 
+ * 
  * @param 魔法圈层-21
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-22
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-23
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-24
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-25
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-26
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-27
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-28
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-29
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-30
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-31
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-32
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-33
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-34
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-35
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-36
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-37
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-38
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-39
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-40
  * @parent ---魔法圈层组21至40---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param ---魔法圈层组41至60---
- * @default
- *
+ * @default 
+ * 
  * @param 魔法圈层-41
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-42
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-43
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-44
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-45
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-46
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-47
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-48
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-49
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-50
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-51
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-52
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-53
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-54
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-55
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-56
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-57
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-58
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-59
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-60
  * @parent ---魔法圈层组41至60---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param ---魔法圈层组61至80---
- * @default
- *
+ * @default 
+ * 
  * @param 魔法圈层-61
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-62
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-63
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-64
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-65
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-66
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-67
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-68
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-69
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-70
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-71
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-72
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-73
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-74
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-75
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-76
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-77
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-78
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-79
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
  * @param 魔法圈层-80
  * @parent ---魔法圈层组61至80---
  * @type struct<HDSCLayer>
  * @desc 魔法圈的详细配置信息。
  * @default 
- *
+ * 
+ * @param ---魔法圈层组81至100---
+ * @default 
+ * 
+ * @param 魔法圈层-81
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-82
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-83
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-84
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-85
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-86
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-87
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-88
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-89
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-90
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-91
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-92
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-93
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-94
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-95
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-96
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-97
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-98
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-99
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-100
+ * @parent ---魔法圈层组81至100---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param ---魔法圈层组101至120---
+ * @default 
+ * 
+ * @param 魔法圈层-101
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-102
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-103
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-104
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-105
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-106
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-107
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-108
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-109
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-110
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-111
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-112
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-113
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-114
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-115
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-116
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-117
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-118
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-119
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-120
+ * @parent ---魔法圈层组101至120---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param ---魔法圈层组121至140---
+ * @default 
+ * 
+ * @param 魔法圈层-121
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-122
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-123
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-124
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-125
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-126
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-127
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-128
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-129
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-130
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-131
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-132
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-133
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-134
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-135
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-136
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-137
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-138
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-139
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-140
+ * @parent ---魔法圈层组121至140---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param ---魔法圈层组141至160---
+ * @default 
+ * 
+ * @param 魔法圈层-141
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-142
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-143
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-144
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-145
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-146
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-147
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-148
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-149
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-150
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-151
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-152
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-153
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-154
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-155
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-156
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-157
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-158
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-159
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-160
+ * @parent ---魔法圈层组141至160---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param ---魔法圈层组161至180---
+ * @default 
+ * 
+ * @param 魔法圈层-161
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-162
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-163
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-164
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-165
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-166
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-167
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-168
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-169
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-170
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-171
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-172
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-173
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-174
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-175
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-176
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-177
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-178
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-179
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-180
+ * @parent ---魔法圈层组161至180---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param ---魔法圈层组181至200---
+ * @default 
+ * 
+ * @param 魔法圈层-181
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-182
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-183
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-184
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-185
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-186
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-187
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-188
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-189
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-190
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-191
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-192
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-193
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-194
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-195
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-196
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-197
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-198
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-199
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default 
+ * 
+ * @param 魔法圈层-200
+ * @parent ---魔法圈层组181至200---
+ * @type struct<HDSCLayer>
+ * @desc 魔法圈的详细配置信息。
+ * @default
+ * 
  */
 /*~struct~HDSCLayer:
  * 
@@ -969,6 +1709,22 @@
  * @default true
  *
  * @param 是否在菜单界面中启用
+ * @parent ---贴图---
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。
+ * @default true
+ *
+ * @param 是否在STG界面中启用
+ * @parent ---贴图---
+ * @type boolean
+ * @on 启用
+ * @off 关闭
+ * @desc true - 启用，false - 关闭。
+ * @default true
+ *
+ * @param 是否在ACT界面中启用
  * @parent ---贴图---
  * @type boolean
  * @on 启用
@@ -1152,15 +1908,19 @@
 //			->☆预加载
 //			->☆存储数据
 //			
+//			->☆天窗层贴图对象池管理
+//				->创建贴图
+//				->销毁贴图
 //			->☆控制器与贴图
-//				->多场景
-//				->界面创建
 //				->控制器帧刷新
 //				->基础特性
-//				->销毁
+//				->自动销毁
 //			
 //			->天窗层魔法圈控制器【Drill_HDSC_Controller】
 //			->天窗层魔法圈贴图【Drill_HDSC_Sprite】
+//			
+//			->☆引擎兼容（STG）
+//			->☆引擎兼容（ACT）
 //
 //
 //		★家谱：
@@ -1252,6 +2012,12 @@
 		return "【" + DrillUp.g_HDSC_PluginTip_curName + "】\n弹道核心插件版本过低，你需要更新 弹道核心 至少v2.2及以上版本。";
 	};
 	//==============================
+	// * 提示信息 - 报错 - 强制更新提示2
+	//==============================
+	DrillUp.drill_HDSC_getPluginTip_NeedUpdate_DynamicSnapshot = function(){
+		return "【" + DrillUp.g_HDSC_PluginTip_curName + "】\n动态快照核心版本过低，你需要更新 动态快照核心 至少v1.2及以上版本。";
+	};
+	//==============================
 	// * 提示信息 - 报错 - 控制器的非数字参数
 	//==============================
 	DrillUp.drill_HDSC_getPluginTip_controllerData_NotId = function( class_name ){
@@ -1281,6 +2047,8 @@
 		data['map_enabled'] = String( dataFrom["是否在地图界面中启用"] || "true") == "true";
 		data['battle_enabled'] = String( dataFrom["是否在战斗界面中启用"] || "true") == "true";
 		data['menu_enabled'] = String( dataFrom["是否在菜单界面中启用"] || "true") == "true";
+		data['STG_enabled'] = String( dataFrom["是否在STG界面中启用"] || "true") == "true";
+		data['ACT_enabled'] = String( dataFrom["是否在ACT界面中启用"] || "true") == "true";
 		
 		
 		// > A主体 - 基础特性
@@ -1293,6 +2061,7 @@
 		data['pause'] = false;
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['zIndex'] = Number( dataFrom["图片层级"] || 14);
+		data['styleName'] = String( dataFrom["标签"] || "");
 		
 		// > A主体 - 其它特性
 		//	（无）
@@ -1328,7 +2097,7 @@
 		data['effect_zoomSpeed'] = Number( dataFrom["缩放速度"] || 1.0);
 		data['effect_zoomRange'] = Number( dataFrom["缩放幅度范围"] || 0.2);
 		
-		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		// > 控制器 - 『控制器与贴图的样式-静态数据-指针初始化』
 		Drill_HDSC_Controller.drill_controller_initData( data );
 		
 		return data;
@@ -1349,7 +2118,7 @@
 		}
 	}
 	/*-----------------魔法圈------------------*/
-	DrillUp.g_HDSC_layers_length = 80;
+	DrillUp.g_HDSC_layers_length = 200;
 	DrillUp.g_HDSC_layers = [];
 	for (var i = 0; i < DrillUp.g_HDSC_layers_length; i++) {
 		if( DrillUp.parameters["魔法圈层-" + String(i+1) ] != undefined &&
@@ -1371,8 +2140,11 @@
 if( Imported.Drill_CoreOfDynamicSnapshot &&
 	Imported.Drill_CoreOfBallistics ){
 	
-	if( typeof(Drill_COBa_ExtendTool) == "undefined" ){	//（弹道核心版本检测）
+	if( typeof(Drill_COBa_ExtendTool) == "undefined" ){  //（弹道核心版本检测）
 		alert( DrillUp.drill_HDSC_getPluginTip_NeedUpdate_Ballistics() );
+	}
+	if( typeof(Graphics.drill_CODS_overstoryLayerClearAll) == "undefined" ){  //（动态快照核心版本检测）
+		alert( DrillUp.drill_HDSC_getPluginTip_NeedUpdate_DynamicSnapshot() );
 	}
 
 
@@ -2463,7 +3235,7 @@ Game_System.prototype.drill_HDSC_checkSysData = function(){
 Game_System.prototype.drill_HDSC_initSysData_Private = function(){
 	
 	this._drill_HDSC_controllerTank = [];	//当前容器（与 g_HDSC_layers 依次对应，容器允许出现null值）
-	for(var i = 0; i < DrillUp.g_HDSC_layers.length; i++){
+	for( var i = 0; i < DrillUp.g_HDSC_layers.length; i++ ){
 		var temp_data = DrillUp.g_HDSC_layers[i];
 		if( temp_data == undefined ){ continue; }
 		
@@ -2482,7 +3254,7 @@ Game_System.prototype.drill_HDSC_checkSysData_Private = function(){
 	}
 	
 	// > 容器的 空数据 检查
-	for(var i = 0; i < DrillUp.g_HDSC_layers.length; i++ ){
+	for( var i = 0; i < DrillUp.g_HDSC_layers.length; i++ ){
 		var temp_data = DrillUp.g_HDSC_layers[i];
 			
 		// > 未存储的，重新初始化
@@ -2499,97 +3271,209 @@ Game_System.prototype.drill_HDSC_checkSysData_Private = function(){
 
 
 //=============================================================================
-// ** ☆控制器与贴图
+// ** ☆天窗层贴图对象池管理
 //
-//			说明：	> 此模块专门管理 贴图 的创建与销毁。
+//			说明：	> 此模块基于 对象池 来进行 创建与销毁。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 控制器与贴图 - 容器初始化
+// * 天窗层贴图对象池管理 - 容器初始化
 //==============================
 var _drill_HDSC_temp_initialize2 = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function(){
 	_drill_HDSC_temp_initialize2.call(this);
-	this._drill_HDSC_spriteTank = [];			//贴图容器
-	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
-};
-
-//==============================
-// * 控制器与贴图 - 销毁时『多场景与游戏窗体-地图界面』
-//==============================
-var _drill_HDSC_smap_terminate = Scene_Map.prototype.terminate;
-Scene_Map.prototype.terminate = function(){
-	_drill_HDSC_smap_terminate.call(this);
-	$gameTemp._drill_HDSC_spriteTank = [];		//贴图容器
-	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
+	this._drill_HDSC_spriteTank = [];				//贴图容器
 };
 //==============================
-// * 控制器与贴图 - 帧刷新『多场景与游戏窗体-地图界面』
+// * 天窗层贴图对象池管理 - 刷新
 //==============================
-var _drill_HDSC_smap_update = Scene_Map.prototype.update;
-Scene_Map.prototype.update = function(){
-	_drill_HDSC_smap_update.call(this);
-	this.drill_HDSC_updateController();		//帧刷新 - 控制器
-	this.drill_HDSC_updateAttr();			//帧刷新 - 基础特性
-	this.drill_HDSC_updateDestroy();		//帧刷新 - 销毁
-};
-//==============================
-// * 控制器与贴图 - 界面创建时『多场景与游戏窗体-地图界面』
-//==============================
-var _drill_HDSC_smap_createAllWindows = Scene_Map.prototype.createAllWindows;
-Scene_Map.prototype.createAllWindows = function(){
-	_drill_HDSC_smap_createAllWindows.call(this);
-	this.drill_HDSC_create();				//创建
-};
-//==============================
-// * 控制器与贴图 - 界面创建『多场景与游戏窗体-地图界面』
-//==============================
-Scene_Map.prototype.drill_HDSC_create = function(){
-	$gameTemp._drill_HDSC_spriteTank = [];			//贴图容器（不允许出现null值）
-	var cur_scene = SceneManager._scene;
+SceneManager.drill_HDSC_refreshSprite = function(){
+	if( $gameTemp == undefined ){ return; }
+	if( $gameSystem == undefined ){ return; }
 	
-	for(var i=0; i< $gameSystem._drill_HDSC_controllerTank.length; i++){
-		var temp_controller = $gameSystem._drill_HDSC_controllerTank[i];
-		if( temp_controller == undefined ){ continue; }
-		
-		// > 如果关闭，则不创建
-		var data = temp_controller.drill_data();
-		if( cur_scene instanceof Scene_Map && data['map_enabled'] != true ){ continue; }
-		if( cur_scene instanceof Scene_Battle && data['battle_enabled'] != true ){ continue; }
-		if( cur_scene instanceof Scene_MenuBase && data['menu_enabled'] != true ){ continue; }
-		
-		
-		// > 创建贴图
-		var temp_sprite = new Drill_HDSC_Sprite();
-		temp_sprite.drill_sprite_setController( temp_controller );
-		temp_sprite.drill_sprite_initChild();
-		
-		
-		// > 添加贴图到层级（天窗层）
-		$gameTemp._drill_HDSC_spriteTank.push( temp_sprite );
-		Graphics.drill_CODS_overstoryLayerAddSprite( temp_sprite );
-		
-	}
-	
-	// > 层级排序（天窗层）
-	Graphics.drill_CODS_sortByZIndex();
-}
-//==============================
-// * 控制器与贴图 - 帧刷新 控制器『多场景与游戏窗体-地图界面』
-//==============================
-Scene_Map.prototype.drill_HDSC_updateController = function(){
+	// > 判断
+	var operate_list = {};	// 格式为：{控制器ID:数字}，其中数字：0不操作/1创建/2销毁。
 	for(var i = 0; i < $gameSystem._drill_HDSC_controllerTank.length; i++ ){
 		var temp_controller = $gameSystem._drill_HDSC_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
 		
-		// > 控制器帧刷新
-		temp_controller.drill_controller_update();
+		// > 判断 - 初始不操作
+		operate_list[ temp_controller._drill_controllerSerial ] = 0;
+		
+		// > 判断 - 创建与销毁
+		this.drill_HDSC_refreshSprite_operate( operate_list, temp_controller );
+	}
+	
+	// > 判断 - 已有的贴图
+	for(var i = 0; i < $gameTemp._drill_HDSC_spriteTank.length; i++ ){
+		var temp_sprite = $gameTemp._drill_HDSC_spriteTank[i];
+		if( temp_sprite == undefined ){ continue; }
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){ continue; }
+		
+		// > 判断 - 已有的贴图 - 创建转为不操作
+		if( operate_list[ temp_controller._drill_controllerSerial ] == 1 ){
+			operate_list[ temp_controller._drill_controllerSerial ] = 0;
+		}
+	}
+	
+	this.drill_HDSC_refreshSpriteCreate( operate_list );
+	this.drill_HDSC_refreshSpriteDestroy( operate_list );
+	
+	// > 层级排序（天窗层）
+	Graphics.drill_CODS_sortByZIndex();
+};
+//==============================
+// * 天窗层贴图对象池管理 - 刷新 - 判断创建与销毁
+//==============================
+SceneManager.drill_HDSC_refreshSprite_operate = function( operate_list, tar_controller ){
+	var data = tar_controller.drill_data();
+	if( SceneManager._scene instanceof Scene_Map ){
+		if( data['map_enabled'] == true ){		//判断创建与销毁『多场景与游戏窗体-地图界面』
+			operate_list[ tar_controller._drill_controllerSerial ] = 1;
+		}else{
+			operate_list[ tar_controller._drill_controllerSerial ] = 2;
+		}
+	}
+	if( SceneManager._scene instanceof Scene_Battle ){
+		if( data['battle_enabled'] == true ){	//判断创建与销毁『多场景与游戏窗体-战斗界面』
+			operate_list[ tar_controller._drill_controllerSerial ] = 1;
+		}else{
+			operate_list[ tar_controller._drill_controllerSerial ] = 2;
+		}
+	}
+	if( SceneManager._scene instanceof Scene_MenuBase ){
+		if( data['menu_enabled'] == true ){		//判断创建与销毁『多场景与游戏窗体-菜单界面』
+			operate_list[ tar_controller._drill_controllerSerial ] = 1;
+		}else{
+			operate_list[ tar_controller._drill_controllerSerial ] = 2;
+		}
+	}
+};
+//==============================
+// * 天窗层贴图对象池管理 - 刷新 - 创建贴图
+//
+//			说明：	> operate_list 的格式为：{控制器ID:数字}，其中数字：0不操作/1创建/2销毁。
+//==============================
+SceneManager.drill_HDSC_refreshSpriteCreate = function( operate_list ){
+	for(var i=0; i < $gameSystem._drill_HDSC_controllerTank.length; i++ ){
+		var temp_controller = $gameSystem._drill_HDSC_controllerTank[i];
+		if( temp_controller == undefined ){ continue; }
+		
+		if( operate_list[ temp_controller._drill_controllerSerial ] == 1 ){
+			
+			// > 创建贴图
+			var temp_sprite = new Drill_HDSC_Sprite();
+			temp_sprite.drill_sprite_setController( temp_controller );
+			temp_sprite.drill_sprite_initChild();
+			
+			// > 添加贴图到层级（天窗层）
+			$gameTemp._drill_HDSC_spriteTank.push( temp_sprite );
+			Graphics.drill_CODS_overstoryLayerAddSprite( temp_sprite );
+			
+			// > 测试
+			//alert( "对象池创建魔法圈：" + temp_controller.drill_data()['styleName'] );
+		}
 	}
 }
 //==============================
-// * 控制器与贴图 - 帧刷新 基础特性『多场景与游戏窗体-地图界面』
+// * 天窗层贴图对象池管理 - 刷新 - 销毁贴图
+//
+//			说明：	> operate_list 的格式为：{控制器ID:数字}，其中数字：0不操作/1创建/2销毁。
+//					> 对象池管理中，函数 drill_controller_isDead 和 drill_sprite_isNeedDestroy 用不到。
 //==============================
-Scene_Map.prototype.drill_HDSC_updateAttr = function(){
+SceneManager.drill_HDSC_refreshSpriteDestroy = function( operate_list ){
+	for(var i = $gameTemp._drill_HDSC_spriteTank.length-1; i >= 0; i--){
+		var temp_sprite = $gameTemp._drill_HDSC_spriteTank[i];
+		if( temp_sprite == undefined ){
+			$gameTemp._drill_HDSC_spriteTank.splice(i,1);
+			continue;
+		}
+		
+		if( operate_list[ temp_sprite._drill_curSerial ] == 2 ){
+			
+			// > 测试
+			//if( temp_sprite._drill_controller != undefined ){
+			//	alert( "对象池销毁魔法圈：" + temp_sprite._drill_controller.drill_data()['styleName'] );
+			//}
+			
+			// > 销毁贴图
+			Graphics.drill_CODS_overstoryLayerRemoveSprite( temp_sprite );
+			temp_sprite.drill_sprite_destroy();
+			$gameTemp._drill_HDSC_spriteTank.splice(i,1);
+		}
+	}
+};
+
+//==============================
+// * 天窗层贴图对象池管理 - 界面创建时『多场景与游戏窗体-地图界面』
+//
+//			说明：	> 每次在 界面创建时 都扫描一遍 创建与销毁关系。
+//					> 玩家不能控制创建与销毁，静态数据"界面中启用"的设置也不能直接修改。玩家只能显示隐藏。
+//==============================
+var _drill_HDSC_smap_createAllWindows = Scene_Map.prototype.createAllWindows;
+Scene_Map.prototype.createAllWindows = function(){
+	_drill_HDSC_smap_createAllWindows.call(this);
+	SceneManager.drill_HDSC_refreshSprite();
+};
+//==============================
+// * 天窗层贴图对象池管理 - 界面创建时『多场景与游戏窗体-战斗界面』
+//==============================
+var _drill_HDSC_sbattle_createAllWindows = Scene_Battle.prototype.createAllWindows;
+Scene_Battle.prototype.createAllWindows = function(){
+	_drill_HDSC_sbattle_createAllWindows.call(this);
+	SceneManager.drill_HDSC_refreshSprite();
+};
+//==============================
+// * 天窗层贴图对象池管理 - 界面创建时『多场景与游戏窗体-菜单界面』
+//==============================
+var _drill_HDSC_smenu_createWindowLayer = Scene_MenuBase.prototype.createWindowLayer;
+Scene_MenuBase.prototype.createWindowLayer = function(){
+	_drill_HDSC_smenu_createWindowLayer.call(this);
+	SceneManager.drill_HDSC_refreshSprite();
+};
+
+
+//=============================================================================
+// ** ☆控制器与贴图
+//
+//			说明：	> 此模块专门管理 帧刷新。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 控制器与贴图 - 帧刷新
+//
+//			说明：	> 直接绑定到 SceneManager 。
+//==============================
+var _drill_HDSC_requestUpdate = SceneManager.requestUpdate;
+SceneManager.requestUpdate = function(){
+	
+    if( !this._stopped ){
+		this.drill_HDSC_updateController();			//帧刷新 - 控制器
+		this.drill_HDSC_updateAttr();				//帧刷新 - 基础特性
+		this.drill_HDSC_updateDestroy();			//帧刷新 - 自动销毁
+    }
+	
+	// > 原函数
+	_drill_HDSC_requestUpdate.call(this);
+};
+//==============================
+// * 控制器与贴图 - 帧刷新 控制器
+//==============================
+SceneManager.drill_HDSC_updateController = function(){
+	if( $gameSystem == undefined ){ return; }
+	for(var i = 0; i < $gameSystem._drill_HDSC_controllerTank.length; i++ ){
+		var temp_controller = $gameSystem._drill_HDSC_controllerTank[i];
+		if( temp_controller == undefined ){ continue; }
+		temp_controller.drill_controller_update();
+	}
+};
+//==============================
+// * 控制器与贴图 - 帧刷新 基础特性
+//==============================
+SceneManager.drill_HDSC_updateAttr = function(){
+	if( $gameTemp == undefined ){ return; }
+	
 	var has_layerChange = false;
 	for(var i = 0; i < $gameTemp._drill_HDSC_spriteTank.length; i++){
 		var temp_sprite = $gameTemp._drill_HDSC_spriteTank[i];
@@ -2610,101 +3494,34 @@ Scene_Map.prototype.drill_HDSC_updateAttr = function(){
 	if( has_layerChange == true ){
 		Graphics.drill_CODS_sortByZIndex();
 	}
-}
+};
 //==============================
-// * 控制器与贴图 - 帧刷新 销毁『多场景与游戏窗体-地图界面』
+// * 控制器与贴图 - 帧刷新 自动销毁
 //==============================
-Scene_Map.prototype.drill_HDSC_updateDestroy = function(){
-	
-	// > 自动销毁 - 控制器
-	for(var i = $gameSystem._drill_HDSC_controllerTank.length-1; i >= 0; i--){
-		var temp_controller = $gameSystem._drill_HDSC_controllerTank[i];
-		if( temp_controller == undefined ){ continue; }
-		if( temp_controller.drill_controller_isDead() ){
-			$gameSystem._drill_HDSC_controllerTank.splice(i,1);
-		}
-	}
+SceneManager.drill_HDSC_updateDestroy = function(){
+	if( $gameTemp == undefined ){ return; }
 	
 	// > 自动销毁 - 贴图
 	for(var i = $gameTemp._drill_HDSC_spriteTank.length-1; i >= 0; i--){
 		var temp_sprite = $gameTemp._drill_HDSC_spriteTank[i];
-		if( temp_sprite.drill_sprite_isNeedDestroy() ){
+		if( temp_sprite == undefined ){
+			$gameTemp._drill_HDSC_spriteTank.splice(i,1);
+			continue;
+		}
+		var temp_controller = temp_sprite._drill_controller;
+		if( temp_controller == undefined ){
+			Graphics.drill_CODS_overstoryLayerRemoveSprite( temp_sprite );	//『天窗层的严格销毁』
+			$gameTemp._drill_HDSC_spriteTank.splice(i,1);
+			temp_sprite.drill_sprite_destroy();
+			continue;
+		}
+		if( temp_controller.drill_controller_isDead() ){
 			Graphics.drill_CODS_overstoryLayerRemoveSprite( temp_sprite );	//（销毁贴图）
 			$gameTemp._drill_HDSC_spriteTank.splice(i,1);
 			temp_sprite.drill_sprite_destroy();
 		}
 	}
 };
-
-//==============================
-// * 控制器与贴图 - 销毁时『多场景与游戏窗体-战斗界面』
-//==============================
-var _drill_HDSC_sbattle_terminate = Scene_Battle.prototype.terminate;
-Scene_Battle.prototype.terminate = function(){
-	_drill_HDSC_sbattle_terminate.call(this);
-	$gameTemp._drill_HDSC_spriteTank = [];		//贴图容器
-	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
-};
-//==============================
-// * 控制器与贴图 - 帧刷新『多场景与游戏窗体-战斗界面』
-//==============================
-var _drill_HDSC_sbattle_update = Scene_Battle.prototype.update;
-Scene_Battle.prototype.update = function(){
-	_drill_HDSC_sbattle_update.call(this);
-	this.drill_HDSC_updateController();			//帧刷新 - 控制器
-	this.drill_HDSC_updateAttr();				//帧刷新 - 基础特性
-	this.drill_HDSC_updateDestroy();			//帧刷新 - 销毁
-};
-//==============================
-// * 控制器与贴图 - 界面创建时『多场景与游戏窗体-战斗界面』
-//==============================
-var _drill_HDSC_sbattle_createAllWindows = Scene_Battle.prototype.createAllWindows;
-Scene_Battle.prototype.createAllWindows = function(){
-	_drill_HDSC_sbattle_createAllWindows.call(this);
-	this.drill_HDSC_create();
-};
-//==============================
-// * 控制器与贴图 - 函数复制
-//==============================
-Scene_Battle.prototype.drill_HDSC_create = Scene_Map.prototype.drill_HDSC_create;						//界面创建       『多场景与游戏窗体-战斗界面』
-Scene_Battle.prototype.drill_HDSC_updateController = Scene_Map.prototype.drill_HDSC_updateController;	//帧刷新 控制器  『多场景与游戏窗体-战斗界面』
-Scene_Battle.prototype.drill_HDSC_updateAttr = Scene_Map.prototype.drill_HDSC_updateAttr;				//帧刷新 基础特性『多场景与游戏窗体-战斗界面』
-Scene_Battle.prototype.drill_HDSC_updateDestroy = Scene_Map.prototype.drill_HDSC_updateDestroy;			//帧刷新 销毁    『多场景与游戏窗体-战斗界面』
-
-//==============================
-// * 控制器与贴图 - 销毁时『多场景与游戏窗体-菜单界面』
-//==============================
-var _drill_HDSC_smenu_terminate = Scene_MenuBase.prototype.terminate;
-Scene_MenuBase.prototype.terminate = function(){
-	_drill_HDSC_smenu_terminate.call(this);
-	$gameTemp._drill_HDSC_spriteTank = [];		//贴图容器
-	Graphics.drill_CODS_overstoryLayerClear();	//清空 天窗层
-};
-//==============================
-// * 控制器与贴图 - 帧刷新『多场景与游戏窗体-菜单界面』
-//==============================
-var _drill_HDSC_smenu_update = Scene_MenuBase.prototype.update;
-Scene_MenuBase.prototype.update = function(){
-	_drill_HDSC_smenu_update.call(this);
-	this.drill_HDSC_updateController();			//帧刷新 - 控制器
-	this.drill_HDSC_updateAttr();				//帧刷新 - 基础特性
-	this.drill_HDSC_updateDestroy();			//帧刷新 - 销毁
-};
-//==============================
-// * 控制器与贴图 - 界面创建时『多场景与游戏窗体-菜单界面』
-//==============================
-var _drill_HDSC_smenu_createWindowLayer = Scene_MenuBase.prototype.createWindowLayer;
-Scene_MenuBase.prototype.createWindowLayer = function(){
-	_drill_HDSC_smenu_createWindowLayer.call(this);
-	this.drill_HDSC_create();
-};
-//==============================
-// * 控制器与贴图 - 函数复制
-//==============================
-Scene_MenuBase.prototype.drill_HDSC_create = Scene_Map.prototype.drill_HDSC_create;						//界面创建       『多场景与游戏窗体-菜单界面』
-Scene_MenuBase.prototype.drill_HDSC_updateController = Scene_Map.prototype.drill_HDSC_updateController;	//帧刷新 控制器  『多场景与游戏窗体-菜单界面』
-Scene_MenuBase.prototype.drill_HDSC_updateAttr = Scene_Map.prototype.drill_HDSC_updateAttr;				//帧刷新 基础特性『多场景与游戏窗体-菜单界面』
-Scene_MenuBase.prototype.drill_HDSC_updateDestroy = Scene_Map.prototype.drill_HDSC_updateDestroy;		//帧刷新 销毁    『多场景与游戏窗体-菜单界面』
 
 
 
@@ -2720,7 +3537,8 @@ Scene_MenuBase.prototype.drill_HDSC_updateDestroy = Scene_Map.prototype.drill_HD
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
@@ -2815,7 +3633,7 @@ Drill_HDSC_Controller.prototype.drill_controller_resetData = function( data_id )
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -2835,16 +3653,16 @@ Drill_HDSC_Controller.prototype.drill_controller_setPause = function( pause ){
 	this._drill_pause = pause;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 判断销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -2880,45 +3698,72 @@ Drill_HDSC_Controller.METHOD__drill_controller_commandChange_restoreAttr    = 45
 Drill_HDSC_Controller.METHOD__drill_controller_commandChange_setMove        = 51;
 Drill_HDSC_Controller.METHOD__drill_controller_commandChange_restoreMove    = 52;
 
-//##############################
-// * A主体 - 切换混合模式【标准函数】
+//==============================
+// * A主体 - 切换混合模式（开放函数）
 //
 //			参数：	> blendMode 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_HDSC_Controller.prototype.drill_controller_setBlendMode = function( blendMode ){
 	this._drill_blendMode = blendMode;
 };
-//##############################
-// * A主体 - 切换图片层级【标准函数】
+//==============================
+// * A主体 - 切换堆叠级（开放函数）
 //
 //			参数：	> zIndex 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_HDSC_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 	this._drill_zIndex = zIndex;
 };
-//##############################
-// * A主体 - 还原混合模式【标准函数】
+//==============================
+// * A主体 - 还原混合模式（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_HDSC_Controller.prototype.drill_controller_restoreBlendMode = function(){
 	var data = this.drill_data();
 	this._drill_blendMode = data['blendMode'];
 };
-//##############################
-// * A主体 - 还原图片层级【标准函数】
+//==============================
+// * A主体 - 还原堆叠级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_HDSC_Controller.prototype.drill_controller_restoreZIndex = function(){
 	var data = this.drill_data();
 	this._drill_zIndex = data['zIndex'];
 };
 
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
+//##############################
+DrillUp.g_HDSC_notFindStyleAlertOnce = true;
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』获取数据指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，所以只读静态数据。不要存储到存档中，也不要挂载到控制器身上。
+//					> 该函数直接获取指针，可以放在帧刷新中使用。
+//##############################
+Drill_HDSC_Controller.prototype.drill_data = function(){
+	var cur_styleId   = this._drill_data_id +1;
+	var cur_styleData = DrillUp.g_HDSC_layers[ this._drill_data_id ];
+	if( cur_styleData == undefined ){
+		
+		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
+		if( DrillUp.g_HDSC_notFindStyleAlertOnce == true ){
+			DrillUp.g_HDSC_notFindStyleAlertOnce = false;
+			alert( DrillUp.drill_HDSC_getPluginTip_StyleNotFind(cur_styleId) );
+		}
+		return {};
+	}
+	return cur_styleData;
+};
 //##############################
 // * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
@@ -2929,7 +3774,7 @@ Drill_HDSC_Controller.prototype.drill_controller_restoreZIndex = function(){
 //##############################
 Drill_HDSC_Controller.drill_controller_initData = function( data ){
 	//	（该函数是静态函数，直接修改 静态数据 的指针值）
-	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 @注释定义 的参数）
 	
 	// > A主体 - 基础特性
 	if( data['src_img'] == undefined ){ data['src_img'] = "" };										//A主体 - 资源
@@ -2940,8 +3785,9 @@ Drill_HDSC_Controller.drill_controller_initData = function( data ){
 	if( data['visible'] == undefined ){ data['visible'] = true };									//A主体 - 显示/隐藏
 	if( data['pause'] == undefined ){ data['pause'] = false };										//A主体 - 暂停/继续
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };									//A主体 - 混合模式
-																									//A主体 - 层级（无）
+	//	（无）																						//A主体 - 层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };										//A主体 - 图片层级
+	if( data['styleName'] == undefined ){ data['styleName'] = "" };									//A主体 - 标签
 	
 	// > A主体 - 其它特性
 	//	（无）
@@ -3015,40 +3861,6 @@ Drill_HDSC_Controller.prototype.drill_controller_resetData_Private = function( d
 	//this.drill_controller_initData();										//初始化数据
 	this.drill_controller_initChild();										//初始化子功能
 }
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
-//##############################
-DrillUp.g_HDSC_notFindStyleAlertOnce = true;
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』空的静态数据
-//			
-//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
-//##############################
-Drill_HDSC_Controller.emptyData = {};
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』获取静态数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 对象指针
-//			
-//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
-//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
-//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
-//##############################
-Drill_HDSC_Controller.prototype.drill_data = function(){
-	var cur_styleId   = this._drill_data_id +1;
-	var cur_styleData = DrillUp.g_HDSC_layers[ this._drill_data_id ];
-	if( cur_styleData == undefined ){
-		
-		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
-		if( DrillUp.g_HDSC_notFindStyleAlertOnce == true ){
-			DrillUp.g_HDSC_notFindStyleAlertOnce = false;
-			alert( DrillUp.drill_HDSC_getPluginTip_StyleNotFind(cur_styleId) );
-		}
-		return Drill_HDSC_Controller.emptyData;
-	}
-	return cur_styleData;
-};
 
 
 //==============================
@@ -3143,55 +3955,55 @@ Drill_HDSC_Controller.prototype.drill_controller_updateChange_Rotation = functio
 	this._drill_childCircle_rotation += this.drill_controller_finalTransform_rotateSpeed();
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置X【标准函数】
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_finalTransform_x = function(){
 	return this._drill_change_x;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置Y【标准函数】
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_finalTransform_y = function(){
 	return this._drill_change_y;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放X【标准函数】
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_finalTransform_scaleX = function(){
 	return this._drill_change_scaleX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放Y【标准函数】
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_finalTransform_scaleY = function(){
 	return this._drill_change_scaleY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 透明度（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 透明度【标准函数】
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_finalTransform_opacity = function(){
 	return this._drill_change_opacity;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切X【标准函数】
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_finalTransform_skewX = function(){
 	return this._drill_change_skewX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切Y【标准函数】
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_finalTransform_skewY = function(){
 	return this._drill_change_skewY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 旋转（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 旋转【标准函数】
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_finalTransform_rotate = function(){
 	return this._drill_change_rotate;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 转速（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 转速【标准函数】
 //##############################
 Drill_HDSC_Controller.prototype.drill_controller_finalTransform_rotateSpeed = function(){
 	return this._drill_childCircle_rotateSpeed;
@@ -3819,8 +4631,8 @@ Drill_HDSC_Controller.prototype.drill_controller_updateEffect = function(){
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁（未使用）
-// **						->销毁（手动）
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
 // **					->A贴图主体
 // **					->B变换特性
@@ -3873,7 +4685,7 @@ Drill_HDSC_Sprite.prototype.update = function(){
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -3885,7 +4697,7 @@ Drill_HDSC_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -3906,7 +4718,7 @@ Drill_HDSC_Sprite.prototype.drill_sprite_initChild = function(){
 // * 魔法圈贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -3926,10 +4738,10 @@ Drill_HDSC_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return true;
 };
 //##############################
-// * 魔法圈贴图 - 是否需要销毁【标准函数】
+// * 魔法圈贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -3939,7 +4751,7 @@ Drill_HDSC_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * 魔法圈贴图 - 销毁【标准函数】
+// * 魔法圈贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -4343,6 +5155,134 @@ Drill_HDSC_Sprite.prototype.drill_sprite_updateEffect = function(){
 		this._drill_layerSprite.scale.y += value;
 	}
 }
+
+
+//=============================================================================
+// ** ☆引擎兼容（STG）
+//
+//			说明：	> 此模块对引擎进行专门兼容。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 引擎兼容 - 最后继承1级
+//==============================
+var _drill_STG_HDSC_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_STG_HDSC_scene_initialize.call(this);
+	
+	//==============================
+	// * 引擎兼容 - 插件指令『STG的插件指令』（游戏窗体，插件位置在前面，需要最后继承）
+	//==============================
+	if( Imported.Drill_STG__objects ){
+		
+		//==============================
+		// * 插件指令 - STG指令绑定
+		//==============================
+		var _drill_STG_HDSC_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+		Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+			_drill_STG_HDSC_pluginCommand.call(this, command, args);
+			this.drill_HDSC_pluginCommand( command, args );
+		}
+		//==============================
+		// * 插件指令 - STG指令执行
+		//==============================
+		Drill_STG_GameInterpreter.prototype.drill_HDSC_pluginCommand = Game_Interpreter.prototype.drill_HDSC_pluginCommand;
+	}
+	
+	//==============================
+	// * 引擎兼容 - 天窗层贴图对象池管理（STG）
+	//==============================
+	if( Imported.Drill_STG__objects ){
+		
+		//==============================
+		// * 天窗层贴图对象池管理（STG） - 判断创建与销毁『多场景与游戏窗体-STG界面』
+		//==============================
+		var _drill_STG_HDSC_refreshSprite_operate = SceneManager.drill_HDSC_refreshSprite_operate;
+		SceneManager.drill_HDSC_refreshSprite_operate = function( operate_list, tar_controller ){
+			_drill_STG_HDSC_refreshSprite_operate.call( this, operate_list, tar_controller );
+			var data = tar_controller.drill_data();
+			if( SceneManager._scene instanceof Drill_STG_MapScene ){
+				if( data['STG_enabled'] == true ){
+					operate_list[ tar_controller._drill_controllerSerial ] = 1;
+				}else{
+					operate_list[ tar_controller._drill_controllerSerial ] = 2;
+				}
+			}
+		}
+		//==============================
+		// * 天窗层贴图对象池管理（STG） - 界面创建时『多场景与游戏窗体-STG界面』
+		//==============================
+		var _drill_STG_HDSC_createWindowLayer = Drill_STG_MapScene.prototype.createWindowLayer;
+		Drill_STG_MapScene.prototype.createWindowLayer = function(){
+			_drill_STG_HDSC_createWindowLayer.call(this);
+			SceneManager.drill_HDSC_refreshSprite();
+		};
+	}
+};
+
+
+//=============================================================================
+// ** ☆引擎兼容（ACT）
+//
+//			说明：	> 此模块对引擎进行专门兼容。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 引擎兼容 - 最后继承1级
+//==============================
+var _drill_ACT_HDSC_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_ACT_HDSC_scene_initialize.call(this);
+	
+	//==============================
+	// * 引擎兼容 - 插件指令『ACT的插件指令』（游戏窗体，插件位置在前面，需要最后继承）
+	//==============================
+	if( Imported.Drill_ACT__objects ){
+		
+		//==============================
+		// * 插件指令 - ACT指令绑定
+		//==============================
+		var _drill_ACT_HDSC_pluginCommand = Drill_ACT_GameInterpreter.prototype.pluginCommand;
+		Drill_ACT_GameInterpreter.prototype.pluginCommand = function( command, args ){
+			_drill_ACT_HDSC_pluginCommand.call(this, command, args);
+			this.drill_HDSC_pluginCommand( command, args );
+		}
+		//==============================
+		// * 插件指令 - ACT指令执行
+		//==============================
+		Drill_ACT_GameInterpreter.prototype.drill_HDSC_pluginCommand = Game_Interpreter.prototype.drill_HDSC_pluginCommand;
+	}
+	
+	//==============================
+	// * 引擎兼容 - 天窗层贴图对象池管理（ACT）
+	//==============================
+	if( Imported.Drill_ACT__objects ){
+		
+		//==============================
+		// * 天窗层贴图对象池管理（ACT） - 判断创建与销毁『多场景与游戏窗体-ACT界面』
+		//==============================
+		var _drill_ACT_HDSC_refreshSprite_operate = SceneManager.drill_HDSC_refreshSprite_operate;
+		SceneManager.drill_HDSC_refreshSprite_operate = function( operate_list, tar_controller ){
+			_drill_ACT_HDSC_refreshSprite_operate.call( this, operate_list, tar_controller );
+			var data = tar_controller.drill_data();
+			if( SceneManager._scene instanceof Drill_ACT_MapScene ){
+				if( data['ACT_enabled'] == true ){
+					operate_list[ tar_controller._drill_controllerSerial ] = 1;
+				}else{
+					operate_list[ tar_controller._drill_controllerSerial ] = 2;
+				}
+			}
+		}
+		//==============================
+		// * 天窗层贴图对象池管理（ACT） - 界面创建时『多场景与游戏窗体-ACT界面』
+		//==============================
+		var _drill_ACT_HDSC_createWindowLayer = Drill_ACT_MapScene.prototype.createWindowLayer;
+		Drill_ACT_MapScene.prototype.createWindowLayer = function(){
+			_drill_ACT_HDSC_createWindowLayer.call(this);
+			SceneManager.drill_HDSC_refreshSprite();
+		};
+	}
+};
 
 
 

@@ -302,499 +302,1237 @@
  * @type struct<MenuBackgroundDefault>
  * @desc 默认背景的配置信息。
  * @default {"初始是否显示":"true","资源-背景":"背景-默认背景(标准)","资源-背景遮罩":"","平移-背景 X":"0","平移-背景 Y":"0","透明度":"255","混合模式":"0","背景X速度":"0.5","背景Y速度":"0.5","图片层级":"0"}
- *
+ * 
  * @param ---背景组 1至20---
- * @default
- *
+ * @default 
+ * 
  * @param 背景-1
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-2
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-3
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-4
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-5
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-6
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-7
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-8
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-9
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-10
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-11
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-12
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-13
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-14
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-15
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-16
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-17
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-18
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-19
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-20
  * @parent ---背景组 1至20---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param ---背景组21至40---
- * @default
- *
+ * @default 
+ * 
  * @param 背景-21
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-22
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-23
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-24
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-25
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-26
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-27
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-28
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-29
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-30
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-31
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-32
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-33
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-34
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-35
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-36
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-37
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-38
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-39
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-40
  * @parent ---背景组21至40---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param ---背景组41至60---
- * @default
- *
+ * @default 
+ * 
  * @param 背景-41
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-42
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-43
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-44
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-45
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-46
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-47
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-48
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-49
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-50
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-51
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-52
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-53
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-54
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-55
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-56
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-57
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-58
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-59
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-60
  * @parent ---背景组41至60---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param ---背景组61至80---
- * @default
- *
+ * @default 
+ * 
  * @param 背景-61
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-62
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-63
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-64
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-65
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-66
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-67
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-68
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-69
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-70
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-71
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-72
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-73
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-74
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-75
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-76
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-77
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-78
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-79
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
  * @param 背景-80
  * @parent ---背景组61至80---
  * @type struct<MenuBackground>
  * @desc 背景的详细配置信息。
  * @default 
- *
+ * 
+ * @param ---背景组81至100---
+ * @default 
+ * 
+ * @param 背景-81
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-82
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-83
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-84
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-85
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-86
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-87
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-88
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-89
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-90
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-91
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-92
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-93
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-94
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-95
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-96
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-97
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-98
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-99
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-100
+ * @parent ---背景组81至100---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param ---背景组101至120---
+ * @default 
+ * 
+ * @param 背景-101
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-102
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-103
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-104
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-105
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-106
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-107
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-108
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-109
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-110
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-111
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-112
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-113
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-114
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-115
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-116
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-117
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-118
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-119
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-120
+ * @parent ---背景组101至120---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param ---背景组121至140---
+ * @default 
+ * 
+ * @param 背景-121
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-122
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-123
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-124
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-125
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-126
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-127
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-128
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-129
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-130
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-131
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-132
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-133
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-134
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-135
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-136
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-137
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-138
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-139
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-140
+ * @parent ---背景组121至140---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param ---背景组141至160---
+ * @default 
+ * 
+ * @param 背景-141
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-142
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-143
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-144
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-145
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-146
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-147
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-148
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-149
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-150
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-151
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-152
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-153
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-154
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-155
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-156
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-157
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-158
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-159
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-160
+ * @parent ---背景组141至160---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param ---背景组161至180---
+ * @default 
+ * 
+ * @param 背景-161
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-162
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-163
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-164
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-165
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-166
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-167
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-168
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-169
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-170
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-171
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-172
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-173
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-174
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-175
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-176
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-177
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-178
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-179
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-180
+ * @parent ---背景组161至180---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param ---背景组181至200---
+ * @default 
+ * 
+ * @param 背景-181
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-182
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-183
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-184
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-185
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-186
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-187
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-188
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-189
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-190
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-191
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-192
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-193
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-194
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-195
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-196
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-197
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-198
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-199
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default 
+ * 
+ * @param 背景-200
+ * @parent ---背景组181至200---
+ * @type struct<MenuBackground>
+ * @desc 背景的详细配置信息。
+ * @default
+ * 
  */
 /*~struct~MenuBackgroundDefault:
  * 
@@ -1416,6 +2154,7 @@
 		data['blendMode'] = Number( dataFrom["混合模式"] || 0);
 		data['layerIndex'] = String( dataFrom["菜单层级"] || "菜单后面层");
 		data['zIndex'] = Number( dataFrom["图片层级"] || 0);
+		data['styleName'] = String( dataFrom["标签"] || "");
 		
 		// > A主体 - 其它特性
 		data['src_img_mask'] = String( dataFrom["资源-背景遮罩"] || "");
@@ -1445,7 +2184,7 @@
 		data['effect_zoomSpeed'] = Number( dataFrom["缩放速度"] || 1.0);
 		data['effect_zoomRange'] = Number( dataFrom["缩放幅度范围"] || 0.2);
 		
-		// > 控制器 初始化数据『控制器与贴图的样式-静态数据-指针初始化』
+		// > 控制器 - 『控制器与贴图的样式-静态数据-指针初始化』
 		Drill_MBa_Controller.drill_controller_initData( data );
 		
 		return data;
@@ -1474,7 +2213,7 @@
 		DrillUp.g_MBa_default = {};
 	}
 	/*-----------------背景------------------*/
-	DrillUp.g_MBa_style_length = 80;
+	DrillUp.g_MBa_style_length = 200;
 	DrillUp.g_MBa_style = [];
 	DrillUp.g_MBa_style[0] = DrillUp.g_MBa_default;
 	for( var i = 1; i <= DrillUp.g_MBa_style_length; i++ ){
@@ -2509,17 +3248,39 @@ Scene_MenuBase.prototype.drill_MBa_sortByZIndex = function () {
 // ** 菜单层级（接口实现）
 //=============================================================================
 //==============================
-// * 菜单层级 - 最顶层
+// * 菜单层级 - 创建
+//==============================
+var _drill_MBa_menuLayer_createBackground = Scene_MenuBase.prototype.createBackground;
+Scene_MenuBase.prototype.createBackground = function(){
+	
+	// > 『菜单后面层-创建』
+	_drill_MBa_menuLayer_createBackground.call(this);
+	
+	// > 『菜单前面层-创建』
+	if( this._foregroundSprite == undefined ){
+		this._foregroundSprite = new Sprite();
+	}
+};
+//==============================
+// * 菜单层级 - 帧刷新
 //==============================
 var _drill_MBa_menuLayer_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
 	_drill_MBa_menuLayer_update.call(this);
 	
-	if(!this._backgroundSprite ){		//菜单后面层（防止覆写报错）
+	// > 菜单后面层（防止覆写报错）
+	if( this._backgroundSprite == undefined ){
 		this._backgroundSprite = new Sprite();
 	}
-	if(!this._foregroundSprite ){		//菜单前面层
+	
+	// > 菜单前面层（防止覆写报错）
+	if( this._foregroundSprite == undefined ){
 		this._foregroundSprite = new Sprite();
+	}
+	
+	// > 『菜单前面层-顺序控制』
+	if( this._foregroundSprite_hasAddChild == undefined ){
+		this._foregroundSprite_hasAddChild = true;
 		this.addChild(this._foregroundSprite);	
 	}
 };
@@ -2584,9 +3345,9 @@ var _drill_MBa_createBackground = Scene_MenuBase.prototype.createBackground;
 Scene_MenuBase.prototype.createBackground = function() {
 	
 	// > 背景初始化
-	SceneManager._drill_MBa_created = false;	
+	SceneManager._drill_MBa_created = false;
    	this._drill_MBa_spriteTank = [];
-   	this._drill_MBa_dataTank = [];				//注意，该数组与DrillUp.g_MBa_style数组的下标不同步，要使用data
+   	this._drill_MBa_controllerTank = [];
 	
 	// > 原函数
 	_drill_MBa_createBackground.call(this);		//（菜单基类在这里创建 ._backgroundSprite ）
@@ -2768,8 +3529,8 @@ Scene_MenuBase.prototype.drill_MBa_create = function() {
 // * 贴图控制 - 帧刷新
 //==============================
 Scene_MenuBase.prototype.drill_MBa_update = function() {
-	this.drill_MBa_updateController();
-	this.drill_MBa_updateAttr();
+	this.drill_MBa_updateController();		//帧刷新 - 控制器
+	this.drill_MBa_updateAttr();			//帧刷新 - 基础特性
 }
 //==============================
 // * 贴图控制 - 帧刷新 控制器
@@ -2778,8 +3539,6 @@ Scene_MenuBase.prototype.drill_MBa_updateController = function(){
 	for(var i = 0; i < this._drill_MBa_controllerTank.length; i++ ){
 		var temp_controller = this._drill_MBa_controllerTank[i];
 		if( temp_controller == undefined ){ continue; }
-		
-		// > 控制器帧刷新
 		temp_controller.drill_controller_update();
 	}
 }
@@ -2920,8 +3679,8 @@ Scene_MenuBase.prototype.drill_MBa_create = function() {
 // **							->序列号
 // **						->显示/隐藏
 // **						->暂停/继续
-// **						->设置销毁
-// **						->是否销毁
+// **						->控制器标记销毁
+// **						->控制器是否销毁
 // **					
 // **					->A主体『界面装饰最终变换值』『变换特性的规范』
 // **						->基础特性
@@ -3015,7 +3774,7 @@ Drill_MBa_Controller.prototype.drill_controller_resetData = function( data_id ){
 //##############################
 // * 控制器 - 显示/隐藏【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -3035,16 +3794,16 @@ Drill_MBa_Controller.prototype.drill_controller_setPause = function( pause ){
 	this._drill_pause = pause;
 };
 //##############################
-// * 控制器 - 设置销毁【标准函数】
+// * 控制器 - 控制器标记销毁【标准函数】
 //
 //			参数：	> 无
-//			返回：	> 布尔
+//			返回：	> 无
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_destroy = function(){
 	this._drill_needDestroy = true;
 };
 //##############################
-// * 控制器 - 是否销毁【标准函数】
+// * 控制器 - 控制器是否销毁【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 布尔
@@ -3083,64 +3842,91 @@ Drill_MBa_Controller.METHOD__drill_controller_commandChange_restoreAttr    = 45;
 Drill_MBa_Controller.METHOD__drill_controller_commandChange_setMove        = 51;
 Drill_MBa_Controller.METHOD__drill_controller_commandChange_restoreMove    = 52;
 
-//##############################
-// * A主体 - 切换混合模式【标准函数】
+//==============================
+// * A主体 - 切换混合模式（开放函数）
 //
 //			参数：	> blendMode 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBa_Controller.prototype.drill_controller_setBlendMode = function( blendMode ){
 	this._drill_blendMode = blendMode;
 };
-//##############################
-// * A主体 - 切换菜单层级【标准函数】
+//==============================
+// * A主体 - 切换层级（开放函数）
 //
 //			参数：	> layerIndex 字符串
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBa_Controller.prototype.drill_controller_setLayerIndex = function( layerIndex ){
 	this._drill_layerIndex = layerIndex;
 };
-//##############################
-// * A主体 - 切换图片层级【标准函数】
+//==============================
+// * A主体 - 切换堆叠级（开放函数）
 //
 //			参数：	> zIndex 数字
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBa_Controller.prototype.drill_controller_setZIndex = function( zIndex ){
 	this._drill_zIndex = zIndex;
 };
-//##############################
-// * A主体 - 还原混合模式【标准函数】
+//==============================
+// * A主体 - 还原混合模式（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBa_Controller.prototype.drill_controller_restoreBlendMode = function(){
 	var data = this.drill_data();
 	this._drill_blendMode = data['blendMode'];
 };
-//##############################
-// * A主体 - 还原地图层级【标准函数】
+//==============================
+// * A主体 - 还原层级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBa_Controller.prototype.drill_controller_restoreLayerIndex = function(){
 	var data = this.drill_data();
 	this._drill_layerIndex = data['layerIndex'];
 };
-//##############################
-// * A主体 - 还原图片层级【标准函数】
+//==============================
+// * A主体 - 还原堆叠级（开放函数）
 //
 //			参数：	> 无
 //			返回：	> 无
-//##############################
+//==============================
 Drill_MBa_Controller.prototype.drill_controller_restoreZIndex = function(){
 	var data = this.drill_data();
 	this._drill_zIndex = data['zIndex'];
 };
 
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
+//##############################
+DrillUp.g_MBa_notFindStyleAlertOnce = true;
+//##############################
+// * 控制器 - 『控制器与贴图的样式-静态数据』获取数据指针【标准函数】
+//			
+//			参数：	> 无
+//			返回：	> 对象指针
+//			
+//			说明：	> 由于数据量巨大，所以只读静态数据。不要存储到存档中，也不要挂载到控制器身上。
+//					> 该函数直接获取指针，可以放在帧刷新中使用。
+//##############################
+Drill_MBa_Controller.prototype.drill_data = function(){
+	var cur_styleId   = this._drill_data_id +1;
+	var cur_styleData = DrillUp.g_MBa_style[ this._drill_data_id ];
+	if( cur_styleData == undefined ){
+		
+		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
+		if( DrillUp.g_MBa_notFindStyleAlertOnce == true ){
+			DrillUp.g_MBa_notFindStyleAlertOnce = false;
+			alert( DrillUp.drill_MBa_getPluginTip_StyleNotFind(cur_styleId) );
+		}
+		return {};
+	}
+	return cur_styleData;
+};
 //##############################
 // * 控制器 - 初始化数据『控制器与贴图』【标准默认值】
 //
@@ -3151,7 +3937,7 @@ Drill_MBa_Controller.prototype.drill_controller_restoreZIndex = function(){
 //##############################
 Drill_MBa_Controller.drill_controller_initData = function( data ){
 	//	（该函数是静态函数，直接修改 静态数据 的指针值）
-	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 接收数据 的参数）
+	//	（参数会有细微区别，因为此处针对 控制器 的参数，而静态数据针对 @注释定义 的参数）
 	
 	// > A主体 - 基础特性
 	if( data['src_img'] == undefined ){ data['src_img'] = "" };										//A主体 - 资源
@@ -3164,6 +3950,7 @@ Drill_MBa_Controller.drill_controller_initData = function( data ){
 	if( data['blendMode'] == undefined ){ data['blendMode'] = 0 };									//A主体 - 混合模式
 	if( data['layerIndex'] == undefined ){ data['layerIndex'] = "菜单后面层" };						//A主体 - 菜单层级
 	if( data['zIndex'] == undefined ){ data['zIndex'] = 0 };										//A主体 - 图片层级
+	if( data['styleName'] == undefined ){ data['styleName'] = "" };									//A主体 - 标签
 	
 	// > A主体 - 其它特性
 	if( data['src_img_mask'] == undefined ){ data['src_img_mask'] = "" };							//A主体 - 遮罩资源
@@ -3233,40 +4020,6 @@ Drill_MBa_Controller.prototype.drill_controller_resetData_Private = function( da
 	//this.drill_controller_initData();										//初始化数据
 	this.drill_controller_initChild();										//初始化子功能
 }
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』校验标记
-//##############################
-DrillUp.g_MBa_notFindStyleAlertOnce = true;
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』空的静态数据
-//			
-//			说明：	> 空数据会在initData时会进行默认值初始化，在其他地方只读。
-//##############################
-Drill_MBa_Controller.emptyData = {};
-//##############################
-// * 控制器 - 『控制器与贴图的样式-静态数据』获取静态数据【标准函数】
-//			
-//			参数：	> 无
-//			返回：	> 对象指针
-//			
-//			说明：	> 由于数据量巨大，不要存储到存档中，也不要直接挂载到Controller身上。
-//					> 静态数据会在initData时会进行默认值初始化，在其他地方只读。
-//					> 【此函数不含遍历，而是直接获取值，可以放在帧刷新中使用】
-//##############################
-Drill_MBa_Controller.prototype.drill_data = function(){
-	var cur_styleId   = this._drill_data_id +1;
-	var cur_styleData = DrillUp.g_MBa_style[ this._drill_data_id ];
-	if( cur_styleData == undefined ){
-		
-		// > 『控制器与贴图的样式-静态数据』 - 校验+提示信息（只执行一次）
-		if( DrillUp.g_MBa_notFindStyleAlertOnce == true ){
-			DrillUp.g_MBa_notFindStyleAlertOnce = false;
-			alert( DrillUp.drill_MBa_getPluginTip_StyleNotFind(cur_styleId) );
-		}
-		return Drill_MBa_Controller.emptyData;
-	}
-	return cur_styleData;
-};
 
 
 //==============================
@@ -3369,61 +4122,61 @@ Drill_MBa_Controller.prototype.drill_controller_updateChange_Position = function
 	this._drill_change_selfYAcc += this.drill_controller_finalTransform_selfYSpeed();
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置X【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_x = function(){
 	return this._drill_change_x + this._drill_change_selfXAcc + this._drill_move_originOffsetX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 位置Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 位置Y【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_y = function(){
 	return this._drill_change_y + this._drill_change_selfYAcc + this._drill_move_originOffsetY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 移动速度X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 移动速度X【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_selfXSpeed = function(){
 	return this._drill_change_selfXSpeed;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 移动速度Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 移动速度Y【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_selfYSpeed = function(){
 	return this._drill_change_selfYSpeed;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放X【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_scaleX = function(){
 	return this._drill_change_scaleX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 缩放Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 缩放Y【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_scaleY = function(){
 	return this._drill_change_scaleY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 透明度（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 透明度【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_opacity = function(){
 	return this._drill_change_opacity;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切X（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切X【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_skewX = function(){
 	return this._drill_change_skewX;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 斜切Y（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 斜切Y【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_skewY = function(){
 	return this._drill_change_skewY;
 }
 //##############################
-// * B变换特性 - 数据最终变换值 - 旋转（可继承，开放函数）
+// * B变换特性 - 数据最终变换值 - 旋转【标准函数】
 //##############################
 Drill_MBa_Controller.prototype.drill_controller_finalTransform_rotate = function(){
 	return this._drill_change_rotate;
@@ -4241,8 +4994,8 @@ Drill_MBa_Controller.prototype.drill_controller_updateEffect = function(){
 // **					->贴图『控制器与贴图』
 // **						->是否就绪
 // **						->优化策略
-// **						->是否需要销毁（未使用）
-// **						->销毁（手动）
+// **						->贴图是否销毁
+// **						->贴图执行销毁
 // **					
 // **					->A贴图主体
 // **					->B变换特性
@@ -4295,7 +5048,7 @@ Drill_MBa_Sprite.prototype.update = function(){
 }
 
 //##############################
-// * C对象绑定 - 设置控制器【开放函数】
+// * C对象绑定 - 设置控制器【标准函数】
 //			
 //			参数：	> controller 控制器对象
 //			返回：	> 无
@@ -4307,7 +5060,7 @@ Drill_MBa_Sprite.prototype.drill_sprite_setController = function( controller ){
 	this._drill_curSerial = controller._drill_controllerSerial;
 };
 //##############################
-// * C对象绑定 - 初始化子功能『控制器与贴图』【开放函数】
+// * C对象绑定 - 初始化子功能『控制器与贴图』【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -4328,7 +5081,7 @@ Drill_MBa_Sprite.prototype.drill_sprite_initChild = function(){
 // * 背景贴图 - 是否就绪【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否显示）
+//			返回：	> 布尔
 //			
 //			说明：	> 这里完全 不考虑 延迟加载问题。
 //##############################
@@ -4348,10 +5101,10 @@ Drill_MBa_Sprite.prototype.drill_sprite_isOptimizationPassed = function(){
     return true;
 };
 //##############################
-// * 背景贴图 - 是否需要销毁【标准函数】
+// * 背景贴图 - 贴图是否销毁【标准函数】
 //			
 //			参数：	> 无
-//			返回：	> 布尔（是否需要销毁）
+//			返回：	> 布尔
 //			
 //			说明：	> 此函数可用于监听 控制器数据 是否被销毁，数据销毁后，贴图可自动销毁。
 //##############################
@@ -4361,7 +5114,7 @@ Drill_MBa_Sprite.prototype.drill_sprite_isNeedDestroy = function(){
     return false;
 };
 //##############################
-// * 背景贴图 - 销毁【标准函数】
+// * 背景贴图 - 贴图执行销毁【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无

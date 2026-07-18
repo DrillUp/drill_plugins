@@ -1398,49 +1398,49 @@ Game_Follower.prototype.resetPattern = function() {
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //##############################
-// * 数据最终变换值 - 位置X（开放函数）
+// * 数据最终变换值 - 位置X【标准函数】
 //##############################
 //	（没有 drill_COEF_finalTransform_x()，数据最终变换值X就是：screenX() ）
 //
 //##############################
-// * 数据最终变换值 - 位置Y（开放函数）
+// * 数据最终变换值 - 位置Y【标准函数】
 //##############################
 //	（没有 drill_COEF_finalTransform_y()，数据最终变换值Y就是：screenY() ）
 //
 
 //##############################
-// * 数据最终变换值 - 累积位置X（开放函数）
+// * 数据最终变换值 - 累积位置X【标准函数】
 //
 //			说明：	> 子插件可继承此函数，使用 像素单位。
 //					  子插件要么继承 screenX，要么继承该函数，不要重复继承。
 //##############################
 Game_CharacterBase.prototype.drill_COEF_acc_x = function(){ return 0; };
 //##############################
-// * 数据最终变换值 - 累积位置Y（开放函数）
+// * 数据最终变换值 - 累积位置Y【标准函数】
 //
 //			说明：	> 子插件可继承此函数，使用 像素单位。
 //					  子插件要么继承 screenY，要么继承该函数，不要重复继承。
 //##############################
 Game_CharacterBase.prototype.drill_COEF_acc_y = function(){ return 0; };
 //##############################
-// * 数据最终变换值 - 累积位置X - 倒影镜像用（开放函数）
+// * 数据最终变换值 - 累积位置X - 倒影镜像用【标准函数】
 //##############################
 Game_CharacterBase.prototype.drill_COEF_acc_LRR_x = function(){ return 0; };
 //##############################
-// * 数据最终变换值 - 累积位置Y - 倒影镜像用（开放函数）
+// * 数据最终变换值 - 累积位置Y - 倒影镜像用【标准函数】
 //##############################
 Game_CharacterBase.prototype.drill_COEF_acc_LRR_y = function(){ return 0; };
 //##############################
-// * 数据最终变换值 - 累积位置X - 同步镜像用（开放函数）
+// * 数据最终变换值 - 累积位置X - 同步镜像用【标准函数】
 //##############################
 Game_CharacterBase.prototype.drill_COEF_acc_LSR_x = function(){ return 0; };
 //##############################
-// * 数据最终变换值 - 累积位置Y - 同步镜像用（开放函数）
+// * 数据最终变换值 - 累积位置Y - 同步镜像用【标准函数】
 //##############################
 Game_CharacterBase.prototype.drill_COEF_acc_LSR_y = function(){ return 0; };
 	
 //##############################
-// * 数据最终变换值 - 缩放X（可继承，开放函数）
+// * 数据最终变换值 - 缩放X【标准函数】
 //
 //			说明：	> 子插件可继承此函数，使用 比例单位（如1.00，注意可为 -1.00）。
 //##############################
@@ -1448,7 +1448,7 @@ Game_CharacterBase.prototype.drill_COEF_finalTransform_scaleX = function(){
 	return 1.00;
 };
 //##############################
-// * 数据最终变换值 - 缩放Y（可继承，开放函数）
+// * 数据最终变换值 - 缩放Y【标准函数】
 //
 //			说明：	> 子插件可继承此函数，使用 比例单位（如1.00，注意可为 -1.00）。
 //##############################
@@ -1456,7 +1456,7 @@ Game_CharacterBase.prototype.drill_COEF_finalTransform_scaleY = function(){
 	return 1.00;
 };
 //##############################
-// * 数据最终变换值 - 透明度（可继承，开放函数）
+// * 数据最终变换值 - 透明度【标准函数】
 //
 //			说明：	> 子插件可继承此函数，使用 透明度值0~255。
 //##############################
@@ -1464,7 +1464,7 @@ Game_CharacterBase.prototype.drill_COEF_finalTransform_opacity = function(){
 	return this._opacity;
 };
 //##############################
-// * 数据最终变换值 - 斜切X（可继承，开放函数）
+// * 数据最终变换值 - 斜切X【标准函数】
 //
 //			说明：	> 子插件可继承此函数，使用 比例单位（如1.00，注意可为 -1.00）。
 //##############################
@@ -1472,7 +1472,7 @@ Game_CharacterBase.prototype.drill_COEF_finalTransform_skewX = function(){
 	return 0.00;
 };
 //##############################
-// * 数据最终变换值 - 斜切Y（可继承，开放函数）
+// * 数据最终变换值 - 斜切Y【标准函数】
 //
 //			说明：	> 子插件可继承此函数，使用 比例单位（如1.00，注意可为 -1.00）。
 //##############################
@@ -1480,7 +1480,7 @@ Game_CharacterBase.prototype.drill_COEF_finalTransform_skewY = function(){
 	return 0.00;
 };
 //##############################
-// * 数据最终变换值 - 旋转（可继承，开放函数）
+// * 数据最终变换值 - 旋转【标准函数】
 //
 //			说明：	> 子插件可继承此函数，使用 角度单位。
 //##############################
@@ -2169,7 +2169,7 @@ Drill_COEF_CollisionBean.prototype.initialize = function(){
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
-// * 实体类 - 显示/隐藏【开放函数】
+// * 实体类 - 显示/隐藏【标准函数】
 //			
 //			参数：	> visible 布尔
 //			返回：	> 无
@@ -2178,7 +2178,7 @@ Drill_COEF_CollisionBean.prototype.drill_bean_setVisible = function( visible ){
 	this._drill_visible = visible;
 };
 //##############################
-// * 实体类 - 设置锚点【开放函数】
+// * 实体类 - 设置锚点【标准函数】
 //			
 //			参数：	> anchor_x 数字
 //					> anchor_y 数字
@@ -2189,7 +2189,7 @@ Drill_COEF_CollisionBean.prototype.drill_bean_setAnchor = function( anchor_x, an
 	this._drill_anchor_y = anchor_y;
 };
 //##############################
-// * 实体类 - 设置位置【开放函数】
+// * 实体类 - 设置位置【标准函数】
 //			
 //			参数：	> x 数字
 //					> y 数字
@@ -2200,7 +2200,7 @@ Drill_COEF_CollisionBean.prototype.drill_bean_setPosition = function( x, y ){
 	this._drill_y = y;
 };
 //##############################
-// * 实体类 - 设置缩放值【开放函数】
+// * 实体类 - 设置缩放值【标准函数】
 //			
 //			参数：	> scale_x 数字
 //					> scale_y 数字
@@ -2211,7 +2211,7 @@ Drill_COEF_CollisionBean.prototype.drill_bean_setScale = function( scale_x, scal
 	this._drill_scale_y = scale_y;
 };
 //##############################
-// * 实体类 - 设置斜切值【开放函数】
+// * 实体类 - 设置斜切值【标准函数】
 //			
 //			参数：	> skew_x 数字
 //					> skew_y 数字
@@ -2222,7 +2222,7 @@ Drill_COEF_CollisionBean.prototype.drill_bean_setSkew = function( skew_x, skew_y
 	this._drill_skew_y = skew_y;
 };
 //##############################
-// * 实体类 - 设置旋转值【开放函数】
+// * 实体类 - 设置旋转值【标准函数】
 //			
 //			参数：	> rotate 数字（弧度）
 //			返回：	> 无
@@ -2231,7 +2231,7 @@ Drill_COEF_CollisionBean.prototype.drill_bean_setRotate = function( rotate ){
 	this._drill_rotate = rotate;
 };
 //##############################
-// * 实体类 - 设置框架【开放函数】
+// * 实体类 - 设置框架【标准函数】
 //			
 //			参数：	> frameX,frameY,frameW,frameH 矩形对象
 //			返回：	> 无

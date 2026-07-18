@@ -1512,7 +1512,7 @@ Drill_ESH_Bean.prototype.initialize = function(){
     this.drill_initPrivateData();										//私有数据初始化
 };
 //##############################
-// * 实体类 - 设置可见【开放函数】
+// * 实体类 - 设置可见【标准函数】
 //			
 //			参数：	> visible 布尔
 //			返回：	> 无
@@ -1521,7 +1521,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setVisible = function( visible ){
 	this._drill_visible = visible;
 };
 //##############################
-// * 实体类 - 设置样式ID【开放函数】
+// * 实体类 - 设置样式ID【标准函数】
 //			
 //			参数：	> styleId 数字
 //			返回：	> 无
@@ -1530,7 +1530,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setStyleId = function( styleId ){
 	this._drill_styleId = styleId;
 };
 //##############################
-// * 实体类 - 设置角色【开放函数】
+// * 实体类 - 设置角色【标准函数】
 //			
 //			参数：	> actorId 数字
 //					> actorIndex 数字
@@ -1551,7 +1551,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setActor = function( actorId, actorIndex ){
 	this._drill_enemyIndex = -1;
 };
 //##############################
-// * 实体类 - 设置敌人【开放函数】
+// * 实体类 - 设置敌人【标准函数】
 //			
 //			参数：	> enemyId 数字
 //					> enemyIndex 数字
@@ -1572,7 +1572,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setEnemy = function( enemyId, enemyIndex ){
 	this._drill_actorIndex = -1;
 };
 //##############################
-// * 实体类 - 判断角色【开放函数】
+// * 实体类 - 判断角色【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
@@ -1583,7 +1583,7 @@ Drill_ESH_Bean.prototype.drill_ESH_isActor = function(){
 	return true;
 };
 //##############################
-// * 实体类 - 判断敌人【开放函数】
+// * 实体类 - 判断敌人【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
@@ -1595,7 +1595,7 @@ Drill_ESH_Bean.prototype.drill_ESH_isEnemy = function(){
 };
 
 //##############################
-// * 实体类 - 捕获 - 设置原位置【开放函数】
+// * 实体类 - 捕获 - 设置原位置【标准函数】
 //			
 //			参数：	> x,y 坐标
 //			返回：	> 无
@@ -1605,7 +1605,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setHomePosition = function( x, y ){
 	this._drill_spriteHomeY = y;
 };
 //##############################
-// * 实体类 - 捕获 - 设置贴图位置【开放函数】
+// * 实体类 - 捕获 - 设置贴图位置【标准函数】
 //			
 //			参数：	> x,y 坐标
 //			返回：	> 无
@@ -1615,7 +1615,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setPosition = function( x, y ){
 	this._drill_spriteY = y;
 };
 //##############################
-// * 实体类 - 捕获 - 设置隐藏状态【开放函数】
+// * 实体类 - 捕获 - 设置隐藏状态【标准函数】
 //			
 //			参数：	> enabled 布尔
 //			返回：	> 无
@@ -1626,7 +1626,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setHidden = function( enabled ){
 	this._drill_isHidden = enabled;
 };
 //##############################
-// * 实体类 - 捕获 - 设置死亡状态【开放函数】
+// * 实体类 - 捕获 - 设置死亡状态【标准函数】
 //			
 //			参数：	> enabled 布尔
 //			返回：	> 无
@@ -1635,7 +1635,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setDead = function( enabled ){
 	this._drill_isDead = enabled;
 };
 //##############################
-// * 实体类 - 捕获 - 设置选中状态【开放函数】
+// * 实体类 - 捕获 - 设置选中状态【标准函数】
 //			
 //			参数：	> enabled 布尔
 //			返回：	> 无
@@ -1645,7 +1645,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setSelected = function( enabled ){
 };
 
 //##############################
-// * 实体类 - 聚焦 - 设置聚焦时长【开放函数】
+// * 实体类 - 聚焦 - 设置聚焦时长【标准函数】
 //			
 //			参数：	> time 数字
 //			返回：	> 无
@@ -1654,7 +1654,7 @@ Drill_ESH_Bean.prototype.drill_ESH_setFocusingTime = function( time ){
 	this._drill_focusingTime = time;
 };
 //##############################
-// * 实体类 - 聚焦 - 帧刷新聚焦时长【开放函数】
+// * 实体类 - 聚焦 - 帧刷新聚焦时长【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -1666,7 +1666,7 @@ Drill_ESH_Bean.prototype.drill_ESH_updateFocusingTime = function(){
 	}
 };
 //##############################
-// * 实体类 - 聚焦 - 判断是否被聚焦【开放函数】
+// * 实体类 - 聚焦 - 判断是否被聚焦【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
@@ -1685,7 +1685,7 @@ Drill_ESH_Bean.prototype.drill_ESH_isFocusing = function(){
 	return false;
 };
 //##############################
-// * 实体类 - 聚焦 - 判断是否符合长期显示【开放函数】
+// * 实体类 - 聚焦 - 判断是否符合长期显示【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 布尔
@@ -2021,7 +2021,7 @@ DrillUp.g_ESH_checkNaN = true;
 // **						->显示贴图/隐藏贴图
 // **						->是否就绪
 // **						->优化策略
-// **						->销毁
+// **						->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					
@@ -2102,7 +2102,7 @@ Drill_ESH_LifeSprite.prototype.update = function() {
 //##############################
 // * 生命框贴图 - 显示贴图/隐藏贴图【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -2116,7 +2116,7 @@ Drill_ESH_LifeSprite.prototype.drill_ESH_setVisible = function( visible ){
 // * 生命框贴图 - 是否就绪【标准函数】
 //
 //			参数：	> 无
-//			返回：	> visible 布尔
+//			返回：	> 布尔
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
@@ -2139,7 +2139,7 @@ Drill_ESH_LifeSprite.prototype.drill_ESH_isOptimizationPassed = function(){
     return true;	//（暂无策略）
 };
 //##############################
-// * 生命框贴图 - 销毁【标准函数】
+// * 生命框贴图 - 销毁独立贴图【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -2176,7 +2176,7 @@ Drill_ESH_LifeSprite.prototype.drill_initSprite = function() {
 	this.drill_createNumber();				//初始化对象 - F参数数字
 };
 //==============================
-// * 生命框贴图 - 销毁（私有）
+// * 生命框贴图 - 销毁独立贴图（私有）
 //==============================
 Drill_ESH_LifeSprite.prototype.drill_ESH_destroy_Private = function() {
 	

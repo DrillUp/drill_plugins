@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        管理器 - 全局存储核心
+ * @plugindesc [v1.4]        管理器 - 全局存储核心
  * @author Drill_up
  * 
  * @Drill_LE_param "文件路径-%d"
@@ -100,6 +100,8 @@
  * 修复了未配置路径时，存储失败的bug。
  * [v1.3]
  * 改进了内部结构，区分了载体的定义。
+ * [v1.4]
+ * 修复了浏览器运行时报错的bug。
  * 
  * 
  * 
@@ -524,7 +526,7 @@ StorageManager.drill_COGS_loadFile = function( file_id ){
 //			说明：	> 传入的数据为加密字符串。
 //==============================
 StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
-	if( require == undefined ){ return; }
+	if( typeof(require) === "undefined" ){ return; }
 	var fs = require('fs');  //『文件载体-fs』
 	
 	// > 路径解析
@@ -548,7 +550,7 @@ StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
 //			说明：	> 返回的数据为解密字符串。
 //==============================
 StorageManager.drill_COGS_loadFromLocalFile = function( file_set ){
-	if( require == undefined ){ return ""; }
+	if( typeof(require) === "undefined" ){ return ""; }
 	var fs = require('fs');  //『文件载体-fs』
 	
 	// > 路径解析
@@ -588,7 +590,7 @@ StorageManager.drill_COGS_path_getDir = function( file_set ){
 // * 存档管理器 - B文件载体 - 『文件载体-文件路径』 - 游戏根目录（开放函数）
 //==============================
 StorageManager.drill_COGS_path_getParentDirectory = function() {
-    if( require == undefined ){ return ""; }
+    if( typeof(require) === "undefined" ){ return ""; }
 	var path = require('path');  //『文件载体-fs』
     var base = path.dirname(process.mainModule.filename);
     return path.join(base, '/');

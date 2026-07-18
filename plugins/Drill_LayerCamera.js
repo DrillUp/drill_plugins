@@ -1814,7 +1814,7 @@ Drill_LCa_Controller.prototype.drill_LCa_isPause = function(){
 //##############################
 // * 控制器 - 暂停/继续【标准函数】
 //
-//			参数：	> enable 布尔
+//			参数：	> pause 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。

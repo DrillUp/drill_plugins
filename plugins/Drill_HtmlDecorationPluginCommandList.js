@@ -75,501 +75,1237 @@
  * ----更新日志
  * [v1.0]
  * 完成插件ヽ(*。>Д<)o゜
- *
- *
- *
+ * 
  * @param ---容器组 1至20---
- * @default
- *
+ * @default 
+ * 
  * @param 指令容器-1
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-2
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-3
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-4
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-5
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-6
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-7
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-8
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-9
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-10
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-11
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-12
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-13
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-14
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-15
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-16
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-17
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-18
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-19
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-20
  * @parent ---容器组 1至20---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param ---容器组21至40---
- * @default
- *
+ * @default 
+ * 
  * @param 指令容器-21
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-22
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-23
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-24
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-25
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-26
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-27
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-28
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-29
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-30
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-31
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-32
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-33
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-34
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-35
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-36
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-37
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-38
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-39
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-40
  * @parent ---容器组21至40---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param ---容器组41至60---
- * @default
- *
+ * @default 
+ * 
  * @param 指令容器-41
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-42
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-43
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-44
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-45
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-46
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-47
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-48
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-49
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-50
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-51
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-52
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-53
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-54
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-55
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-56
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-57
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-58
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-59
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-60
  * @parent ---容器组41至60---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param ---容器组61至80---
- * @default
- *
+ * @default 
+ * 
  * @param 指令容器-61
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-62
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-63
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-64
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-65
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-66
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-67
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-68
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-69
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-70
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-71
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-72
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-73
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-74
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-75
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-76
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-77
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-78
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-79
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
  * @param 指令容器-80
  * @parent ---容器组61至80---
  * @type struct<PluginCommandNote>
  * @desc 指令容器的详细配置信息。
  * @default 
- *
+ * 
+ * @param ---容器组81至100---
+ * @default 
+ * 
+ * @param 指令容器-81
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-82
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-83
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-84
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-85
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-86
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-87
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-88
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-89
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-90
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-91
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-92
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-93
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-94
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-95
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-96
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-97
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-98
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-99
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-100
+ * @parent ---容器组81至100---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param ---容器组101至120---
+ * @default 
+ * 
+ * @param 指令容器-101
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-102
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-103
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-104
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-105
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-106
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-107
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-108
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-109
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-110
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-111
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-112
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-113
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-114
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-115
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-116
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-117
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-118
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-119
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-120
+ * @parent ---容器组101至120---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param ---容器组121至140---
+ * @default 
+ * 
+ * @param 指令容器-121
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-122
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-123
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-124
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-125
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-126
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-127
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-128
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-129
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-130
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-131
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-132
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-133
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-134
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-135
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-136
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-137
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-138
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-139
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-140
+ * @parent ---容器组121至140---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param ---容器组141至160---
+ * @default 
+ * 
+ * @param 指令容器-141
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-142
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-143
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-144
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-145
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-146
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-147
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-148
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-149
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-150
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-151
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-152
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-153
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-154
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-155
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-156
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-157
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-158
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-159
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-160
+ * @parent ---容器组141至160---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param ---容器组161至180---
+ * @default 
+ * 
+ * @param 指令容器-161
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-162
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-163
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-164
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-165
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-166
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-167
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-168
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-169
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-170
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-171
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-172
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-173
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-174
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-175
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-176
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-177
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-178
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-179
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-180
+ * @parent ---容器组161至180---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param ---容器组181至200---
+ * @default 
+ * 
+ * @param 指令容器-181
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-182
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-183
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-184
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-185
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-186
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-187
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-188
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-189
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-190
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-191
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-192
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-193
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-194
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-195
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-196
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-197
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-198
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-199
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default 
+ * 
+ * @param 指令容器-200
+ * @parent ---容器组181至200---
+ * @type struct<PluginCommandNote>
+ * @desc 指令容器的详细配置信息。
+ * @default
+ * 
  */
 /*~struct~PluginCommandNote:
  * 
@@ -610,6 +1346,9 @@
 //			->☆插件指令
 //			
 //			->☆指令解析
+//			
+//			->☆引擎兼容（STG）
+//			->☆引擎兼容（ACT）
 //
 //
 //		★家谱：
@@ -677,7 +1416,7 @@
 		return data;
 	}
 	/*-----------------指令容器------------------*/
-	DrillUp.g_HDPCL_group_length = 80;
+	DrillUp.g_HDPCL_group_length = 200;
 	DrillUp.g_HDPCL_group = [];
 	for( var i = 0; i < DrillUp.g_HDPCL_group_length; i++ ){
 		if( DrillUp.parameters["指令容器-" + String(i+1) ] != undefined &&
@@ -769,4 +1508,72 @@ DataManager.drill_HDPCL_runCommandRow = function( str, gameInterpreter ){
 		DrillUp.drill_HDSGi_globalPluginCommand( command, args, gameInterpreter );
 	}
 };
+
+
+//=============================================================================
+// ** ☆引擎兼容（STG）
+//
+//			说明：	> 此模块对引擎进行专门兼容。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 引擎兼容 - 最后继承1级
+//==============================
+var _drill_STG_HDPCL_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_STG_HDPCL_scene_initialize.call(this);
+	
+	//==============================
+	// * 引擎兼容 - 插件指令『STG的插件指令』（游戏窗体，插件位置在前面，需要最后继承）
+	//==============================
+	if( Imported.Drill_STG__objects ){
+		
+		//==============================
+		// * 插件指令 - STG指令绑定
+		//==============================
+		var _drill_STG_HDPCL_pluginCommand = Drill_STG_GameInterpreter.prototype.pluginCommand;
+		Drill_STG_GameInterpreter.prototype.pluginCommand = function( command, args ){
+			_drill_STG_HDPCL_pluginCommand.call(this, command, args);
+			this.drill_HDPCL_pluginCommand( command, args );
+		}
+		//==============================
+		// * 插件指令 - STG指令执行
+		//==============================
+		Drill_STG_GameInterpreter.prototype.drill_HDPCL_pluginCommand = Game_Interpreter.prototype.drill_HDPCL_pluginCommand;
+	}
+}
+
+
+//=============================================================================
+// ** ☆引擎兼容（ACT）
+//
+//			说明：	> 此模块对引擎进行专门兼容。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 引擎兼容 - 最后继承1级
+//==============================
+var _drill_ACT_HDPCL_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_ACT_HDPCL_scene_initialize.call(this);
+	
+	//==============================
+	// * 引擎兼容 - 插件指令『ACT的插件指令』（游戏窗体，插件位置在前面，需要最后继承）
+	//==============================
+	if( Imported.Drill_ACT__objects ){
+		
+		//==============================
+		// * 插件指令 - ACT指令绑定
+		//==============================
+		var _drill_ACT_HDPCL_pluginCommand = Drill_ACT_GameInterpreter.prototype.pluginCommand;
+		Drill_ACT_GameInterpreter.prototype.pluginCommand = function( command, args ){
+			_drill_ACT_HDPCL_pluginCommand.call(this, command, args);
+			this.drill_HDPCL_pluginCommand( command, args );
+		}
+		//==============================
+		// * 插件指令 - ACT指令执行
+		//==============================
+		Drill_ACT_GameInterpreter.prototype.drill_HDPCL_pluginCommand = Game_Interpreter.prototype.drill_HDPCL_pluginCommand;
+	}
+}
 

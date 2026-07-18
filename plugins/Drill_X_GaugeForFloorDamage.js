@@ -305,7 +305,7 @@ Game_Actor.prototype.executeFloorDamage = function(){
 		}
 		if( this._drill_LDF_lastDamage_default > 0 ){
 			
-			// > 【地图UI - 临时漂浮参数数字】简单指令
+			// > 【地图UI - 临时漂浮参数数字】简单临时配置『临时配置』
 			var style_id = DrillUp.g_XGFFD_defaultBind1 -1;
 			var ballistics_id = DrillUp.g_GFN_simple_defaultBallisticsId -1;
 			var sustain_time = DrillUp.g_GFN_simple_defaultTime;
@@ -321,7 +321,7 @@ Game_Actor.prototype.executeFloorDamage = function(){
 		}
 		if( this._drill_LDF_lastDamage_default < 0 ){
 			
-			// > 【地图UI - 临时漂浮参数数字】简单指令
+			// > 【地图UI - 临时漂浮参数数字】简单临时配置『临时配置』
 			var style_id = DrillUp.g_XGFFD_defaultBind2 -1;
 			var ballistics_id = DrillUp.g_GFN_simple_defaultBallisticsId -1;
 			var sustain_time = DrillUp.g_GFN_simple_defaultTime;
@@ -378,7 +378,7 @@ Game_Actor.prototype.drill_LDF_executeFloorDamage = function(){
 		}
 		if( this._drill_LDF_lastDamage_custom == 0 ){ return; }
 		
-		// > 【地图UI - 临时漂浮参数数字】简单指令
+		// > 【地图UI - 临时漂浮参数数字】简单临时配置『临时配置』
 		var style_id = DrillUp.g_XGFFD_bind[ $gamePlayer._drill_LDF_lastCustomType ] -1;
 		var ballistics_id = DrillUp.g_GFN_simple_defaultBallisticsId -1;
 		var sustain_time = DrillUp.g_GFN_simple_defaultTime;

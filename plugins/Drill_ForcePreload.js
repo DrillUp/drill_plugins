@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        管理器 - 强制预加载文件夹
+ * @plugindesc [v1.2]        管理器 - 强制预加载文件夹
  * @author Drill_up
  * 
  * @Drill_LE_param "文件夹路径-%d"
@@ -68,6 +68,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 改进了内部结构，防止在手机端报错。
+ * [v1.2]
+ * 修复了浏览器运行时报错的bug。
  * 
  * 
  * 
@@ -292,7 +294,7 @@ Game_Temp.prototype.drill_FPr_preloadInit = function() {
 		if( temp_path == "" ){ continue; }
 		
 		// > 文件夹
-		if( require == undefined ){ continue; }
+		if( typeof(require) === "undefined" ){ continue; }
 		var r_fs = require('fs');      //『文件载体-fs』
 		var r_path = require('path');  //『文件载体-fs』
 		

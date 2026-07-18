@@ -40,7 +40,7 @@
  * 1.插件的作用域：战斗界面。
  *   作用于战斗的各个层级。
  * 2.更多详细内容，去看看文档 "13.UI > 大家族-漂浮文字.docx"。
- *   临时对象相关内容，去看看文档 "13.UI > 关于临时对象与模板.docx"。
+ *   临时配置相关内容，去看看文档 "13.UI > 关于临时配置与模板.docx"。
  * 3.该插件的指令较多且使用频繁，建议使用小工具：插件信息查看器。
  *   在开启游戏编辑器时，可以并行使用读取器复制指令。
  * 细节：
@@ -82,78 +82,78 @@
  * ……
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件 - 简单指令
+ * ----激活条件 - 简单临时配置
  * 你可以通过插件指令快速生成对象：
  * 
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置-敌方[1] : 文本[一段文字]
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置-敌方[1] : 文本[一段文字] : 样式[1]
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置-敌方[1] : 文本[一段文字] : 样式[1] : 弹道[1]
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置-敌方[1] : 文本[一段文字] : 样式[1] : 弹道[1] : 持续时间[20]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置-敌方[1] : 文本[一段文字]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置-敌方[1] : 文本[一段文字] : 样式[1]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置-敌方[1] : 文本[一段文字] : 样式[1] : 弹道[1]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置-敌方[1] : 文本[一段文字] : 样式[1] : 弹道[1] : 持续时间[20]
  * 
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置[100,200] : 文本[一段文字]
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置变量[25,26] : 文本[一段文字]
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置-敌方[1] : 文本[一段文字]
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置-敌方变量[21] : 文本[一段文字]
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置-我方[1] : 文本[一段文字]
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置-我方变量[21] : 文本[一段文字]
- * 插件指令：>战斗临时漂浮文字 : 简单临时对象 : 位置-鼠标 : 文本[一段文字]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置[100,200] : 文本[一段文字]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置变量[25,26] : 文本[一段文字]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置-敌方[1] : 文本[一段文字]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置-敌方变量[21] : 文本[一段文字]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置-我方[1] : 文本[一段文字]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置-我方变量[21] : 文本[一段文字]
+ * 插件指令：>战斗临时漂浮文字 : 简单临时配置 : 位置-鼠标 : 文本[一段文字]
  * 
  * 1.前半部分（位置-敌方[1]）和 后半部分（文本[一段文字]）
  *   的参数可以随意组合。一共有4*7种组合方式。
- * 2.临时对象创建后，持续时间结束会自动清掉。
+ * 2.临时配置创建漂浮文字后，持续时间结束会自动清掉。
  * 
  * -----------------------------------------------------------------------------
- * ----激活条件 - 高级指令
- * 你可以通过插件指令控制临时对象的具体参数：
+ * ----激活条件 - 高级临时配置
+ * 你可以通过插件指令控制临时配置的具体参数：
  * 
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 初始化 : 样式[1] : 弹道[1]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 初始化 : 样式[1] : 弹道[1]
  * 
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-内容文本 : 文本[一段文字]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-内容文本 : 字符串[21]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-额外位置偏移 : 偏移[-10,20]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-UI基准 : 相对于战斗场景
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-UI基准 : 相对于镜头
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-战斗层级 : 下层
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-战斗层级 : 上层
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-战斗层级 : 图片层
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-战斗层级 : 最顶层
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-图片层级 : 图片层级[4]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-布局透明度 : 透明度[255]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-布局透明度 : 透明度变量[21]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-锁定窗口色调 : 开启锁定
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-锁定窗口色调 : 关闭锁定
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-窗口色调 : 色调[0,0,0]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-窗口附加宽度 : 值[+5]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-窗口附加高度 : 值[+5]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-逐个绘制 : 开启
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-逐个绘制 : 关闭
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-内容文本 : 文本[一段文字]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-内容文本 : 字符串[21]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-额外位置偏移 : 偏移[-10,20]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-UI基准 : 相对于战斗场景
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-UI基准 : 相对于镜头
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-战斗层级 : 下层
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-战斗层级 : 上层
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-战斗层级 : 图片层
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-战斗层级 : 最顶层
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-图片层级 : 图片层级[4]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-布局透明度 : 透明度[255]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-布局透明度 : 透明度变量[21]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-锁定窗口色调 : 开启锁定
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-锁定窗口色调 : 关闭锁定
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-窗口色调 : 色调[0,0,0]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-窗口附加宽度 : 值[+5]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-窗口附加高度 : 值[+5]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-逐个绘制 : 开启
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-逐个绘制 : 关闭
  * 
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-开始移动前延迟时间 : 时长[60]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-移动结束后等待时间 : 时长[60]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-初速度 : 速度[1.0]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-固定方向 : 角度[90.0]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-固定方向 : 角度变量[21]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-扇形朝向 : 角度[90.0]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-极坐标模式-扇形朝向 : 角度变量[21]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-直角坐标模式-X轴初速度 : 速度[1.0]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-直角坐标模式-Y轴初速度 : 速度[1.0]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改弹道属性-轨道锚点模式-轨道初速度 : 速度[1.0]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-开始移动前延迟时间 : 时长[60]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-移动结束后等待时间 : 时长[60]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-极坐标模式-初速度 : 速度[1.0]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-极坐标模式-固定方向 : 角度[90.0]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-极坐标模式-固定方向 : 角度变量[21]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-极坐标模式-扇形朝向 : 角度[90.0]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-极坐标模式-扇形朝向 : 角度变量[21]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-直角坐标模式-X轴初速度 : 速度[1.0]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-直角坐标模式-Y轴初速度 : 速度[1.0]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改弹道属性-轨道锚点模式-轨道初速度 : 速度[1.0]
  * 
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 创建 : 位置[100,200] : 持续时间[20]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 创建 : 位置变量[25,26] : 持续时间[20]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 创建 : 位置-鼠标 : 持续时间[20]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 创建 : 位置-敌方[1] : 持续时间[20]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 创建 : 位置-敌方变量[21] : 持续时间[20]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 创建 : 位置-我方[1] : 持续时间[20]
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 创建 : 位置-我方变量[21] : 持续时间[20]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 创建 : 位置[100,200] : 持续时间[20]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 创建 : 位置变量[25,26] : 持续时间[20]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 创建 : 位置-鼠标 : 持续时间[20]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 创建 : 位置-敌方[1] : 持续时间[20]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 创建 : 位置-敌方变量[21] : 持续时间[20]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 创建 : 位置-我方[1] : 持续时间[20]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 创建 : 位置-我方变量[21] : 持续时间[20]
  * 
  * 1.插件指令需要先后执行： 初始化、修改样式属性、修改弹道属性、创建 。
  *   如果 样式属性/弹道属性 不需要变化，直接先后执行： 初始化、创建 即可。
- *   临时对象创建之后，将不再受控制。
+ *   临时配置创建漂浮文字后，将不再受控制。
  * 2.注意你配置的 弹道 的 模式与类型 ，比如 速度类型、方向类型，
  *   并不是修改了任意属性就都会生效，还要看配置的类型是否用到了该参数。
  *   比如 "修改弹道属性-固定方向"，只在 方向类型 为 固定方向 的情况下才有效。
- * 3.临时对象创建后，持续时间结束会自动清掉。
+ * 3.临时配置创建漂浮文字后，持续时间结束会自动清掉。
  * 4."位置-敌方[2]"指敌人的具体位置，这个位置随时可能会变化，
  *   比如漂浮的小爱丽丝，其位置一直上下漂浮变化。
  * 5."修改样式属性-内容文本"中的"字符串"对应字符串核心中指定编号的自定义文本。
@@ -162,7 +162,7 @@
  * ----可选设定 - 空格支持
  * 插件指令下面的写法也是有效的：
  * 
- * 插件指令：>战斗临时漂浮文字 : 临时对象 : 修改样式属性-内容文本 : 文本[药水 + 1]
+ * 插件指令：>战斗临时漂浮文字 : 临时配置 : 修改样式属性-内容文本 : 文本[药水 + 1]
  * 
  * 1.你可以在该插件指令中的文本使用空格。
  *   从原则上来说，脚本会将插件指令的空格分开，所以含空格的写法是不推荐的。
@@ -200,7 +200,7 @@
  * [v1.2]
  * 优化了与战斗活动镜头的变换关系。
  * [v1.3]
- * 大幅度改进了 插件指令 结构，完善了 临时对象 的设置。
+ * 大幅度改进了 插件指令 结构，完善了 临时配置 的设置。
  * [v1.4]
  * 添加了漂浮文字外框设置色调的功能。
  * [v1.5]
@@ -210,22 +210,22 @@
  *
  *
  *
- * @param 简单指令的默认样式
+ * @param 简单临时配置的默认样式
  * @type number
  * @min 1
- * @desc 简单指令若未配置样式时，则使用默认样式。默认样式对应配置样式的编号。
+ * @desc 简单临时配置若未配置样式时，则使用默认样式。默认样式对应配置样式的编号。
  * @default 1
  * 
- * @param 简单指令的默认弹道
+ * @param 简单临时配置的默认弹道
  * @type number
  * @min 1
- * @desc 简单指令若未配置弹道时，则使用默认弹道。默认样式对应配置样式的弹道。
+ * @desc 简单临时配置若未配置弹道时，则使用默认弹道。默认样式对应配置样式的弹道。
  * @default 1
  * 
- * @param 简单指令的默认持续时间
+ * @param 简单临时配置的默认持续时间
  * @type number
  * @min 1
- * @desc 简单指令若未配置持续时间时，则使用默认的持续时间。
+ * @desc 简单临时配置若未配置持续时间时，则使用默认的持续时间。
  * @default 120
  * 
  * 
@@ -1005,8 +1005,8 @@
 //			->☆提示信息
 //			->☆静态数据
 //			->☆插件指令
-//				->简单指令
-//				->高级指令
+//				->简单临时配置
+//				->高级临时配置
 //			->☆预加载
 //			->☆场景容器之单位贴图
 //				->获取 - 敌人容器指针【标准函数】
@@ -1021,9 +1021,9 @@
 //				->图片层级排序【标准函数】
 //				->层级与镜头的位移【标准函数】
 //			
-//			->☆临时对象
-//				->高级指令 初始化
-//				->高级指令 创建
+//			->☆临时配置
+//				->高级临时配置 初始化
+//				->高级临时配置 创建
 //				->修改样式属性
 //				->修改弹道属性
 //			->☆贴图控制
@@ -1094,16 +1094,28 @@
 		return "【" + DrillUp.g_BFTT_PluginTip_curName + "】\n缺少 字符串核心 插件，插件指令执行失败。";
 	};
 	//==============================
-	// * 提示信息 - 报错 - 临时对象 内容文本为空
+	// * 提示信息 - 报错 - 找不到配置1
 	//==============================
-	DrillUp.drill_BFTT_getPluginTip_DataIsEmpty = function(){
-		return "【" + DrillUp.g_BFTT_PluginTip_curName + "】\n插件指令错误，你使用高级指令时，内容文本为空，将不显示任何文本。";
+	DrillUp.drill_BFTT_getPluginTip_DataNotFind1 = function( data_id ){
+		return "【" + DrillUp.g_BFTT_PluginTip_curName + "】\n插件指令错误，漂浮文字样式["+data_id+"]不存在或未配置。";
 	};
 	//==============================
-	// * 提示信息 - 报错 - 临时对象 未初始化
+	// * 提示信息 - 报错 - 找不到配置2
+	//==============================
+	DrillUp.drill_BFTT_getPluginTip_DataNotFind2 = function( data_id ){
+		return "【" + DrillUp.g_BFTT_PluginTip_curName + "】\n插件指令错误，漂浮文字弹道["+data_id+"]不存在或未配置。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 临时配置 内容文本为空
+	//==============================
+	DrillUp.drill_BFTT_getPluginTip_DataIsEmpty = function(){
+		return "【" + DrillUp.g_BFTT_PluginTip_curName + "】\n插件指令错误，你使用高级临时配置时，内容文本为空，将不显示任何文本。";
+	};
+	//==============================
+	// * 提示信息 - 报错 - 临时配置 未初始化
 	//==============================
 	DrillUp.drill_BFTT_getPluginTip_BufferIsNull = function(){
-		return "【" + DrillUp.g_BFTT_PluginTip_curName + "】\n插件指令错误，你使用高级指令时，未执行临时对象的初始化指令。";
+		return "【" + DrillUp.g_BFTT_PluginTip_curName + "】\n插件指令错误，你使用高级临时配置时，未执行临时配置的初始化指令。";
 	};
 	//==============================
 	// * 提示信息 - 报错 - 窗口字符底层校验
@@ -1250,9 +1262,9 @@
 	
 	
 	/*-----------------杂项------------------*/
-	DrillUp.g_BFTT_simple_defaultStyleId = Number(DrillUp.parameters["简单指令的默认样式"] || 1); 
-	DrillUp.g_BFTT_simple_defaultBallisticsId = Number(DrillUp.parameters["简单指令的默认弹道"] || 1); 
-	DrillUp.g_BFTT_simple_defaultTime = Number(DrillUp.parameters["简单指令的默认持续时间"] || 60); 
+	DrillUp.g_BFTT_simple_defaultStyleId = Number(DrillUp.parameters["简单临时配置的默认样式"] || 1); 
+	DrillUp.g_BFTT_simple_defaultBallisticsId = Number(DrillUp.parameters["简单临时配置的默认弹道"] || 1); 
+	DrillUp.g_BFTT_simple_defaultTime = Number(DrillUp.parameters["简单临时配置的默认持续时间"] || 60); 
 	
 	/*-----------------临时漂浮样式集合------------------*/
 	DrillUp.g_BFTT_style_length = 20;
@@ -1263,7 +1275,7 @@
 			var temp = JSON.parse(DrillUp.parameters["临时漂浮样式-" + String(i+1) ]);
 			DrillUp.g_BFTT_style[i] = DrillUp.drill_BFTT_initContext( temp );
 		}else{
-			DrillUp.g_BFTT_style[i] = DrillUp.drill_BFTT_initContext( {} );
+			DrillUp.g_BFTT_style[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 	
@@ -1276,7 +1288,7 @@
 			var temp = JSON.parse(DrillUp.parameters["临时漂浮弹道-" + String(i+1) ]);
 			DrillUp.g_BFTT_ballistics[i] = DrillUp.drill_BFTT_initBallistics( temp );
 		}else{
-			DrillUp.g_BFTT_ballistics[i] = DrillUp.drill_BFTT_initBallistics( {} );
+			DrillUp.g_BFTT_ballistics[i] = undefined;		//（设为空值，节约静态数据占用容量）
 		}
 	}
 
@@ -1306,12 +1318,12 @@ Game_Interpreter.prototype.drill_BFTT_pluginCommand = function( command, args ){
 	if( command === ">战斗临时漂浮文字" ){
 		
 		
-		/*-----------------简单指令------------------*/
+		/*-----------------简单临时配置------------------*/
 		if( args.length >= 6 ){		//（考虑变化参数数量情况，但不考虑 文本含空格 情况）
 			var unit = String(args[1]);
 			var temp1 = String(args[3]);
 			var temp2 = String(args[5]);
-			if( unit == "简单临时对象" ){
+			if( unit == "简单临时配置" || unit == "简单临时对象" ){
 				
 				var pos = null;
 				if( temp1.indexOf("位置-敌方变量[") != -1 || temp1.indexOf("敌方变量位置[") != -1 ){
@@ -1399,29 +1411,31 @@ Game_Interpreter.prototype.drill_BFTT_pluginCommand = function( command, args ){
 		}
 		
 		
-		/*-----------------高级指令 - 初始化------------------*/
+		/*-----------------高级临时配置 - 初始化------------------*/
 		if( args.length == 8 ){	
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
-			if( unit == "临时对象" && type == "初始化" ){
-				temp1 = temp1.replace("样式[","");
-				temp1 = temp1.replace("]","");
-				temp1 = Number(temp1)-1;
-				temp2 = temp2.replace("弹道[","");
-				temp2 = temp2.replace("]","");
-				temp2 = Number(temp2)-1;
-				$gameTemp.drill_BFTT_setBuffer( temp1, temp2 );
+			if( unit == "临时配置" || unit == "临时对象" ){
+				if( type == "初始化" ){
+					temp1 = temp1.replace("样式[","");
+					temp1 = temp1.replace("]","");
+					temp1 = Number(temp1)-1;
+					temp2 = temp2.replace("弹道[","");
+					temp2 = temp2.replace("]","");
+					temp2 = Number(temp2)-1;
+					$gameTemp.drill_BFTT_setBuffer( temp1, temp2 );
+				}
 			}
 		}
 		
-		/*-----------------高级指令 - 修改样式属性------------------*/
+		/*-----------------高级临时配置 - 修改样式属性------------------*/
 		if( args.length >= 6 ){		//（考虑变化参数数量情况）
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( unit == "临时对象" ){
+			if( unit == "临时配置" || unit == "临时对象" ){
 				
 				if( type == "修改样式属性-内容文本" || type == "修改内容文本" ){
 					if( temp1.indexOf("字符串[") != -1 ){
@@ -1453,7 +1467,7 @@ Game_Interpreter.prototype.drill_BFTT_pluginCommand = function( command, args ){
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( unit == "临时对象" ){
+			if( unit == "临时配置" || unit == "临时对象" ){
 				
 				if( type == "修改样式属性-额外位置偏移" || type == "修改额外位置偏移" ){
 					temp1 = temp1.replace("偏移[","");
@@ -1525,12 +1539,12 @@ Game_Interpreter.prototype.drill_BFTT_pluginCommand = function( command, args ){
 			}
 		}
 		
-		/*-----------------高级指令 - 修改弹道属性------------------*/
+		/*-----------------高级临时配置 - 修改弹道属性------------------*/
 		if( args.length == 6 ){	
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
-			if( unit == "临时对象" ){
+			if( unit == "临时配置" || unit == "临时对象" ){
 				
 				if( type == "修改弹道属性-开始移动前延迟时间" ){
 					temp1 = temp1.replace("时长[","");
@@ -1593,80 +1607,82 @@ Game_Interpreter.prototype.drill_BFTT_pluginCommand = function( command, args ){
 			}
 		}
 		
-		/*-----------------高级指令 - 创建------------------*/
+		/*-----------------高级临时配置 - 创建------------------*/
 		if( args.length == 8 ){	
 			var unit = String(args[1]);
 			var type = String(args[3]);
 			var temp1 = String(args[5]);
 			var temp2 = String(args[7]);
-			if( unit == "临时对象" && type == "创建" ){
-				
-				var pos = null;
-				if( temp1.indexOf("位置-敌方变量[") != -1 || temp1.indexOf("敌方变量位置[") != -1 ){
-					temp1 = temp1.replace("位置-敌方变量[","");
-					temp1 = temp1.replace("敌方变量位置[","");
-					temp1 = temp1.replace("]","");
-					temp1 = $gameVariables.value(Number(temp1));
-					var temp_sprite = $gameTemp.drill_BFTT_getEnemySpriteByIndex(temp1-1);
-					if( temp_sprite != undefined ){
-						pos = [ temp_sprite.x, 
-								temp_sprite.y ];
+			if( unit == "临时配置" || unit == "临时对象" ){
+				if( type == "创建" ){
+					
+					var pos = null;
+					if( temp1.indexOf("位置-敌方变量[") != -1 || temp1.indexOf("敌方变量位置[") != -1 ){
+						temp1 = temp1.replace("位置-敌方变量[","");
+						temp1 = temp1.replace("敌方变量位置[","");
+						temp1 = temp1.replace("]","");
+						temp1 = $gameVariables.value(Number(temp1));
+						var temp_sprite = $gameTemp.drill_BFTT_getEnemySpriteByIndex(temp1-1);
+						if( temp_sprite != undefined ){
+							pos = [ temp_sprite.x, 
+									temp_sprite.y ];
+						}
+					}else if( temp1.indexOf("位置-敌方[") != -1 || temp1.indexOf("敌方位置[") != -1 ){
+						temp1 = temp1.replace("位置-敌方[","");
+						temp1 = temp1.replace("敌方位置[","");
+						temp1 = temp1.replace("]","");
+						temp1 = Number(temp1);
+						var temp_sprite = $gameTemp.drill_BFTT_getEnemySpriteByIndex(temp1-1);
+						if( temp_sprite != undefined ){
+							pos = [ temp_sprite.x, 
+									temp_sprite.y ];
+						}
+					}else if( temp1.indexOf("位置-我方变量[") != -1 || temp1.indexOf("我方变量位置[") != -1 ){
+						temp1 = temp1.replace("位置-我方变量[","");
+						temp1 = temp1.replace("我方变量位置[","");
+						temp1 = temp1.replace("]","");
+						temp1 = $gameVariables.value(Number(temp1));
+						var temp_sprite = $gameTemp.drill_BFTT_getActorSpriteByIndex(temp1-1);
+						if( temp_sprite != undefined ){
+							pos = [ temp_sprite.x, 
+									temp_sprite.y ];
+						}else{
+							//（第一人称下，获取不到我方角色的位置）
+						}
+					}else if( temp1.indexOf("位置-我方[") != -1 || temp1.indexOf("我方位置[") != -1 ){
+						temp1 = temp1.replace("位置-我方[","");
+						temp1 = temp1.replace("我方位置[","");
+						temp1 = temp1.replace("]","");
+						temp1 = Number(temp1);
+						var temp_sprite = $gameTemp.drill_BFTT_getActorSpriteByIndex(temp1-1);
+						if( temp_sprite != undefined ){
+							pos = [ temp_sprite.x, 
+									temp_sprite.y ];
+						}else{
+							//（第一人称下，获取不到我方角色的位置）
+						}
+					}else if( temp1.indexOf("位置变量[") != -1 ){
+						temp1 = temp1.replace("位置变量[","");
+						temp1 = temp1.replace("]","");
+						temp1 = temp1.split(/[,，]/);
+						pos = [ $gameVariables.value(Number(temp1[0])), 
+								$gameVariables.value(Number(temp1[1])) ];
+					}else if( temp1.indexOf("位置[") != -1 ){
+						temp1 = temp1.replace("位置[","");
+						temp1 = temp1.replace("]","");
+						temp1 = temp1.split(/[,，]/);
+						pos = [ Number(temp1[0]), 
+								Number(temp1[1]) ];
+					}else if( temp1 == "位置-鼠标" || temp1 == "鼠标位置" ){
+						pos = [ _drill_mouse_x, _drill_mouse_y ];
 					}
-				}else if( temp1.indexOf("位置-敌方[") != -1 || temp1.indexOf("敌方位置[") != -1 ){
-					temp1 = temp1.replace("位置-敌方[","");
-					temp1 = temp1.replace("敌方位置[","");
-					temp1 = temp1.replace("]","");
-					temp1 = Number(temp1);
-					var temp_sprite = $gameTemp.drill_BFTT_getEnemySpriteByIndex(temp1-1);
-					if( temp_sprite != undefined ){
-						pos = [ temp_sprite.x, 
-								temp_sprite.y ];
+					
+					if( pos != null ){
+						temp2 = temp2.replace("持续时间[","");
+						temp2 = temp2.replace("]","");
+						temp2 = Number(temp2);
+						$gameTemp.drill_BFTT_createByBuffer( pos, temp2 );
 					}
-				}else if( temp1.indexOf("位置-我方变量[") != -1 || temp1.indexOf("我方变量位置[") != -1 ){
-					temp1 = temp1.replace("位置-我方变量[","");
-					temp1 = temp1.replace("我方变量位置[","");
-					temp1 = temp1.replace("]","");
-					temp1 = $gameVariables.value(Number(temp1));
-					var temp_sprite = $gameTemp.drill_BFTT_getActorSpriteByIndex(temp1-1);
-					if( temp_sprite != undefined ){
-						pos = [ temp_sprite.x, 
-								temp_sprite.y ];
-					}else{
-						//（第一人称下，获取不到我方角色的位置）
-					}
-				}else if( temp1.indexOf("位置-我方[") != -1 || temp1.indexOf("我方位置[") != -1 ){
-					temp1 = temp1.replace("位置-我方[","");
-					temp1 = temp1.replace("我方位置[","");
-					temp1 = temp1.replace("]","");
-					temp1 = Number(temp1);
-					var temp_sprite = $gameTemp.drill_BFTT_getActorSpriteByIndex(temp1-1);
-					if( temp_sprite != undefined ){
-						pos = [ temp_sprite.x, 
-								temp_sprite.y ];
-					}else{
-						//（第一人称下，获取不到我方角色的位置）
-					}
-				}else if( temp1.indexOf("位置变量[") != -1 ){
-					temp1 = temp1.replace("位置变量[","");
-					temp1 = temp1.replace("]","");
-					temp1 = temp1.split(/[,，]/);
-					pos = [ $gameVariables.value(Number(temp1[0])), 
-							$gameVariables.value(Number(temp1[1])) ];
-				}else if( temp1.indexOf("位置[") != -1 ){
-					temp1 = temp1.replace("位置[","");
-					temp1 = temp1.replace("]","");
-					temp1 = temp1.split(/[,，]/);
-					pos = [ Number(temp1[0]), 
-							Number(temp1[1]) ];
-				}else if( temp1 == "位置-鼠标" || temp1 == "鼠标位置" ){
-					pos = [ _drill_mouse_x, _drill_mouse_y ];
-				}
-				
-				if( pos != null ){
-					temp2 = temp2.replace("持续时间[","");
-					temp2 = temp2.replace("]","");
-					temp2 = Number(temp2);
-					$gameTemp.drill_BFTT_createByBuffer( pos, temp2 );
 				}
 			}
 		}
@@ -2093,43 +2109,55 @@ Scene_Battle.prototype.drill_BFTT_layerCameraMoving_Private = function( xx, yy, 
 
 
 //=============================================================================
-// ** ☆临时对象
+// ** ☆临时配置
 //			
-//			说明：	> 此模块专门管理 插件指令控制的临时对象 。
+//			说明：	> 此模块专门管理 插件指令控制的临时配置 。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 临时对象 - 容器初始化
+// * 临时配置 - 容器初始化
 //==============================
 var _drill_BFTT_temp_initialize2 = Game_Temp.prototype.initialize;
 Game_Temp.prototype.initialize = function() {
 	_drill_BFTT_temp_initialize2.call(this);
-	this._drill_BFTT_commandBuffer = null;		//临时对象
+	this._drill_BFTT_commandBuffer = null;		//临时配置
 	this._drill_BFTT_commandSeq = [];			//漂浮文字容器
 };
 //==============================
-// * 临时对象 - 容器销毁
+// * 临时配置 - 容器销毁
 //==============================
 var _drill_BFTT_temp_terminate2 = Scene_Battle.prototype.terminate;
 Scene_Battle.prototype.terminate = function() {
 	_drill_BFTT_temp_terminate2.call(this);
-	$gameTemp._drill_BFTT_commandBuffer = null;		//临时对象
+	$gameTemp._drill_BFTT_commandBuffer = null;		//临时配置
 	$gameTemp._drill_BFTT_commandSeq = [];			//漂浮文字容器
 };
 //==============================
-// * 『临时对象』 - 简单指令
+// * 『临时配置』 - 简单临时配置
 //==============================
 Game_Temp.prototype.drill_BFTT_createSimple = function( pos, text, style_id, ballistics_id, sustain_time ){
 	if( style_id == undefined ){ style_id = DrillUp.g_BFTT_simple_defaultStyleId -1; }
 	if( ballistics_id == undefined ){ ballistics_id = DrillUp.g_BFTT_simple_defaultBallisticsId -1; }
 	if( sustain_time == undefined ){ sustain_time = DrillUp.g_BFTT_simple_defaultTime; }
 	
-	// > 基本参数初始化
-	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_style[ style_id ] ));  //『深拷贝-『临时对象』』
-	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_ballistics[ ballistics_id ] ));  //『深拷贝-『临时对象』』
+	// > 简单 校验
+	var style_data = DrillUp.g_BFTT_style[ style_id ];
+	if( style_data == undefined ){
+		alert( DrillUp.drill_BFTT_getPluginTip_DataNotFind1( style_id+1 ) );
+		return;
+	}
+	var ballistics_data = DrillUp.g_BFTT_ballistics[ ballistics_id ];
+	if( ballistics_data == undefined ){
+		alert( DrillUp.drill_BFTT_getPluginTip_DataNotFind2( ballistics_id+1 ) );
+		return;
+	}
 	
-	// > 临时对象设置
+	// > 简单 参数准备
+	var data = {};
+	data['s_data'] = JSON.parse(JSON.stringify( style_data ));  //『深拷贝-『临时配置』』
+	data['b_data'] = JSON.parse(JSON.stringify( ballistics_data ));  //『深拷贝-『临时配置』』
+	
+	// > 简单 设置
 	data['b_data']['movementNum'] = 1;
 	data['b_data']['movementTime'] = sustain_time;
 	data['param_x'] = pos[0];
@@ -2141,30 +2169,46 @@ Game_Temp.prototype.drill_BFTT_createSimple = function( pos, text, style_id, bal
 	this._drill_BFTT_commandSeq.push( data );
 };
 //==============================
-// * 『临时对象』 - 高级指令 初始化
+// * 『临时配置』 - 高级临时配置 初始化
 //==============================
 Game_Temp.prototype.drill_BFTT_setBuffer = function( style_id, ballistics_id ){
 	
-	// > 基本参数初始化
-	var data = {};
-	data['s_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_style[ style_id ] ));  //『深拷贝-『临时对象』』
-	data['b_data'] = JSON.parse(JSON.stringify( DrillUp.g_BFTT_ballistics[ ballistics_id ] ));  //『深拷贝-『临时对象』』
+	// > 高级 校验
+	var style_data = DrillUp.g_BFTT_style[ style_id ];
+	if( style_data == undefined ){
+		alert( DrillUp.drill_BFTT_getPluginTip_DataNotFind1( style_id+1 ) );
+		return;
+	}
+	var ballistics_data = DrillUp.g_BFTT_ballistics[ ballistics_id ];
+	if( ballistics_data == undefined ){
+		alert( DrillUp.drill_BFTT_getPluginTip_DataNotFind2( ballistics_id+1 ) );
+		return;
+	}
 	
-	// > 临时对象设置
+	// > 高级 参数准备
+	var data = {};
+	data['s_data'] = JSON.parse(JSON.stringify( style_data ));  //『深拷贝-『临时配置』』
+	data['b_data'] = JSON.parse(JSON.stringify( ballistics_data ));  //『深拷贝-『临时配置』』
+	
+	// > 高级 设置
 	data['param_x'] = 0;
 	data['param_y'] = 0;
 	
 	this._drill_BFTT_commandBuffer = data;
 };
 //==============================
-// * 『临时对象』 - 高级指令 创建
+// * 『临时配置』 - 高级临时配置 创建
 //==============================
 Game_Temp.prototype.drill_BFTT_createByBuffer = function( pos, time ){
+	
+	// > 高级 校验
 	var data = this._drill_BFTT_commandBuffer;
 	if( data == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
-	data = JSON.parse(JSON.stringify( data ));  //『深拷贝-『临时对象』』
 	
-	// > 临时对象设置
+	// > 高级 参数准备
+	data = JSON.parse(JSON.stringify( data ));  //『深拷贝-『临时配置』』
+	
+	// > 高级 设置
 	data['b_data']['movementNum'] = 1;
 	data['b_data']['movementTime'] = time;
 	data['param_x'] = pos[0];
@@ -2187,14 +2231,14 @@ Game_Temp.prototype.drill_BFTT_createByBuffer = function( pos, time ){
 	this._drill_BFTT_commandSeq.push( data );
 };
 //==============================
-// * 临时对象 - 修改样式属性-内容文本
+// * 临时配置 - 修改样式属性-内容文本
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_context = function( context ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['s_data']['context'] = context;
 };
 //==============================
-// * 临时对象 - 修改样式属性-额外位置偏移
+// * 临时配置 - 修改样式属性-额外位置偏移
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_offset = function( xx, yy ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
@@ -2202,42 +2246,42 @@ Game_Temp.prototype.drill_BFTT_setStyle_offset = function( xx, yy ){
 	this._drill_BFTT_commandBuffer['s_data']['offsetEx_y'] = yy;
 };
 //==============================
-// * 临时对象 - 修改样式属性-UI基准
+// * 临时配置 - 修改样式属性-UI基准
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_benchmark = function( benchmark ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['s_data']['window_benchmark'] = benchmark;
 };
 //==============================
-// * 临时对象 - 修改样式属性-战斗层级
+// * 临时配置 - 修改样式属性-战斗层级
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_layer = function( layer ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['s_data']['window_battle_layer'] = layer;
 };
 //==============================
-// * 临时对象 - 修改样式属性-图片层级
+// * 临时配置 - 修改样式属性-图片层级
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_zIndex = function( zIndex ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['s_data']['window_battle_zIndex'] = zIndex;
 };
 //==============================
-// * 临时对象 - 修改样式属性-布局透明度
+// * 临时配置 - 修改样式属性-布局透明度
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_opacity = function( opacity ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['s_data']['window_opacity'] = opacity;
 };
 //==============================
-// * 临时对象 - 修改样式属性-锁定窗口色调
+// * 临时配置 - 修改样式属性-锁定窗口色调
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_toneLock = function( locked ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['s_data']['window_tone_lock'] = locked;
 };
 //==============================
-// * 临时对象 - 修改样式属性-窗口色调
+// * 临时配置 - 修改样式属性-窗口色调
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_tone = function( r, g, b ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
@@ -2246,77 +2290,77 @@ Game_Temp.prototype.drill_BFTT_setStyle_tone = function( r, g, b ){
 	this._drill_BFTT_commandBuffer['s_data']['window_tone_b'] = b;
 };
 //==============================
-// * 临时对象 - 修改样式属性-窗口附加宽度
+// * 临时配置 - 修改样式属性-窗口附加宽度
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_exWidth = function( width ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['s_data']['window_ex_width'] = width;
 };
 //==============================
-// * 临时对象 - 修改样式属性-窗口附加高度
+// * 临时配置 - 修改样式属性-窗口附加高度
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_exHeight = function( height ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['s_data']['window_ex_height'] = height;
 };
 //==============================
-// * 临时对象 - 修改样式属性-逐个绘制
+// * 临时配置 - 修改样式属性-逐个绘制
 //==============================
 Game_Temp.prototype.drill_BFTT_setStyle_timingEnabled = function( enable ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['s_data']['timing_enabled'] = enable;
 };
 //==============================
-// * 临时对象 - 修改弹道属性-开始移动前延迟时间
+// * 临时配置 - 修改弹道属性-开始移动前延迟时间
 //==============================
 Game_Temp.prototype.drill_BFTT_setBallistics_movementDelay = function( movementDelay ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['b_data']['movementDelay'] = movementDelay;
 };
 //==============================
-// * 临时对象 - 修改弹道属性-移动结束后等待时间
+// * 临时配置 - 修改弹道属性-移动结束后等待时间
 //==============================
 Game_Temp.prototype.drill_BFTT_setBallistics_movementEndDelay = function( movementEndDelay ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['b_data']['movementEndDelay'] = movementEndDelay;
 };
 //==============================
-// * 临时对象 - 修改弹道属性-极坐标模式-初速度
+// * 临时配置 - 修改弹道属性-极坐标模式-初速度
 //==============================
 Game_Temp.prototype.drill_BFTT_setBallistics_polarSpeedBase = function( polarSpeedBase ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['b_data']['polarSpeedBase'] = polarSpeedBase;
 };
 //==============================
-// * 临时对象 - 修改弹道属性-极坐标模式-固定方向
+// * 临时配置 - 修改弹道属性-极坐标模式-固定方向
 //==============================
 Game_Temp.prototype.drill_BFTT_setBallistics_polarDirFixed = function( polarDirFixed ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['b_data']['polarDirFixed'] = polarDirFixed;
 };
 //==============================
-// * 临时对象 - 修改弹道属性-极坐标模式-扇形朝向
+// * 临时配置 - 修改弹道属性-极坐标模式-扇形朝向
 //==============================
 Game_Temp.prototype.drill_BFTT_setBallistics_polarDirSectorFace = function( polarDirSectorFace ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['b_data']['polarDirSectorFace'] = polarDirSectorFace;
 };
 //==============================
-// * 临时对象 - 修改弹道属性-直角坐标模式-X轴初速度
+// * 临时配置 - 修改弹道属性-直角坐标模式-X轴初速度
 //==============================
 Game_Temp.prototype.drill_BFTT_setBallistics_cartXSpeedBase = function( cartXSpeedBase ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['b_data']['cartXSpeedBase'] = cartXSpeedBase;
 };
 //==============================
-// * 临时对象 - 修改弹道属性-直角坐标模式-Y轴初速度
+// * 临时配置 - 修改弹道属性-直角坐标模式-Y轴初速度
 //==============================
 Game_Temp.prototype.drill_BFTT_setBallistics_cartYSpeedBase = function( cartYSpeedBase ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
 	this._drill_BFTT_commandBuffer['b_data']['cartYSpeedBase'] = cartYSpeedBase;
 };
 //==============================
-// * 临时对象 - 修改弹道属性-轨道锚点模式-轨道初速度
+// * 临时配置 - 修改弹道属性-轨道锚点模式-轨道初速度
 //==============================
 Game_Temp.prototype.drill_BFTT_setBallistics_trackSpeedBase = function( trackSpeedBase ){
 	if( this._drill_BFTT_commandBuffer == undefined ){ alert( DrillUp.drill_BFTT_getPluginTip_BufferIsNull() ); return; }
@@ -2446,7 +2490,7 @@ Scene_Battle.prototype.drill_BFTT_updateWindowPosition = function() {
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						x->销毁
+// **						x->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					

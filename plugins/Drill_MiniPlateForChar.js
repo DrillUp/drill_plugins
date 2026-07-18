@@ -1128,7 +1128,7 @@
 		return data;
 	}
 	/*-----------------皮肤样式------------------*/
-	DrillUp.g_MPFC_style_list_length = 20;
+	DrillUp.g_MPFC_style_list_length = 10;
 	DrillUp.g_MPFC_style_list = [];
 	for( var i = 0; i < DrillUp.g_MPFC_style_list_length; i++ ){
 		if( DrillUp.parameters["皮肤样式-" + String(i+1) ] != undefined &&
@@ -1561,17 +1561,39 @@ Scene_MenuBase.prototype.drill_MPFC_sortByZIndex = function () {
 // ** 菜单层级（接口实现）
 //=============================================================================
 //==============================
-// * 菜单层级 - 最顶层
+// * 菜单层级 - 创建
+//==============================
+var _drill_MPFC_menuLayer_createBackground = Scene_MenuBase.prototype.createBackground;
+Scene_MenuBase.prototype.createBackground = function(){
+	
+	// > 『菜单后面层-创建』
+	_drill_MPFC_menuLayer_createBackground.call(this);
+	
+	// > 『菜单前面层-创建』
+	if( this._foregroundSprite == undefined ){
+		this._foregroundSprite = new Sprite();
+	}
+};
+//==============================
+// * 菜单层级 - 帧刷新
 //==============================
 var _drill_MPFC_menuLayer_update = Scene_MenuBase.prototype.update;
 Scene_MenuBase.prototype.update = function() {
 	_drill_MPFC_menuLayer_update.call(this);
 	
-	if(!this._backgroundSprite ){		//菜单后面层（防止覆写报错）
+	// > 菜单后面层（防止覆写报错）
+	if( this._backgroundSprite == undefined ){
 		this._backgroundSprite = new Sprite();
 	}
-	if(!this._foregroundSprite ){		//菜单前面层
+	
+	// > 菜单前面层（防止覆写报错）
+	if( this._foregroundSprite == undefined ){
 		this._foregroundSprite = new Sprite();
+	}
+	
+	// > 『菜单前面层-顺序控制』
+	if( this._foregroundSprite_hasAddChild == undefined ){
+		this._foregroundSprite_hasAddChild = true;
 		this.addChild(this._foregroundSprite);	
 	}
 };
@@ -1869,7 +1891,7 @@ Drill_MPFC_Bean.prototype.initialize = function(){
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
-// * 实体类 - 设置可见【开放函数】（暂未使用）
+// * 实体类 - 设置可见【标准函数】（暂未使用）
 //			
 //			参数：	> visible 布尔
 //			返回：	> 无
@@ -1878,7 +1900,7 @@ Drill_MPFC_Bean.prototype.drill_bean_setVisible = function( visible ){
 	this._drill_visible = visible;
 };
 //##############################
-// * 实体类 - 设置位置【开放函数】
+// * 实体类 - 设置位置【标准函数】
 //			
 //			参数：	> x 数字
 //					> y 数字
@@ -1891,7 +1913,7 @@ Drill_MPFC_Bean.prototype.drill_bean_setPosition = function( x, y ){
 	this._drill_y = y;
 };
 //##############################
-// * 实体类 - 设置框架【开放函数】
+// * 实体类 - 设置框架【标准函数】
 //			
 //			参数：	> frameX,frameY,frameW,frameH 矩形对象
 //			返回：	> 无
@@ -1905,7 +1927,7 @@ Drill_MPFC_Bean.prototype.drill_bean_resetFrame = function( frameX, frameY, fram
 	this._drill_frameH = frameH;
 };
 //##############################
-// * 实体类 - 设置内容【开放函数】
+// * 实体类 - 设置内容【标准函数】
 //			
 //			参数：	> context 字符串
 //			返回：	> 无
@@ -1915,7 +1937,7 @@ Drill_MPFC_Bean.prototype.drill_bean_setContext = function( context ){
 	this.drill_bean_refreshContext();
 };
 //##############################
-// * 实体类 - 刷新内容【开放函数】
+// * 实体类 - 刷新内容【标准函数】
 //			
 //			参数：	> 无
 //			返回：	> 无
@@ -1924,7 +1946,7 @@ Drill_MPFC_Bean.prototype.drill_bean_refreshContext = function(){
 	this._drill_contextSerial = new Date().getTime() + Math.random();	//（强制刷新内容）『随机因子-生成一个不重复的序列号』
 };
 //##############################
-// * 实体类 - 设置皮肤样式【开放函数】
+// * 实体类 - 设置皮肤样式【标准函数】
 //			
 //			参数：	> styleMode 字符串（默认皮肤样式/锁定皮肤样式）
 //					> styleLockedId 数字
@@ -2072,7 +2094,7 @@ Scene_MenuBase.prototype.update = function() {
 // **						x->显示贴图/隐藏贴图（通过实体类控制）
 // **						x->是否就绪
 // **						x->优化策略
-// **						x->销毁
+// **						x->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					

@@ -460,8 +460,8 @@
 //		★功能结构树：
 //			->☆提示信息
 //			->☆静态数据
-//			->☆原型链规范（Scene_Boot）
 //			
+//			->☆原型链规范（Scene_Boot）
 //			->☆启动控制
 //				->游戏窗口模式
 //					->全屏模式
@@ -469,13 +469,13 @@
 //				->界面底色
 //			
 //			->启动标志界面【Scene_Drill_TBS】
-//				->A主体
-//				->B预加载
-//				->C阶段控制
-//				->D单图模式
-//				->E播放GIF模式
-//				->F视频模式
-//				->G音乐设置
+//				->2A主体
+//				->2B预加载
+//				->2C阶段控制
+//				->2D单图模式
+//				->2E播放GIF模式
+//				->2F视频模式
+//				->2G音乐设置
 //				->☆原型链规范（Scene_Drill_TBS）
 //
 //
@@ -585,15 +585,6 @@
 		data['bgm_src'] = String( dataFrom["资源-BGM"] || "");
 		return data;
 	}
-	
-	/*-----------------游戏窗口------------------*/
-	DrillUp.g_TBS_screen_mode = String(DrillUp.parameters["游戏窗口模式"] || "窗口模式");
-	DrillUp.g_TBS_screen_maximize = String(DrillUp.parameters["窗口是否最大化"] || "true") == "true";
-	DrillUp.g_TBS_screen = String(DrillUp.parameters["窗口是否设置初始缩放高宽"] || "false") == "true";
-	DrillUp.g_TBS_screen_width = Number(DrillUp.parameters["窗口初始缩放宽度"] || 816);
-	DrillUp.g_TBS_screen_height = Number(DrillUp.parameters["窗口初始缩放高度"] || 624);
-	DrillUp.g_TBS_screen_back_color = String(DrillUp.parameters["启动界面底色"] || "#000000");
-	
 	/*-----------------阶段------------------*/
 	DrillUp.g_TBS_list_length = 20;
 	DrillUp.g_TBS_list = [];
@@ -607,6 +598,14 @@
 		}
 	}
 	DrillUp.g_TBS_list[ DrillUp.g_TBS_list_length ] = null;		//跳出界面的收尾设置
+	
+	/*-----------------游戏窗口------------------*/
+	DrillUp.g_TBS_screen_mode = String(DrillUp.parameters["游戏窗口模式"] || "窗口模式");
+	DrillUp.g_TBS_screen_maximize = String(DrillUp.parameters["窗口是否最大化"] || "true") == "true";
+	DrillUp.g_TBS_screen = String(DrillUp.parameters["窗口是否设置初始缩放高宽"] || "false") == "true";
+	DrillUp.g_TBS_screen_width = Number(DrillUp.parameters["窗口初始缩放宽度"] || 816);
+	DrillUp.g_TBS_screen_height = Number(DrillUp.parameters["窗口初始缩放高度"] || 624);
+	DrillUp.g_TBS_screen_back_color = String(DrillUp.parameters["启动界面底色"] || "#000000");
 	
 	
 	
@@ -788,17 +787,17 @@ Graphics.initialize = function( width, height, type ){
 // **						x> 创建 - 菜单背景（createBackground）
 // **						x> 创建 - 帮助窗口（createHelpWindow）
 // **					
-// **					->A主体
+// **					->2A主体
 // **						->界面底色
-// **					->B预加载
-// **					->C阶段控制
+// **					->2B预加载
+// **					->2C阶段控制
 // **						->显示时间为0瞬间切换
 // **						->第N张图片必须播放M秒才可跳过
 // **						->跳过按键
-// **					->D单图模式
-// **					->E播放GIF模式
-// **					->F视频模式
-// **					->G音乐设置
+// **					->2D单图模式
+// **					->2E播放GIF模式
+// **					->2F视频模式
+// **					->2G音乐设置
 // **		界面成员：
 // **					> ._drill_main_layer			主层
 // **						> ._drill_pic_sprite		单图
@@ -821,44 +820,44 @@ Scene_Drill_TBS.prototype.initialize = function() {
     Scene_Base.prototype.initialize.call(this);
 	this._drill_dataList = DrillUp.g_TBS_list;	//数据列表
 	
-	this.drill_scene_initAttr();				//初始化子功能 - A主体
-	this.drill_scene_initPreload();				//初始化子功能 - B预加载
-	this.drill_scene_initLevel();				//初始化子功能 - C阶段控制
-	this.drill_scene_initPic();					//初始化子功能 - D单图模式
-	this.drill_scene_initGIF();					//初始化子功能 - E播放GIF模式
-	this.drill_scene_initVideo();				//初始化子功能 - F视频模式
-	this.drill_scene_initMusic();				//初始化子功能 - G音乐设置
+	this.drill_scene_initAttr();				//初始化子功能 - 2A主体
+	this.drill_scene_initPreload();				//初始化子功能 - 2B预加载
+	this.drill_scene_initLevel();				//初始化子功能 - 2C阶段控制
+	this.drill_scene_initPic();					//初始化子功能 - 2D单图模式
+	this.drill_scene_initGIF();					//初始化子功能 - 2E播放GIF模式
+	this.drill_scene_initVideo();				//初始化子功能 - 2F视频模式
+	this.drill_scene_initMusic();				//初始化子功能 - 2G音乐设置
 }
 //==============================
 // * 启动标志界面 - 创建（继承）
 //==============================
 Scene_Drill_TBS.prototype.create = function() {	
     Scene_Base.prototype.create.call(this);
-	this.drill_scene_createAttr();				//创建 - A主体
+	this.drill_scene_createAttr();				//创建 - 2A主体
 };
 //==============================
 // * 启动标志界面 - 帧刷新（继承）
 //==============================
 Scene_Drill_TBS.prototype.update = function() {
 	Scene_Base.prototype.update.call(this);
-	if( this.drill_isAllBitmapReady() != true ){ return; }	//帧刷新 - B预加载 - 判断
-															//帧刷新 - A主体（无）
-	this.drill_scene_updateLevel();							//帧刷新 - C阶段控制
-	this.drill_scene_updatePic();							//帧刷新 - D单图模式
-	this.drill_scene_updateGIF();							//帧刷新 - E播放GIF模式
-	this.drill_scene_updateVideo();							//帧刷新 - F视频模式
-															//帧刷新 - G音乐设置（无）
+	if( this.drill_isAllBitmapReady() != true ){ return; }	//帧刷新 - 2B预加载 - 判断
+															//帧刷新 - 2A主体（无）
+	this.drill_scene_updateLevel();							//帧刷新 - 2C阶段控制
+	this.drill_scene_updatePic();							//帧刷新 - 2D单图模式
+	this.drill_scene_updateGIF();							//帧刷新 - 2E播放GIF模式
+	this.drill_scene_updateVideo();							//帧刷新 - 2F视频模式
+															//帧刷新 - 2G音乐设置（无）
 };
 
 
 //==============================
-// * A主体 - 初始化子功能
+// * 2A主体 - 初始化子功能
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_initAttr = function() {
 	this._drill_main_layer = null;
 }
 //==============================
-// * A主体 - 创建
+// * 2A主体 - 创建
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_createAttr = function() {
 	
@@ -878,7 +877,7 @@ Scene_Drill_TBS.prototype.drill_scene_createAttr = function() {
 
 
 //==============================
-// * B预加载 - 初始化子功能
+// * 2B预加载 - 初始化子功能
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_initPreload = function() {
 	this._drill_bitmapTank = [];	//bitmap容器
@@ -886,7 +885,7 @@ Scene_Drill_TBS.prototype.drill_scene_initPreload = function() {
 	this.drill_preloadBitmap();
 }
 //==============================
-// * B预加载 - 执行预加载
+// * 2B预加载 - 执行预加载
 //
 //			说明：	> 在 Scene_Drill_TBS.prototype.initialize 时执行图片资源加载是有效的。
 //					  场景基类的 isReady 会根据的图片资源缓存加载情况，进行阻塞。
@@ -924,7 +923,7 @@ Scene_Drill_TBS.prototype.drill_preloadBitmap = function() {
 	}
 }
 //==============================
-// * B预加载 - 判断
+// * 2B预加载 - 判断
 //
 //			说明：	> 此函数可以没有，但保险起见先写上。
 //==============================
@@ -954,7 +953,7 @@ Scene_Drill_TBS.prototype.drill_isAllBitmapReady = function() {
 
 
 //==============================
-// * C阶段控制 - 初始化子功能
+// * 2C阶段控制 - 初始化子功能
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_initLevel = function() {
 	this._drill_level = 0;							//当前阶段
@@ -965,7 +964,7 @@ Scene_Drill_TBS.prototype.drill_scene_initLevel = function() {
 	this._drill_TBS_videoEnd = false;				//阶段结束 - 视频模式
 }
 //==============================
-// * C阶段控制 - 帧刷新
+// * 2C阶段控制 - 帧刷新
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_updateLevel = function() {
 	this._drill_level_time += 1;
@@ -999,7 +998,7 @@ Scene_Drill_TBS.prototype.drill_scene_updateLevel = function() {
 	}
 }
 //==============================
-// * C阶段控制 - 结束标记
+// * 2C阶段控制 - 结束标记
 //==============================
 Scene_Drill_TBS.prototype.drill_isLevelFinished = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -1018,13 +1017,13 @@ Scene_Drill_TBS.prototype.drill_isLevelFinished = function() {
 
 
 //==============================
-// * D单图模式 - 初始化子功能
+// * 2D单图模式 - 初始化子功能
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_initPic = function() {
 	this._drill_pic_sprite = new Sprite();
 }
 //==============================
-// * D单图模式 - 建立单图
+// * 2D单图模式 - 建立单图
 //==============================
 Scene_Drill_TBS.prototype.drill_createPic = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -1040,10 +1039,10 @@ Scene_Drill_TBS.prototype.drill_createPic = function() {
 	if( temp_data['img_show'] == 0 ){ temp_sprite.opacity = 255; }
 	this._drill_main_layer.addChild(temp_sprite);
 	this._drill_pic_sprite = temp_sprite;
-	this._drill_gif_sprite.opacity = 1;		//（隐藏 E播放GIF模式）
+	this._drill_gif_sprite.opacity = 1;		//（隐藏 2E播放GIF模式）
 }
 //==============================
-// * D单图模式 - 帧刷新 播放
+// * 2D单图模式 - 帧刷新 播放
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_updatePic = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -1083,13 +1082,13 @@ Scene_Drill_TBS.prototype.drill_scene_updatePic = function() {
 
 
 //==============================
-// * E播放GIF模式 - 初始化子功能
+// * 2E播放GIF模式 - 初始化子功能
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_initGIF = function() {
 	this._drill_gif_sprite = new Sprite();
 }
 //==============================
-// * E播放GIF模式 - 建立GIF
+// * 2E播放GIF模式 - 建立GIF
 //==============================
 Scene_Drill_TBS.prototype.drill_createGIF = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -1108,10 +1107,10 @@ Scene_Drill_TBS.prototype.drill_createGIF = function() {
 	this._drill_main_layer.addChild(temp_sprite);
 	this._drill_gif_sprite = temp_sprite;
 	this._drill_gif_sprite_data = temp_sprite_data;
-	this._drill_pic_sprite.opacity = 1;		//（隐藏 D单图模式）
+	this._drill_pic_sprite.opacity = 1;		//（隐藏 2D单图模式）
 }
 //==============================
-// * E播放GIF模式 - 帧刷新 播放
+// * 2E播放GIF模式 - 帧刷新 播放
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_updateGIF = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -1167,13 +1166,13 @@ Scene_Drill_TBS.prototype.drill_scene_updateGIF = function() {
 
 
 //==============================
-// * F视频模式 - 初始化子功能
+// * 2F视频模式 - 初始化子功能
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_initVideo = function() {
 	//（无）
 }
 //==============================
-// * F视频模式 - 建立视频
+// * 2F视频模式 - 建立视频
 //==============================
 Scene_Drill_TBS.prototype.drill_createVideo = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -1184,7 +1183,7 @@ Scene_Drill_TBS.prototype.drill_createVideo = function() {
 	Graphics.playVideo('movies/' + temp_data.video_src + ext);
 }
 //==============================
-// * F视频模式 - 帧刷新 播放
+// * 2F视频模式 - 帧刷新 播放
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_updateVideo = function() {
 	var temp_data = this._drill_dataList[this._drill_level];
@@ -1215,7 +1214,7 @@ Scene_Drill_TBS.prototype.drill_scene_updateVideo = function() {
 	}
 }
 //==============================
-// * F视频模式 - 影片后缀
+// * 2F视频模式 - 影片后缀
 //==============================
 Scene_Drill_TBS.prototype.videoFileExt = function() {
     if (Graphics.canPlayVideoType('video/webm') && !Utils.isMobileDevice()) {
@@ -1227,13 +1226,13 @@ Scene_Drill_TBS.prototype.videoFileExt = function() {
 
 
 //==============================
-// * G音乐设置 - 初始化子功能
+// * 2G音乐设置 - 初始化子功能
 //==============================
 Scene_Drill_TBS.prototype.drill_scene_initMusic = function() {
 	//（无）
 }
 //==============================
-// * G音乐设置 - 播放
+// * 2G音乐设置 - 播放
 //==============================
 Scene_Drill_TBS.prototype.drill_createMusic = function() {
 	var temp_data = this._drill_dataList[this._drill_level];

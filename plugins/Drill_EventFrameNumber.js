@@ -1023,7 +1023,7 @@ Drill_EFN_Controller.prototype.drill_EFN_isEnable = function(){
 //##############################
 // * 控制器 - 暂停/继续【标准函数】
 //
-//			参数：	> enable 布尔
+//			参数：	> pause 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1034,7 +1034,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setPause = function( pause ){
 };
 
 //##############################
-// * 控制器 - A主体 - 设置当前帧【开放函数】
+// * 控制器 - A主体 - 设置当前帧【标准函数】
 //
 //			参数：	> pattern 数字
 //			返回：	> 无
@@ -1043,7 +1043,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setPattern = function( pattern ){
 	this._drill_loop_curSeq = [ pattern ];
 };
 //##############################
-// * 控制器 - A主体 - 获取当前帧数【开放函数】
+// * 控制器 - A主体 - 获取当前帧数【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -1052,7 +1052,7 @@ Drill_EFN_Controller.prototype.drill_EFN_pattern = function(){
 	return this._drill_loop_curPattern;
 };
 //##############################
-// * 控制器 - A主体 - 设置初始帧【开放函数】
+// * 控制器 - A主体 - 设置初始帧【标准函数】
 //
 //			参数：	> orgPattern 数字
 //			返回：	> 无
@@ -1065,7 +1065,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setOrgPattern = function( orgPattern ){
 	this.drill_EFN_refreshLoop();
 };
 //##############################
-// * 控制器 - A主体 - 获取初始帧【开放函数】
+// * 控制器 - A主体 - 获取初始帧【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -1074,7 +1074,7 @@ Drill_EFN_Controller.prototype.drill_EFN_orgPattern = function(){
 	return this._drill_data['orgPattern'];
 };
 //##############################
-// * 控制器 - A主体 - 设置最大帧数【开放函数】
+// * 控制器 - A主体 - 设置最大帧数【标准函数】
 //
 //			参数：	> maxPattern 数字
 //			返回：	> 无
@@ -1087,7 +1087,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setMaxPattern = function( maxPattern ){
 	this.drill_EFN_refreshLoop();
 };
 //##############################
-// * 控制器 - A主体 - 获取最大帧数【开放函数】
+// * 控制器 - A主体 - 获取最大帧数【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -1096,7 +1096,7 @@ Drill_EFN_Controller.prototype.drill_EFN_maxPattern = function(){
 	return this._drill_data['maxPattern'];
 };
 //##############################
-// * 控制器 - A主体 - 获取当前计数器【开放函数】
+// * 控制器 - A主体 - 获取当前计数器【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -1107,7 +1107,7 @@ Drill_EFN_Controller.prototype.drill_EFN_animationCount = function(){
 	return 0;
 };
 //##############################
-// * 控制器 - A主体 - 获取间隔【开放函数】
+// * 控制器 - A主体 - 获取间隔【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 数字
@@ -1118,7 +1118,7 @@ Drill_EFN_Controller.prototype.drill_EFN_animationWait = function(){
 	return this._drill_inter_cur;
 };
 //##############################
-// * 控制器 - A主体 - 设置固定帧【开放函数】
+// * 控制器 - A主体 - 设置固定帧【标准函数】
 //
 //			参数：	> pattern 数字
 //			返回：	> 无
@@ -1128,7 +1128,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setLockPattern = function( pattern ){
 	data['lockPattern'] = pattern;
 };
 //##############################
-// * 控制器 - A主体 - 解除固定帧【开放函数】
+// * 控制器 - A主体 - 解除固定帧【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1139,7 +1139,7 @@ Drill_EFN_Controller.prototype.drill_EFN_clearLockPattern = function(){
 };
 
 //##############################
-// * 控制器 - C帧间隔器 - 设置帧间隔【开放函数】
+// * 控制器 - C帧间隔器 - 设置帧间隔【标准函数】
 //
 //			参数：	> interFormula 字符串
 //			返回：	> 无
@@ -1149,7 +1149,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setInterFormula = function( interFormul
 	data['interFormula'] = interFormula;
 };
 //##############################
-// * 控制器 - C帧间隔器 - 设置帧间隔【开放函数】
+// * 控制器 - C帧间隔器 - 设置帧间隔【标准函数】
 //
 //			参数：	> interDashingFormula 字符串
 //			返回：	> 无
@@ -1160,7 +1160,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setInterDashingFormula = function( inte
 };
 
 //##############################
-// * 控制器 - D帧播放器 - 重刷序列【开放函数】
+// * 控制器 - D帧播放器 - 重刷序列【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1170,7 +1170,7 @@ Drill_EFN_Controller.prototype.drill_EFN_refreshLoop = function(){
 	this._drill_EFN_lastState = "";
 };
 //##############################
-// * 控制器 - D帧播放器 - 设置循环【开放函数】
+// * 控制器 - D帧播放器 - 设置循环【标准函数】
 //
 //			参数：	> loopType 字符串
 //					> seq 数字数组
@@ -1183,7 +1183,7 @@ Drill_EFN_Controller.prototype.drill_EFN_setLoopType = function( loopType, seq )
 	this.drill_EFN_refreshLoop();
 };
 //##############################
-// * 控制器 - D帧播放器 - 设置排除帧【开放函数】
+// * 控制器 - D帧播放器 - 设置排除帧【标准函数】
 //
 //			参数：	> enable 布尔
 //			返回：	> 无

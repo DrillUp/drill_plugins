@@ -1016,15 +1016,15 @@ if( DrillUp.g_COGN_preloadEnabled == true ){
 // **						->显示贴图/隐藏贴图
 // **						->是否就绪
 // **						->优化策略
-// **						->销毁
+// **						->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					->参数数字
 // **						->延迟初始化
-// **						->修改变化因子 数字【开放函数】
-// **						->修改变化因子 字符串【开放函数】
-// **						->修改额定值【开放函数】
-// **						->修改额定值显示【开放函数】
+// **						->修改变化因子 数字【标准函数】
+// **						->修改变化因子 字符串【标准函数】
+// **						->修改额定值【标准函数】
+// **						->修改额定值显示【标准函数】
 // **						
 // **					->A主体
 // **						->内容层
@@ -1159,7 +1159,7 @@ Drill_COGN_NumberSprite.prototype.drill_sprite_updateDelayingInit = function() {
 //##############################
 // * 参数数字 - 显示贴图/隐藏贴图【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1172,7 +1172,7 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_setVisible = function( visible ){
 // * 参数数字 - 是否就绪【标准函数】
 //
 //			参数：	> 无
-//			返回：	> visible 布尔
+//			返回：	> 布尔
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
@@ -1192,7 +1192,7 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_isOptimizationPassed = function(){
     return true;	//（暂无策略）
 };
 //##############################
-// * 参数数字 - 销毁【标准函数】
+// * 参数数字 - 销毁独立贴图【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1204,7 +1204,7 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_destroy = function(){
 };
 
 //##############################
-// * 参数数字 - 修改变化因子 数字【开放函数】
+// * 参数数字 - 修改变化因子 数字【标准函数】
 //
 //			参数：	> value 数字（变化因子值）
 //			返回：	> 无
@@ -1217,7 +1217,7 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_reflashValue = function( value ){
 	this._drill_factor_value = value;
 }
 //##############################
-// * 参数数字 - 修改变化因子 字符串【开放函数】
+// * 参数数字 - 修改变化因子 字符串【标准函数】
 //
 //			参数：	> value 字符串（变化因子值）
 //			返回：	> 无
@@ -1230,7 +1230,7 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_reflashString = function( str ){
 	this._drill_factor_string = str;
 }
 //##############################
-// * 参数数字 - 修改额定值【开放函数】
+// * 参数数字 - 修改额定值【标准函数】
 //
 //			参数：	> num 数字（额定值）
 //			返回：	> 无
@@ -1242,9 +1242,9 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_setSpecifiedNum = function( num ){
 	data['specified_conditionNum'] = num;
 }
 //##############################
-// * 参数数字 - 修改额定值显示【开放函数】
+// * 参数数字 - 修改额定值显示【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1336,7 +1336,7 @@ Drill_COGN_NumberSprite.prototype.drill_initSprite = function() {
 };
 
 //==============================
-// * 参数数字 - 销毁（私有）
+// * 参数数字 - 销毁独立贴图（私有）
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_COGN_destroy_Private = function() {
 	this.visible = false;
@@ -1366,14 +1366,14 @@ Drill_COGN_NumberSprite.prototype.drill_COGN_destroy_Private = function() {
 	this._drill_specifiedEx_bitmap = null;
 }
 //==============================
-// * 参数条 - 销毁 - 断开贴图连接（私有）『递归函数-头』
+// * 参数条 - 销毁独立贴图 - 断开贴图连接（私有）『递归函数-头』
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_sprite_removeChildConnect = function( parent_sprite ){
 	if( parent_sprite == undefined ){ return; }
 	this.drill_sprite_removeChildConnect_Recursion( parent_sprite );
 };
 //==============================
-// * 参数条 - 销毁 - 断开贴图连接（私有）『递归函数-节』
+// * 参数条 - 销毁独立贴图 - 断开贴图连接（私有）『递归函数-节』
 //==============================
 Drill_COGN_NumberSprite.prototype.drill_sprite_removeChildConnect_Recursion = function( parent_sprite ){
 	var sprite_list = parent_sprite.children;

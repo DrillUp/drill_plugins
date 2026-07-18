@@ -1429,7 +1429,7 @@ Scene_Battle.prototype.drill_DCBu_updatePosition = function() {
 // **						x->显示贴图/隐藏贴图
 // **						x->是否就绪
 // **						x->优化策略
-// **						->销毁
+// **						->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					
@@ -1473,7 +1473,7 @@ Drill_DCBu_BtnLayerSprite.prototype.update = function() {
 	this.drill_sprite_updateRebuild();		//帧刷新 - B样式变化 - 重建
 };
 //##############################
-// * 按钮组层 - 销毁【标准函数】
+// * 按钮组层 - 销毁独立贴图【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1505,7 +1505,7 @@ Drill_DCBu_BtnLayerSprite.prototype.drill_initSprite = function() {
 	this.drill_sprite_initStyle();			//初始化对象 - B样式变化
 };
 //==============================
-// * 按钮组层 - 销毁（私有）
+// * 按钮组层 - 销毁独立贴图（私有）
 //==============================
 Drill_DCBu_BtnLayerSprite.prototype.drill_DCBu_destroy_Private = function() {
 	

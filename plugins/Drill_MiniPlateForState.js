@@ -2266,7 +2266,7 @@ Drill_MPFS_Bean.prototype.initialize = function(){
     this.drill_bean_initData();											//私有数据初始化
 };
 //##############################
-// * 实体类 - 显示/隐藏【开放函数】
+// * 实体类 - 显示/隐藏【标准函数】
 //			
 //			参数：	> visible 布尔
 //			返回：	> 无
@@ -2275,7 +2275,7 @@ Drill_MPFS_Bean.prototype.drill_bean_setVisible = function( visible ){
 	this._drill_visible = visible;
 };
 //##############################
-// * 实体类 - 设置位置【开放函数】
+// * 实体类 - 设置位置【标准函数】
 //			
 //			参数：	> x 数字
 //					> y 数字
@@ -2288,7 +2288,7 @@ Drill_MPFS_Bean.prototype.drill_bean_setPosition = function( x, y ){
 	this._drill_y = y;
 };
 //##############################
-// * 实体类 - 设置框架【开放函数】
+// * 实体类 - 设置框架【标准函数】
 //			
 //			参数：	> frameX,frameY,frameW,frameH 矩形对象
 //			返回：	> 无
@@ -2302,7 +2302,7 @@ Drill_MPFS_Bean.prototype.drill_bean_resetFrame = function( frameX, frameY, fram
 	this._drill_frameH = frameH;
 };
 //##############################
-// * 实体类 - 设置状态和buff【开放函数】
+// * 实体类 - 设置状态和buff【标准函数】
 //			
 //			参数：	> state_list 数字列表
 //					> buff_list 数字列表
@@ -2313,7 +2313,7 @@ Drill_MPFS_Bean.prototype.drill_bean_setStateAndBuff = function( state_list, buf
 	this._drill_buff_list = buff_list;
 };
 //##############################
-// * 实体类 - 设置所在层级【开放函数】
+// * 实体类 - 设置所在层级【标准函数】
 //			
 //			参数：	> layer 字符串
 //			返回：	> 无
@@ -2400,7 +2400,7 @@ Scene_Map.prototype.createAllWindows = function(){
 // **						x->显示贴图/隐藏贴图（通过实体类控制）
 // **						x->是否就绪
 // **						x->优化策略
-// **						x->销毁
+// **						x->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					

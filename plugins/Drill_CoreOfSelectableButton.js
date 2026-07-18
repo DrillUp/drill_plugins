@@ -1573,7 +1573,7 @@ if( Imported.Drill_CoreOfBallistics ){
 // **						->显示贴图/隐藏贴图
 // **						->是否就绪
 // **						->优化策略
-// **						->销毁
+// **						->销毁独立贴图
 // **						->初始化数据
 // **						->初始化对象
 // **					
@@ -1770,7 +1770,7 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_setPosition = function( x, y ){
 //##############################
 // * 按钮组贴图 - 显示贴图/隐藏贴图【标准函数】
 //
-//			参数：	> visible 布尔（是否显示）
+//			参数：	> visible 布尔
 //			返回：	> 无
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
@@ -1783,7 +1783,7 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_setVisible = function( visible ){
 // * 按钮组贴图 - 是否就绪【标准函数】
 //
 //			参数：	> 无
-//			返回：	> visible 布尔
+//			返回：	> 布尔
 //			
 //			说明：	> 可放在帧刷新函数中实时调用。
 //##############################
@@ -1803,7 +1803,7 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_isOptimizationPassed = function(){
     return true;	//（暂无策略）
 };
 //##############################
-// * 按钮组贴图 - 销毁【标准函数】
+// * 按钮组贴图 - 销毁独立贴图【标准函数】
 //
 //			参数：	> 无
 //			返回：	> 无
@@ -1941,7 +1941,7 @@ Drill_COSB_LayerSprite.prototype.drill_initSprite = function() {
 };
 
 //==============================
-// * 按钮组贴图 - 销毁（私有）
+// * 按钮组贴图 - 销毁独立贴图（私有）
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_COSB_destroy_Private = function(){
 	this.visible = false;
@@ -1976,14 +1976,14 @@ Drill_COSB_LayerSprite.prototype.drill_COSB_destroy_Private = function(){
 	// > 销毁 - DEBUG（无）
 };
 //==============================
-// * 按钮组贴图 - 销毁 - 断开贴图连接（私有）『递归函数-头』
+// * 按钮组贴图 - 销毁独立贴图 - 断开贴图连接（私有）『递归函数-头』
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_sprite_removeChildConnect = function( parent_sprite ){
 	if( parent_sprite == undefined ){ return; }
 	this.drill_sprite_removeChildConnect_Recursion( parent_sprite );
 };
 //==============================
-// * 按钮组贴图 - 销毁 - 断开贴图连接（私有）『递归函数-节』
+// * 按钮组贴图 - 销毁独立贴图 - 断开贴图连接（私有）『递归函数-节』
 //==============================
 Drill_COSB_LayerSprite.prototype.drill_sprite_removeChildConnect_Recursion = function( parent_sprite ){
 	var sprite_list = parent_sprite.children;
