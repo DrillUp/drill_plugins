@@ -656,6 +656,11 @@
  * @desc 类型为"扇形范围方向"时，扇形弧的角度数。
  * @default 90.0
  * 
+ * @param 方向角速率
+ * @parent 方向类型
+ * @desc 前面参数都是指定方向的初始值，而该参数指方向的变化速率。随着时间推移，方向会逐渐偏转。
+ * @default 0.0
+ * 
  * @param 方向计算公式
  * @parent 方向类型
  * @type note
@@ -940,6 +945,7 @@
 		data['polarDirFixed'] = Number( dataFrom["固定方向"] || 0);
 		data['polarDirSectorFace'] = Number( dataFrom["扇形朝向"] || 0);
 		data['polarDirSectorDegree'] = Number( dataFrom["扇形角度"] || 0);
+		data['polarDirRate'] = Number( dataFrom["方向角速率"] || 0);
 		temp_str = String( dataFrom["方向计算公式"] || "\"return 0\"" );
 		temp_str = temp_str.substring(1,temp_str.length-1);
 		temp_str = temp_str.replace(/\\n/g,"\n");
@@ -1246,13 +1252,6 @@ Drill_COSE_Controller.prototype.drill_initPrivateData = function(){
 	}
 	
 	
-	// > 碎片群弹道 - 随机因子
-	this._drill_randomFactor_speed = Math.random();
-	this._drill_randomFactor_dir = Math.random();
-	this._drill_randomFactor_xSpeed = Math.random();
-	this._drill_randomFactor_ySpeed = Math.random();
-	this._drill_randomFactor_opacity = Math.random();
-	
 	// > 碎片群弹道 - 弹道数据
 	this._drill_COSE_ballistics_move = {};
 	this._drill_COSE_ballistics_opacity = {};
@@ -1290,6 +1289,7 @@ Drill_COSE_Controller.prototype.drill_initBallisticsMove = function( data, b_dat
 	temp_b_move['polarDirFixed'] = b_data["polarDirFixed"];						//极坐标 - 方向 - 固定方向
 	temp_b_move['polarDirSectorFace'] = b_data["polarDirSectorFace"];			//极坐标 - 方向 - 扇形朝向
 	temp_b_move['polarDirSectorDegree'] = b_data["polarDirSectorDegree"];		//极坐标 - 方向 - 扇形角度
+	temp_b_move['polarDirRate'] = b_data["polarDirRate"];						//极坐标 - 方向 - 方向角速率
 	temp_b_move['polarDirFormula'] = b_data["polarDirFormula"];					//极坐标 - 方向 - 方向计算公式
 	//   直角坐标（cartesian）
 	temp_b_move['cartRotation'] = b_data["cartRotation"];						//直角坐标 - 直角坐标整体旋转
@@ -1307,16 +1307,6 @@ Drill_COSE_Controller.prototype.drill_initBallisticsMove = function( data, b_dat
 	temp_b_move['cartYSpeedMax'] = b_data["cartYSpeedMax"];						//直角坐标 - y - 最大速度
 	temp_b_move['cartYSpeedMin'] = b_data["cartYSpeedMin"];						//直角坐标 - y - 最小速度
 	temp_b_move['cartYDistanceFormula'] = b_data["cartYDistanceFormula"];		//直角坐标 - y - 路程计算公式
-	
-	// > 随机因子（RandomFactor）
-	//		（每个碎片对应一个随机因子，掌握一条弹道。）
-	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系。）
-	temp_b_move['polarSpeedRandomFactor'] = this._drill_randomFactor_speed;		//极坐标 - 速度 - 随机因子
-	temp_b_move['polarDirRandomFactor'] = this._drill_randomFactor_dir;			//极坐标 - 方向 - 随机因子
-	temp_b_move['cartXSpeedRandomFactor'] = this._drill_randomFactor_xSpeed;	//直角坐标 - x - 随机因子
-	temp_b_move['cartYSpeedRandomFactor'] = this._drill_randomFactor_ySpeed;	//直角坐标 - y - 随机因子
-	// > 随机迭代次数（RandomIteration）
-	//		（无）
 	
 	// > 生成参数数据
 	this._drill_COSE_ballistics_move = $gameTemp.drill_COBa_setBallisticsMove( temp_b_move );
@@ -1381,13 +1371,6 @@ Drill_COSE_Controller.prototype.drill_initBallisticsOpacity = function( data, su
 	else{
 		alert( DrillUp.drill_COSE_getPluginTip_ErrorOpacityType( data['shatter_opacityType'] ) );
 	}
-	
-	//   随机因子（RandomFactor）
-	//		（每个碎片对应一个随机因子，掌握一条弹道。）
-	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系。）
-	temp_b_opacity['randomFactor'] = this._drill_randomFactor_opacity;
-	//   随机迭代次数（RandomIteration）
-	//		（无）
 	
 	// > 生成参数数据
 	this._drill_COSE_ballistics_opacity = $gameTemp.drill_COBa_setBallisticsOpacity( temp_b_opacity );

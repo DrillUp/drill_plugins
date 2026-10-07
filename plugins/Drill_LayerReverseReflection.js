@@ -1926,7 +1926,7 @@ SceneManager.initialize = function() {
 		var screen_x = this.drill_screenX();
 		var screen_y = this.drill_screenY();
 		
-		// > 【行走图 - 行走图优化核心】『物体数据最终变换值』
+		// > 【行走图 - 行走图优化核心】『数据最终变换值-子插件调用』
 		screen_x += this._character.drill_COEF_acc_LRR_x();
 		screen_y += this._character.drill_COEF_acc_LRR_y();
 		

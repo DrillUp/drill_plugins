@@ -1346,7 +1346,7 @@ Sprite_Character.prototype.drill_MPFE_updatePosition = function() {
 	
 	//var xx = this.x;
 	//var yy = this.y;
-	var xx = ch.screenX();			//（这里已经包含 行走图的『物体数据最终变换值』 了）
+	var xx = ch.screenX();			//（这里已包含『数据最终变换值-子插件调用』）
 	var yy = ch.screenY();
 	
 	var ww = bean._drill_frameW;

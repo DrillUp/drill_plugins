@@ -2017,7 +2017,7 @@ SceneManager.initialize = function() {
 		// > 镜头像素位置
 		var screen_x = this.drill_screenX();
 		
-		// > 【行走图 - 行走图优化核心】『物体数据最终变换值』
+		// > 【行走图 - 行走图优化核心】『数据最终变换值-子插件调用』
 		screen_x += this._character.drill_COEF_acc_LSR_x();
 		
 		// > 同步镜像赋值
@@ -2052,7 +2052,7 @@ SceneManager.initialize = function() {
 		}
 		// > 偏移补正值 - 等距同步
 		if( $gameSystem._drill_LSR_mode == "等距同步" ){
-			screen_y += this._character.drill_COEF_acc_LSR_y();  //【行走图 - 行走图优化核心】『物体数据最终变换值』
+			screen_y += this._character.drill_COEF_acc_LSR_y();  //【行走图 - 行走图优化核心】『数据最终变换值-子插件调用』
 		}
 		
 		this.y = screen_y;

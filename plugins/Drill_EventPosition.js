@@ -625,8 +625,8 @@ Game_Interpreter.prototype.drill_EPo_pluginCommand = function( command, args ){
 		if( args.length == 8 ){				//（旧指令）>位置与位移 : 本事件 : 移动到相对位置 : 3 : 3
 			var temp1 = String(args[1]);
 			var type = String(args[3]);
-			var temp2 = parseInt(args[5]);
-			var temp3 = parseInt(args[7]);
+			var temp2 = Number(args[5]);
+			var temp3 = Number(args[7]);
 			if( temp1 == "本事件" ){
 				var e = $gameMap.event( this._eventId );
 				if( e == undefined ){ return; } //『防止并行删除事件出错』
@@ -672,8 +672,8 @@ Game_Interpreter.prototype.drill_EPo_pluginCommand = function( command, args ){
 			var temp1 = String(args[1]);
 			var temp2 = String(args[3]);
 			var type = String(args[5]);
-			var temp4 = parseInt(args[7]);
-			var temp5 = parseInt(args[9]);
+			var temp4 = Number(args[7]);
+			var temp5 = Number(args[9]);
 			if( temp1 == "指定事件" ){
 				if(type == "移动到绝对位置" ){
 					var e_list = temp2.split(/[,，]/);

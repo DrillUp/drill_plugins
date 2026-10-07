@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.4]        窗口字符 - 描边效果
+ * @plugindesc [v1.5]        窗口字符 - 描边效果
  * @author Drill_up
  * 
  * @Drill_LE_param "颜色-%d"
@@ -135,6 +135,8 @@
  * 完善了作用于所有文本的功能。
  * [v1.4]
  * 大幅度修改了底层，并且兼容了新的底层结构。
+ * [v1.5]
+ * 完善了插件的兼容性。
  * 
  *
  * 
@@ -1255,13 +1257,35 @@ DrillUp.drill_DCOB_getColor = function( index ){
 	if( DrillUp.g_DCOB_color_list[index]['color'] == undefined ){ console.log( DrillUp.drill_DCOB_getPluginTip_ColorNotFind( index ) ); return "rgba(0,0,0,0.5)" }
 	var str = DrillUp.g_DCOB_color_list[index]['color'];
 	if( str.length == 7 ){
-		var r = parseInt(str.substring(1, 3), 16);
-		var g = parseInt(str.substring(3, 5), 16);
-		var b = parseInt(str.substring(5, 7), 16);
+		var r = DrillUp.drill_DCOB_HexStringToNumber( str.substring(1, 3) );
+		var g = DrillUp.drill_DCOB_HexStringToNumber( str.substring(3, 5) );
+		var b = DrillUp.drill_DCOB_HexStringToNumber( str.substring(5, 7) );
 		var a = DrillUp.g_DCOB_color_list[index]['opacity'] / 255;
 		str = "rgba(" + r + "," + g + "," + b + ","+ a +")"
 	}
 	return str;
+};
+//==============================
+// * 全局默认值 - 获取描边颜色 - 十六进制字符串 转 数字
+//			
+//			标签：	> 『十六进制的转义』
+//			说明：	> 插件单独实现的转换函数。
+//==============================
+DrillUp.drill_DCOB_HexStringToNumber = function( hex_str ){
+	var result = 0;
+	for( var i = 0; i < hex_str.length; i++ ){
+		var c = hex_str.charCodeAt(i);
+		var digit = 0;
+		if( c >= 48 && c <= 57 ){         //0~9
+			digit = c - 48;
+		}else if( c >= 65 && c <= 70 ){   //A~F
+			digit = c - 55;
+		}else if( c >= 97 && c <= 102 ){  //a~f
+			digit = c - 87;
+		}
+		result = result * 16 + digit;     //（每*16，位数+1）
+	}
+	return result;
 };
 
 

@@ -1089,11 +1089,33 @@ Sprite.prototype.drill_COF_setFillBoardType = function( type ) {
 	if( type == "纯黄" || type == "黄色" ){ temp_sprite.setBlendColor([255, 255, 0, 255]); }
 	if( type == "纯白" || type == "白色" ){ temp_sprite.setBlendColor([255, 255, 255, 255]); }
 	if( (/^#/g).test(type) ){
-		var str_r = type.slice(1,3);
-		var str_g = type.slice(3,5);
-		var str_b = type.slice(5,7);
-		temp_sprite.setBlendColor([ parseInt(str_r,16), parseInt(str_g,16), parseInt(str_b,16), 255]);
+		var num_r = $gameTemp.drill_COF_HexStringToNumber( type.slice(1,3) );
+		var num_g = $gameTemp.drill_COF_HexStringToNumber( type.slice(3,5) );
+		var num_b = $gameTemp.drill_COF_HexStringToNumber( type.slice(5,7) );
+		temp_sprite.setBlendColor([ num_r, num_g, num_b, 255]);
 	}
+}
+//==============================
+// * 颜色工具 - 字符串转RGB - 十六进制字符串 转 数字
+//			
+//			标签：	> 『十六进制的转义』
+//			说明：	> 插件单独实现的转换函数。
+//==============================
+Game_Temp.prototype.drill_COF_HexStringToNumber = function( hex_str ){
+	var result = 0;
+	for( var i = 0; i < hex_str.length; i++ ){
+		var c = hex_str.charCodeAt(i);
+		var digit = 0;
+		if( c >= 48 && c <= 57 ){         //0~9
+			digit = c - 48;
+		}else if( c >= 65 && c <= 70 ){   //A~F
+			digit = c - 55;
+		}else if( c >= 97 && c <= 102 ){  //a~f
+			digit = c - 87;
+		}
+		result = result * 16 + digit;     //（每*16，位数+1）
+	}
+	return result;
 }
 //==============================
 // ** 填充 - 线性模式（接口）
@@ -1321,10 +1343,10 @@ Sprite.prototype.drill_COF_setRainbowBoardType = function( type ) {
 	if( type == "黄色"){ temp_sprite.setBlendColor([255, 255, 0, 255]); }
 	if( type == "纯白"){ temp_sprite.setBlendColor([255, 255, 255, 255]); }
 	if( (/^#/g).test(type) ){
-		var str_r = type.slice(1,3);
-		var str_g = type.slice(3,5);
-		var str_b = type.slice(5,7);
-		temp_sprite.setBlendColor([ parseInt(str_r,16), parseInt(str_g,16), parseInt(str_b,16), 255]);
+		var num_r = $gameTemp.drill_COF_HexStringToNumber( type.slice(1,3) );
+		var num_g = $gameTemp.drill_COF_HexStringToNumber( type.slice(3,5) );
+		var num_b = $gameTemp.drill_COF_HexStringToNumber( type.slice(5,7) );
+		temp_sprite.setBlendColor([ num_r, num_g, num_b, 255]);
 	}
 }
 //==============================

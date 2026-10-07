@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        图片 - 临时屏幕快照
+ * @plugindesc [v1.6]        图片 - 临时屏幕快照
  * @author Drill_up
  * 
  * 
@@ -45,17 +45,17 @@
  * 
  * 插件指令：>图片临时屏幕快照 : 临时快照 : 建立屏幕截图
  * 
- * 插件指令：>图片临时屏幕快照 : 图片[1] : 设为临时快照
- * 插件指令：>图片临时屏幕快照 : 图片变量[21] : 设为临时快照
- * 插件指令：>图片临时屏幕快照 : 批量图片[1,2] : 设为临时快照
- * 插件指令：>图片临时屏幕快照 : 批量图片变量[21,22] : 设为临时快照
- * 插件指令：>图片临时屏幕快照 : 图片[1] : 去除快照
- * 插件指令：>图片临时屏幕快照 : 图片变量[21] : 去除快照
- * 插件指令：>图片临时屏幕快照 : 批量图片[1,2] : 去除快照
- * 插件指令：>图片临时屏幕快照 : 批量图片变量[21,22] : 去除快照
+ * 插件指令：>图片临时屏幕快照 : 图片[1] : 绑定临时快照
+ * 插件指令：>图片临时屏幕快照 : 图片变量[21] : 绑定临时快照
+ * 插件指令：>图片临时屏幕快照 : 批量图片[1,2] : 绑定临时快照
+ * 插件指令：>图片临时屏幕快照 : 批量图片变量[21,22] : 绑定临时快照
+ * 插件指令：>图片临时屏幕快照 : 图片[1] : 解绑临时快照
+ * 插件指令：>图片临时屏幕快照 : 图片变量[21] : 解绑临时快照
+ * 插件指令：>图片临时屏幕快照 : 批量图片[1,2] : 解绑临时快照
+ * 插件指令：>图片临时屏幕快照 : 批量图片变量[21,22] : 解绑临时快照
  * 
- * 1.你需要先建立屏幕截图，再将临时快照赋值给 图片对象。
- * 2.注意，屏幕快照都是临时的，且只能作为临时贴图使用，无法保存到存档中。
+ * 1.你需要先建立屏幕截图，再绑定临时快照。
+ * 2.注意，临时快照只能作为临时贴图使用，无法保存到存档中。
  *
  * -----------------------------------------------------------------------------
  * ----可选设定 - 保存文件
@@ -96,13 +96,15 @@
  * [v1.1]
  * 改进了静态快照的内部结构。
  * [v1.2]
- * 添加了保存快照文件的功能。
+ * 添加了静态快照保存功能。
  * [v1.3]
  * 优化了内部结构。
  * [v1.4]
  * 改进了截图保存的功能。
  * [v1.5]
  * 修复了浏览器运行时报错的bug。
+ * [v1.6]
+ * 修改规范了指令。
  * 
  * 
  * 
@@ -189,9 +191,9 @@
 //				->消除图片
 //				->消除图片（command235）
 //			->☆图片控制
-//			->☆静态快照容器
 //			
-//			->☆保存快照文件
+//			->☆静态快照容器
+//			->☆静态快照的保存
 //
 //
 //		★家谱：
@@ -240,7 +242,7 @@
 	
 	
 	//==============================
-	// * 静态数据 - 文件路径
+	// * 静态数据 - 文件设置
 	//				（~struct~DrillFile）
 	//==============================
 	DrillUp.drill_PSS_initFile = function( dataFrom ){
@@ -257,8 +259,7 @@
 		
 		return data;
 	}
-
-	/*-----------------杂项------------------*/
+	/*-----------------文件设置------------------*/
 	if( DrillUp.parameters["存储快照文件设置"] != undefined &&
 		DrillUp.parameters["存储快照文件设置"] != "" ){
 		var data = JSON.parse( DrillUp.parameters["存储快照文件设置"] );
@@ -283,6 +284,19 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 // * 插件指令 - 指令执行
 //==============================
 Game_Interpreter.prototype.drill_PSS_pluginCommand = function( command, args ){
+	DrillUp.drill_PSS_globalPluginCommand( command, args, this );
+}
+//==============================
+// * 插件指令 - 『作用全局的插件指令』
+//
+//			参数：	> command 字符串
+//					> args 字符串列表
+//					> gameInterpreter 解释器对象
+//
+//			说明：	> 该函数不能有 this 对象。
+//					> 该函数不依赖解释器对象，gameInterpreter 可以为 null。函数可跨界面调用。
+//==============================
+DrillUp.drill_PSS_globalPluginCommand = function( command, args, gameInterpreter ){
 	if( command === ">图片临时屏幕快照" ){ 
 		
 		/*-----------------临时快照------------------*/
@@ -292,19 +306,20 @@ Game_Interpreter.prototype.drill_PSS_pluginCommand = function( command, args ){
 			if( unit == "临时快照" ){
 				if( type == "建立屏幕截图" ){
 					$gameTemp.drill_PSS_createSnapshot();
+					return;
 				}
 				if( type == "保存到文件" ){
 					$gameTemp.drill_PSS_saveSnapshot();
+					return;
 				}
-				return;
 			}
 		}
 		if( args.length == 2 ){
 			var type = String(args[1]);
 			if( type == "打开保存的文件路径" ){
 				$gameTemp.drill_PSS_openUrl();
+				return;
 			}
-			return;
 		}
 		
 		
@@ -366,7 +381,7 @@ Game_Interpreter.prototype.drill_PSS_pluginCommand = function( command, args ){
 		/*-----------------设置快照------------------*/
 		if( pics != null && args.length == 4 ){
 			var type = String(args[3]);
-			if( type == "设为临时快照" ){
+			if( type == "绑定临时快照" || type == "设为临时快照" ){
 				for( var i = 0; i < pics.length; i++ ){
 					
 					// > 贴图赋值
@@ -378,7 +393,7 @@ Game_Interpreter.prototype.drill_PSS_pluginCommand = function( command, args ){
 					pics[i].drill_PSS_setDataSnapShotId( $gameTemp.drill_PSS_getLastSnapshotId() );
 				}
 			}
-			if( type == "去除快照" ){
+			if( type == "解绑临时快照" || type == "去除快照" ){
 				for( var i = 0; i < pics.length; i++ ){
 					
 					// > 贴图赋值
@@ -754,29 +769,28 @@ Game_Temp.prototype.drill_PSS_createSnapshot = function() {
 	return bitmap_id;
 }
 //==============================
-// * 静态快照容器 - 获取 创建的快照（开放函数）
+// * 静态快照容器 - 获取 上一个创建的快照（开放函数）
 //==============================
 Game_Temp.prototype.drill_PSS_getLastSnapshot = function() {
 	if( this._drill_PSS_curBitmapId == -1 ){ return null; }
 	return this._drill_PSS_curBitmapTank[ this._drill_PSS_curBitmapId ];
 }
 //==============================
-// * 静态快照容器 - 获取 创建的快照ID（开放函数）
+// * 静态快照容器 - 获取 上一个创建的快照ID（开放函数）
 //==============================
 Game_Temp.prototype.drill_PSS_getLastSnapshotId = function() {
 	return this._drill_PSS_curBitmapId;
 }
 
 
-
 //=============================================================================
-// ** ☆保存快照文件
+// ** ☆静态快照的保存
 //
 //			说明：	> 此模块提供 保存 静态快照文件 功能。
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 保存快照文件 - 保存到文件
+// * 静态快照的保存 - 保存到文件
 //==============================
 Game_Temp.prototype.drill_PSS_saveSnapshot = function() {
     
@@ -800,7 +814,7 @@ Game_Temp.prototype.drill_PSS_saveSnapshot = function() {
 	this.drill_PSS_saveBitmap( bitmap, settings['url_path'], file_name, settings['file_type'], settings['image_quality'] );
 };
 //==============================
-// * 保存快照文件 - 时间格式化（真实时间）
+// * 静态快照的保存 - 时间格式化（真实时间）
 //==============================
 Date.prototype.drill_PSS_getDateTextByFormat = function( fmt ){
 	var o = {
@@ -823,7 +837,7 @@ Date.prototype.drill_PSS_getDateTextByFormat = function( fmt ){
 	return fmt;
 }
 //==============================
-// * 保存快照文件 - 执行保存
+// * 静态快照的保存 - 执行保存
 //
 //			参数：	> bitmap        资源对象
 //					> url_path      文件夹路径（"snapshot/"）
@@ -873,7 +887,7 @@ Game_Temp.prototype.drill_PSS_saveBitmap = function( bitmap, url_path, file_name
 	fs.writeFileSync( filePath, data, 'base64' );
 }
 //==============================
-// * 保存快照文件 - 『文件载体-文件路径』 - 游戏根目录（开放函数）
+// * 静态快照的保存 - 『文件载体-文件路径』 - 游戏根目录（开放函数）
 //==============================
 Game_Temp.prototype.drill_PSS_parentDirectoryPath = function() {
 	if( typeof(require) === "undefined" ){ return ""; }
@@ -882,7 +896,7 @@ Game_Temp.prototype.drill_PSS_parentDirectoryPath = function() {
 	return path.join(base, '/');
 };
 //==============================
-// * 保存快照文件 - 执行打开保存的文件夹路径
+// * 静态快照的保存 - 打开保存的文件路径（开放函数）
 //==============================
 Game_Temp.prototype.drill_PSS_openUrl = function() {
 	if( typeof(require) === "undefined" ){ return; }

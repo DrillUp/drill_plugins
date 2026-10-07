@@ -1923,6 +1923,7 @@
 //					> 循环积累值
 //				->帧刷新 基础特性
 //				->帧刷新 自动销毁
+//			->☆脚印监听器
 //			
 //			->粒子控制器【Drill_LPR_Controller】
 //				->2A雨滴管理
@@ -3683,10 +3684,10 @@ Scene_Map.prototype.drill_LPR_updateDestroy = function(){
 // **						->控制器标记销毁
 // **						->控制器是否销毁
 // **					
-// **					->A主体
-// **					->B变换特性
+// **					->A主体（继承）『基础特性和变换特性』
+// **					->B变换特性（继承）『变换特性-粒子贴图』『数据最终变换值-类继承』
 // **					->C校验值
-// **					->D指令叠加变化『变换特性-粒子贴图』
+// **					->D指令叠加变化
 // **						x> 主体贴图-整体移动到
 // **						> 主体贴图-整体透明度
 // **						x> 主体贴图-整体旋转
@@ -4510,6 +4511,23 @@ Drill_LPR_Controller.prototype.drill_controller_getCameraYAcc = function(){
 // **						->贴图是否销毁
 // **						->贴图执行销毁
 // **					
+// **					->A贴图主体
+// **					->B变换特性
+// **					->C对象绑定
+// **					->D指令叠加变化-控制器用『弹道-图像用』
+// **					->E延迟指令
+// **					->F周期指令
+// **					
+// **					->H粒子群弹道
+// **					->I随机因子
+// **					->J粒子变化
+// **					->K粒子重设
+// **					->L粒子生命周期
+// **					
+// **					->O贴图加载-控制器用
+// **					->P直线拖尾贴图
+// **					->Q双层效果
+// **					
 // **					->2A雨滴管理（无）
 // **					->2B雨线管理（无）
 // **					->2C叠加高光（无）
@@ -4645,8 +4663,8 @@ Drill_LPR_Sprite.prototype.drill_sprite_initAttr = function(){
 			- 主体贴图（this）
 			- - 粒子层（_drill_COPa_parSpriteLayer）
 			- - - 粒子贴图组（_drill_COPa_parSpriteTank）
-			- - 直线拖尾层（_drill_COPa_trailingSpriteLayer）
-			- - - 直线拖尾贴图组（_drill_COPa_trailingSpriteTank）
+			- - 直线拖尾层（_drill_COPa_trailingSpriteLayer）（关闭）
+			- - - 直线拖尾贴图组（_drill_COPa_trailingSpriteTank）（关闭）
 	*/
 	
 	// > 常规
@@ -4679,14 +4697,21 @@ Drill_LPR_Sprite.prototype.drill_sprite_initChange = function(){
 Drill_LPR_Sprite.prototype.drill_sprite_createTransformLayer = function() {
 	
 	// > 粒子层
+	//		（ParticleContainer 只管理向下一级的子贴图，不支持子贴图嵌套）
+	//		（ParticleContainer 不支持 子贴图设置skew）
+	//		（ParticleContainer 不支持 子贴图设置visible）
+	//		（ParticleContainer 不支持 子贴图切换bitmap，『粒子容器的材质固定问题』）
+	//		（ParticleContainer 不支持 子贴图继承的update，『粒子容器的外部帧刷新』）
+	//		（ParticleContainer 不支持 mask遮罩）
+	//		（ParticleContainer 自身没有 anchor定义）
 	var temp_layer = new PIXI.particles.ParticleContainer(
-		2500, 					//粒子最大数量
+		2500, 					//粒子 - 最大数量
 		{
-			position: true,		//粒子平移
-			scale: true,		//粒子缩放（2A雨滴管理，pixi有显示bug，不能关闭）
-			alpha: true,		//粒子透明度
-			rotation: false,	//粒子旋转（2A雨滴管理，关闭）
-			uvs: true			//粒子纹理（2A雨滴管理，雨滴当前帧）
+			position: true,		//粒子 - 平移
+			scale: true,		//粒子 - 缩放（见 2A雨滴管理，pixi有显示bug，不能关闭）
+			alpha: true,		//粒子 - 透明度
+			rotation: false,	//粒子 - 旋转（见 2A雨滴管理，关闭）
+			uvs: true			//粒子 - 纹理（见 2A雨滴管理，雨滴当前帧）（即是否启用'setFrame'功能）
 		}
 	);
 	return temp_layer;

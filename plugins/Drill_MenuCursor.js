@@ -3211,13 +3211,15 @@ Drill_MCu_Sprite.prototype.drill_sprite_destroySelf = function(){
 Drill_MCu_Sprite.prototype.drill_sprite_initAttr = function(){
 	var data = this._drill_controller._drill_data;
 	
-	// > 属性初始化
-	this.anchor.x = 0.5;
-	this.anchor.y = 0.5;
+	// > 主体贴图
 	this.visible = false;
 	this.blendMode = data['blendMode'];
 	this.layerIndex = data['layerIndex'];
 	this.zIndex = data['zIndex'];
+	
+	// > 主体贴图 - 锚点
+	this.anchor.x = 0.5;
+	this.anchor.y = 0.5;
 	
 	
 	// > 资源对象组

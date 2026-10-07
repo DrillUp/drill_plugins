@@ -66,7 +66,6 @@
  * ……
  *
  * 只需要填入文件名即可，不需要后缀。
- * （视频文件不会被去除，但也不会被加密）
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定
@@ -1622,7 +1621,7 @@ Drill_MVi_VideoSprite.prototype.drill_sprite_initVideo = function() {
 	this._drill_video.texture = this._drill_texture;
 	this._drill_video.anchor.x = 0.5;
 	this._drill_video.anchor.y = 0.5;
-	this._drill_video.tint = parseInt(data['tint']);
+	this._drill_video.tint = data['tint'];
 	this.addChild(this._drill_video);
 	
 	// > 视频资源 初始化

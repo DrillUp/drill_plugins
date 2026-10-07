@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v2.4]        数学模型 - 弹道核心
+ * @plugindesc [v2.5]        数学模型 - 弹道核心
  * @author Drill_up
  * 
  * 
@@ -106,6 +106,8 @@
  * 优化了叠加变化的结构，
  * [v2.4]
  * 添加了 瞬间变化 的条件识别。
+ * [v2.5]
+ * 添加了 方向角速率 的功能。
  * 
  */
  
@@ -133,32 +135,36 @@
 //			->☆静态数据
 //			
 //			
-//			->☆移动弹道 标准模块（1I移动弹道 实现）
+//			->☆移动弹道 标准模块
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
 //				->推演赋值【标准函数】
-//			->☆透明度弹道 标准模块（1H透明度弹道 实现）
+//				->（由 1I移动弹道 具体实现）
+//			->☆透明度弹道 标准模块
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
 //				->推演赋值【标准函数】
-//			->☆缩放X弹道 标准模块（1H缩放X弹道 实现）
+//				->（由 1H透明度弹道 具体实现）
+//			->☆缩放X弹道 标准模块
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
 //				->推演赋值【标准函数】
-//			->☆缩放Y弹道 标准模块（1H缩放Y弹道 实现）
+//				->（由 1H缩放X弹道 具体实现）
+//			->☆缩放Y弹道 标准模块
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
 //				->推演赋值【标准函数】
-//			->☆旋转角弹道 标准模块（1H旋转角弹道 实现）
+//				->（由 1H缩放Y弹道 具体实现）
+//			->☆旋转角弹道 标准模块
 //				->初始化数据【标准默认值】
 //				->获取弹道总时间【标准函数】
 //				->推演赋值【标准函数】
+//				->（由 1H旋转角弹道 具体实现）
 //			
-//			->☆弹道工具 标准模块（0M弹道工具函数 实现）
+//			->☆弹道工具 标准模块
 //				->字符串 转 锚点列表【标准函数】
 //				->锚点列表 转 字符串【标准函数】
-//				->生成随机数（随机种子）【标准函数】
-//				->生成随机数（迭代）【标准函数】
+//				->（由 0M弹道工具函数 具体实现）
 //			
 //			->弹道管理器（私有）【Drill_COBa_Manager】
 //				->0A一维弹道【common】
@@ -171,13 +177,13 @@
 //					> 轨道锚点模式
 //					> 两点式
 //				->0H一维弹道应用
-//					->1H透明度弹道
-//					->1H缩放X弹道
-//					->1H缩放Y弹道
-//					->1H旋转角弹道
+//					->1H透明度弹道（私有）
+//					->1H缩放X弹道（私有）
+//					->1H缩放Y弹道（私有）
+//					->1H旋转角弹道（私有）
 //				->0I二维弹道应用
-//					->1I移动弹道
-//				->0M弹道工具函数
+//					->1I移动弹道（私有）
+//				->0M弹道工具函数（私有）
 //				->0N校验值
 //			
 //			
@@ -229,9 +235,7 @@
 //				  __________  /_.-'''-._\
 //			
 //		★其它说明细节：
-//			1.随机因子是一个特殊的参数，作用是使得轨迹既有随机性，又不会在重新赋值时出现轨迹重置现象。
-//			  如果你要锁定随机因子，在 默认值 中对因子数列进行的赋值即可。通常情况下随机因子【不需要赋值】。
-//			2.默认情况下，data['planimetryTime'] 时长 就是数组的长度。
+//			1.默认情况下，data['planimetryTime'] 时长 就是数组的长度。
 //			  但如果你设置了 延迟时间，就需要考虑数组长度变化的问题了。
 //
 //		★存在的问题：
@@ -288,7 +292,7 @@
 
 
 //#############################################################################
-// ** 【标准模块】☆移动弹道 标准模块（1I移动弹道 实现）
+// ** 【标准模块】☆移动弹道 标准模块
 //#############################################################################
 //##############################
 // * 移动弹道 - 初始化数据【标准默认值】
@@ -306,7 +310,7 @@
 //					
 //			说明：	> 动态参数对象 全部参数见 drill_COBa_setBallisticsMove_Private 。
 //                  > 注意，锚点列表的格式固定为：[ {'x':0,'y':0} ]，你可以用工具类转一下。
-//					> 执行后，会固定【随机因子】，可将 返回数据 存储，进而确保生成相同的弹道。
+//					> 执行后，会固定 随机因子列表（randomFactorList），可将 返回数据 存储，进而确保生成相同的弹道。
 //					  返回数据 可以放入此函数再次执行，参数对象内容不会变。
 //##############################
 Game_Temp.prototype.drill_COBa_setBallisticsMove = function( data ){
@@ -349,7 +353,6 @@ Drill_COBa_Manager.drill_COBa_getBallisticsMove_TotalTime = function(){
 //			说明：	> 对象编号 obj_index 必须按照预先给的来，即 0 到 'movementNum'-1 的值。
 //					> 每次推演返回的数组长度都一样。
 //					  但注意 弹道长度 = 时长+1，延迟参数 会影响弹道长度。
-//					> 此处的【随机因子】已被固定，如果要再次推演不同的随机弹道，可以修改【随机迭代次数】。
 //##############################
 Game_Temp.prototype.drill_COBa_preBallisticsMove = function( obj_data, obj_index, org_x, org_y ){
 	Drill_COBa_Manager.drill_COBa_preBallisticsMove( obj_data, obj_index, org_x, org_y );
@@ -360,7 +363,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsMove = function( obj_data, obj_index,
 
 
 //#############################################################################
-// ** 【标准模块】☆透明度弹道 标准模块（1H透明度弹道 实现）
+// ** 【标准模块】☆透明度弹道 标准模块
 //#############################################################################
 //##############################
 // * 透明度弹道 - 初始化数据【标准默认值】
@@ -408,7 +411,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsOpacity = function( obj_data, obj_ind
 }
 
 //#############################################################################
-// ** 【标准模块】☆缩放X弹道 标准模块（1H缩放X弹道 实现）
+// ** 【标准模块】☆缩放X弹道 标准模块
 //#############################################################################
 //##############################
 // * 缩放X弹道 - 初始化数据【标准默认值】
@@ -456,7 +459,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleX = function( obj_data, obj_inde
 }
 
 //#############################################################################
-// ** 【标准模块】☆缩放Y弹道 标准模块（1H缩放Y弹道 实现）
+// ** 【标准模块】☆缩放Y弹道 标准模块
 //#############################################################################
 //##############################
 // * 缩放Y弹道 - 初始化数据【标准默认值】
@@ -504,7 +507,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleY = function( obj_data, obj_inde
 }
 
 //#############################################################################
-// ** 【标准模块】☆旋转角弹道 标准模块（1H旋转角弹道 实现）
+// ** 【标准模块】☆旋转角弹道 标准模块
 //#############################################################################
 //##############################
 // * 旋转角弹道 - 初始化数据【标准默认值】
@@ -554,7 +557,7 @@ Drill_COBa_Manager.drill_COBa_preBallisticsRotate = function( obj_data, obj_inde
 
 
 //#############################################################################
-// ** 【标准模块】☆弹道工具 标准模块（0M弹道工具函数 实现）
+// ** 【标准模块】☆弹道工具 标准模块
 //#############################################################################
 //##############################
 // * 弹道工具 - 字符串 转 锚点列表【标准函数】
@@ -584,37 +587,6 @@ DrillUp.drill_COBa_convertPointListToString = function( point_list ){
 Drill_COBa_Manager.drill_COBa_convertPointListToString = function( point_list ){
 	return this.drill_COBa_convertPointListToString_Private( point_list );
 };
-//##############################
-// * 弹道工具 - 生成随机数（随机种子）【标准函数】
-//			
-//			参数：	> seed 数字	（正整数）
-//			返回：	> 数字 		（0~1随机数）
-//			
-//			标签：	> 『随机因子-迭代工具』
-//			说明：	> 如果随机种子为 1至100，那么你将得到线性均匀分布的随机值。不是乱序随机。
-//##############################
-DrillUp.drill_COBa_Math1D_getRandomInSeed = function( seed ){
-	return Drill_COBa_Manager.drill_COBa_Math1D_getRandomInSeed( seed );
-};
-Drill_COBa_Manager.drill_COBa_Math1D_getRandomInSeed = function( seed ){
-	return this.drill_COBa_Math1D_getRandomInSeed_Private( seed );
-};
-//##############################
-// * 弹道工具 - 生成随机数（迭代）【标准函数】
-//			
-//			参数：	> org_ran 数字   （0~1原随机数）
-//					> iteration 数字 （正整数，迭代次数）
-//			返回：	> 数字           （0~1新随机数）
-//			
-//			标签：	> 『随机因子-迭代工具』
-//			说明：	> 经过迭代后，能够得到乱序的随机数。
-//##############################
-DrillUp.drill_COBa_Math1D_getRandomInIteration = function( org_ran, iteration ){
-	return Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( org_ran, iteration );
-};
-Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration = function( org_ran, iteration ){
-	return this.drill_COBa_Math1D_getRandomInIteration_Private( org_ran, iteration );
-};
 
 
 
@@ -638,8 +610,7 @@ Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration = function( org_ran, i
 // **							->缩放X
 // **							->缩放Y
 // **							->旋转角
-// **						->随机因子（RandomFactor）
-// **						->随机迭代次数（RandomIteration）
+// **						->随机因子列表（randomFactorList）
 // **					
 // **					->0B二维弹道【planimetry】
 // **						->模式
@@ -675,23 +646,20 @@ Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration = function( org_ran, i
 // **								> 增减速变化
 // **								> 弹性变化
 // **								> 抛物线变化
-// **							->随机因子（RandomFactor）
-// **							->随机迭代次数（RandomIteration）
+// **							->随机因子列表（randomFactorList）
 // **							->终止条件（terminate）
 // **					
 // **					->0H一维弹道应用
-// **						->1H透明度弹道
-// **						->1H缩放X弹道
-// **						->1H缩放Y弹道
-// **						->1H旋转角弹道
+// **						->1H透明度弹道（私有）
+// **						->1H缩放X弹道（私有）
+// **						->1H缩放Y弹道（私有）
+// **						->1H旋转角弹道（私有）
 // **					->0I二维弹道应用
-// **						->1I移动弹道
+// **						->1I移动弹道（私有）
 // **					
-// **					->0M弹道工具函数
+// **					->0M弹道工具函数（私有）
 // **						->字符串 转 锚点列表
 // **						->锚点列表 转 字符串
-// **						->生成随机数（随机种子）
-// **						->生成随机数（迭代）
 // **					->0N校验值
 // **						->undefined未定义
 // **						->NaN值
@@ -719,51 +687,53 @@ Drill_COBa_Manager._drill_COBa_commonData = {};
 //==============================
 // * 0A一维弹道 - 初始化（私有）
 //==============================
-Drill_COBa_Manager.drill_COBa_setBallisticsCommon = function( data ){
+Drill_COBa_Manager.drill_COBa_setBallisticsCommon = function( dataFrom ){
 	var result = {};
 	
 	// > 基础参数（common）
-	result['commonNum'] = data['commonNum'] || 1;						//一维弹道 - 子弹数量
-	result['commonTime'] = data['commonTime'] || 1;                 	//一维弹道 - 时长
-	result['commonDelay'] = data['commonDelay'] || 0;               	//一维弹道 - 开始前延迟时间
-	result['commonEndDelay'] = data['commonEndDelay'] || 0;         	//一维弹道 - 到终点后延迟时间
-	result['commonOrderDelay'] = data['commonOrderDelay'] || 0;         //一维弹道 - ID依次延迟时间
-	result['commonMode'] = data['commonMode'] || "目标值模式";      	//一维弹道 - 变化模式（时间公式模式/时间锚点模式/目标值模式）
+	result['commonNum'] = dataFrom['commonNum'] || 1;						//一维弹道 - 子弹数量
+	result['commonTime'] = dataFrom['commonTime'] || 1;                 	//一维弹道 - 时长
+	result['commonDelay'] = dataFrom['commonDelay'] || 0;               	//一维弹道 - 开始前延迟时间
+	result['commonEndDelay'] = dataFrom['commonEndDelay'] || 0;         	//一维弹道 - 到终点后延迟时间
+	result['commonOrderDelay'] = dataFrom['commonOrderDelay'] || 0;         //一维弹道 - ID依次延迟时间
+	result['commonMode'] = dataFrom['commonMode'] || "目标值模式";      	//一维弹道 - 变化模式（时间公式模式/时间锚点模式/目标值模式）
 	
 	
 	//   ■ 时间公式（o-t图）
 	if( result['commonMode'] == "时间公式模式" ){
-		result['otFormula'] = data['otFormula'];						//时间公式 - 公式值（字符串，可为空）
+		result['otFormula'] = dataFrom['otFormula'];						//时间公式 - 公式值（字符串，可为空）
 	}
 	
 	//   ■ 时间锚点（anchor）
 	else if( result['commonMode'] == "时间锚点模式" ){
-		result['anchorPointTank'] = data['anchorPointTank'] || [];		//时间锚点 - 锚点列表
+		result['anchorPointTank'] = dataFrom['anchorPointTank'] || [];		//时间锚点 - 锚点列表
 	}
 	
 	//   ■ 目标值（target）
 	else if( result['commonMode'] == "目标值模式" ){
-		result['targetType'] = data['targetType'] || "瞬间变化";		//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
-		result['targetDifference'] = data['targetDifference'] || 0;     //目标值 - 距离差值（终点值减起点值）
+		result['targetType'] = dataFrom['targetType'] || "瞬间变化";		//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = dataFrom['targetDifference'] || 0;     //目标值 - 距离差值（终点值减起点值）
 	}
 	
 	
-	// > 随机因子（RandomFactor）
-	result['randomFactor'] = data['randomFactor'] || Math.random();		//『随机因子-玩法用』
-	
-	
-	// > 随机迭代次数（RandomIteration）
-	if( data['randomIterationList'] != undefined ){
-		result['randomIterationList'] = data['randomIterationList'];	//（这里直接用指针，迭代次数变化，推演跟着变）
-																		//（可直接为空对象，节约配置参数存储空间）
+	// > 随机因子列表（randomFactorList）
+	//		『随机因子的迭代管理』『随机因子的迭代工具』：弹道核心不含任何迭代功能，需要外部插件自己管理随机因子。
+	result['randomFactorList'] = [];
+	for( var i = 0; i < result['commonNum']; i++ ){
+		if( dataFrom['randomFactorList'] !== undefined &&
+			dataFrom['randomFactorList'][i] !== undefined ){
+			result['randomFactorList'][i] = dataFrom['randomFactorList'][i];
+		}else{
+			result['randomFactorList'][i] = Math.random();  //『随机因子-玩法用』（可以被子插件覆盖赋值）
+		}
 	}
 	
 	
 	// > 终止条件（terminate）
-	result['terminateRangeEnabled'] = data['terminateRangeEnabled'] || false;				//终止条件 - 范围开关
-	if( result['terminateRangeEnabled'] == true ){
-		if( data['terminateRange'] != undefined ){											//终止条件 - 范围
-			result['terminateRange'] = JSON.parse(JSON.stringify( data['terminateRange'] ));  //『深拷贝-核心自定义数据』
+	result['terminateRangeEnabled'] = dataFrom['terminateRangeEnabled'] || false;	//终止条件 - 范围开关
+	if( result['terminateRangeEnabled'] == true ){									//
+		if( dataFrom['terminateRange'] != undefined ){								//终止条件 - 范围
+			result['terminateRange'] = JSON.parse(JSON.stringify( dataFrom['terminateRange'] ));  //『深拷贝-核心自定义数据』
 		}else{
 			result['terminateRange'] = {'min':0,'max':0};
 		}
@@ -778,11 +748,11 @@ Drill_COBa_Manager.drill_COBa_setBallisticsCommon = function( data ){
 // * 0A一维弹道 - 获取弹道总时间（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_getBallisticsCommon_TotalTime = function(){
-	var data = this._drill_COBa_commonData;
-	var result = data['commonTime'];
-	result += data['commonDelay'];
-	result += data['commonEndDelay'];
-	result += data['commonOrderDelay'] * (data['commonNum']-1);
+	var dataFrom = this._drill_COBa_commonData;
+	var result = dataFrom['commonTime'];
+	result += dataFrom['commonDelay'];
+	result += dataFrom['commonEndDelay'];
+	result += dataFrom['commonOrderDelay'] * (dataFrom['commonNum']-1);
 	return result;
 }
 //==============================
@@ -814,10 +784,10 @@ Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_inde
 			if( formula == undefined || formula == "" ){ formula = "return 0"; }
 			eval("obj['otFunction'] = function( p ){ "+formula+" }" );
 		}
-		if( data['commonMode'] == "时间锚点模式" ){		
+		if( data['commonMode'] == "时间锚点模式" ){
 			//（无公式）
 		}
-		if( data['commonMode'] == "目标值模式" ){		
+		if( data['commonMode'] == "目标值模式" ){
 			//（无公式）
 		}
 	}
@@ -836,17 +806,12 @@ Drill_COBa_Manager.drill_COBa_preBallisticsCommon = function( obj_data, obj_inde
 		// > 时间公式模式 - 起点值
 		obj_data['_drill_COBa_common'].push( orgCommon );
 		
-		// > 时间公式模式 - 随机值（来自随机因子）
-		var randomValue = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['randomFactor'], obj_index );	//随机因子
-		var randomValue_i = 1;
-		if( data['randomIterationList'] != undefined ){
-			if( data['randomIterationList'][ obj_index ] != undefined ){
-				randomValue_i = data['randomIterationList'][ obj_index ];
-			}else{
-				randomValue_i = data['randomIterationList'][0];
-			}
+		// > 时间公式模式 - 随机值（来自 随机因子列表）
+		var randomValue = 0;
+		if( data['randomFactorList'] !== undefined &&
+			data['randomFactorList'][ obj_index ] !== undefined ){
+			randomValue = data['randomFactorList'][ obj_index ];
 		}
-		randomValue = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( randomValue, data['commonNum']*randomValue_i +obj_index );
 		
 		// > 时间公式模式 - 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -1052,115 +1017,136 @@ Drill_COBa_Manager._drill_COBa_planimetryData = {};
 //==============================
 // * 0B二维弹道 - 初始化数据 默认值（私有）
 //==============================
-Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
+Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( dataFrom ){
 	var result = {};
 	
 	// > 基础参数（planimetry）
-	result['planimetryNum'] = data['planimetryNum'] || 1;								//二维弹道 - 子弹数量
-	result['planimetryTime'] = data['planimetryTime'] || 1;                     		//二维弹道 - 时长
-	result['planimetryDelay'] = data['planimetryDelay'] || 0;                   		//二维弹道 - 开始前延迟时间
-	result['planimetryEndDelay'] = data['planimetryEndDelay'] || 0;             		//二维弹道 - 到终点后延迟时间
-	result['planimetryOrderDelay'] = data['planimetryOrderDelay'] || 0; 				//二维弹道 - ID依次延迟时间（可为正数负数，将在首尾形成额外梯度的延迟时间）
-	result['planimetryMode'] = data['planimetryMode'] || "极坐标模式";          		//二维弹道 - 变化模式（极坐标模式/直角坐标模式/两点式/…）
+	result['planimetryNum'] = dataFrom['planimetryNum'] || 1;								//二维弹道 - 子弹数量
+	result['planimetryTime'] = dataFrom['planimetryTime'] || 1;                     		//二维弹道 - 时长
+	result['planimetryDelay'] = dataFrom['planimetryDelay'] || 0;                   		//二维弹道 - 开始前延迟时间
+	result['planimetryEndDelay'] = dataFrom['planimetryEndDelay'] || 0;             		//二维弹道 - 到终点后延迟时间
+	result['planimetryOrderDelay'] = dataFrom['planimetryOrderDelay'] || 0; 				//二维弹道 - ID依次延迟时间（可为正数负数，将在首尾形成额外梯度的延迟时间）
+	result['planimetryMode'] = dataFrom['planimetryMode'] || "极坐标模式";          		//二维弹道 - 变化模式（极坐标模式/直角坐标模式/两点式/…）
 	
 	//   ■ 极坐标（polar）		
 	if( result['planimetryMode'] == "极坐标模式" ){  //（这样写是为了减少参数数量，便于存储）
-		result['polarSpeedType'] = data['polarSpeedType'] || "只初速度";				//极坐标 - 速度 - 类型
-		result['polarSpeedBase'] = data['polarSpeedBase'] || 0;                         //极坐标 - 速度 - 初速度
-		result['polarSpeedRandom'] = data['polarSpeedRandom'] || 0;                     //极坐标 - 速度 - 速度随机波动量
-		result['polarSpeedInc'] = data['polarSpeedInc'] || 0;                           //极坐标 - 速度 - 加速度
-		result['polarSpeedMax'] = data['polarSpeedMax'] || 0;                           //极坐标 - 速度 - 最大速度
-		result['polarSpeedMin'] = data['polarSpeedMin'] || 0;                           //极坐标 - 速度 - 最小速度
-		result['polarDistanceFormula'] = data['polarDistanceFormula']; 					//极坐标 - 速度 - 路程计算公式（字符串，可为空）
-		result['polarDirType'] = data['polarDirType'] || "固定方向";                    //极坐标 - 方向 - 类型
-		result['polarDirFixed'] = data['polarDirFixed'] || 0;                           //极坐标 - 方向 - 固定方向
-		result['polarDirSectorFace'] = data['polarDirSectorFace'] || 0;                 //极坐标 - 方向 - 扇形朝向
-		result['polarDirSectorDegree'] = data['polarDirSectorDegree'] || 0;             //极坐标 - 方向 - 扇形角度
-		result['polarDirFormula'] = data['polarDirFormula'];							//极坐标 - 方向 - 方向计算公式（字符串，可为空）
+		result['polarSpeedType'] = dataFrom['polarSpeedType'] || "只初速度";				//极坐标 - 速度 - 类型
+		result['polarSpeedBase'] = dataFrom['polarSpeedBase'] || 0;                         //极坐标 - 速度 - 初速度
+		result['polarSpeedRandom'] = dataFrom['polarSpeedRandom'] || 0;                     //极坐标 - 速度 - 速度随机波动量
+		result['polarSpeedInc'] = dataFrom['polarSpeedInc'] || 0;                           //极坐标 - 速度 - 加速度
+		result['polarSpeedMax'] = dataFrom['polarSpeedMax'] || 0;                           //极坐标 - 速度 - 最大速度
+		result['polarSpeedMin'] = dataFrom['polarSpeedMin'] || 0;                           //极坐标 - 速度 - 最小速度
+		result['polarDistanceFormula'] = dataFrom['polarDistanceFormula']; 					//极坐标 - 速度 - 路程计算公式（字符串，可为空）
+		result['polarDirType'] = dataFrom['polarDirType'] || "固定方向";                    //极坐标 - 方向 - 类型
+		result['polarDirFixed'] = dataFrom['polarDirFixed'] || 0;                           //极坐标 - 方向 - 固定方向
+		result['polarDirSectorFace'] = dataFrom['polarDirSectorFace'] || 0;                 //极坐标 - 方向 - 扇形朝向
+		result['polarDirSectorDegree'] = dataFrom['polarDirSectorDegree'] || 0;             //极坐标 - 方向 - 扇形角度
+		result['polarDirRate'] = dataFrom['polarDirRate'] || 0;                             //极坐标 - 方向 - 方向角速率
+		result['polarDirFormula'] = dataFrom['polarDirFormula'];							//极坐标 - 方向 - 方向计算公式（字符串，可为空）
 	}
 	//   ■ 直角坐标（cartesian）
 	else if( result['planimetryMode'] == "直角坐标模式" ){
-		result['cartRotation'] = data['cartRotation'] || 0;								//直角坐标 - 整体坐标轴旋转角度
-		result['cartXSpeedType'] = data['cartXSpeedType'] || "只初速度";				//直角坐标 - x - 类型	
-		result['cartXSpeedBase'] = data['cartXSpeedBase'] || 0;                         //直角坐标 - x - 初速度
-		result['cartXSpeedRandom'] = data['cartXSpeedRandom'] || 0;                     //直角坐标 - x - 速度随机波动量
-		result['cartXSpeedInc'] = data['cartXSpeedInc'] || 0;                           //直角坐标 - x - 加速度
-		result['cartXSpeedMax'] = data['cartXSpeedMax'] || 0;                           //直角坐标 - x - 最大速度
-		result['cartXSpeedMin'] = data['cartXSpeedMin'] || 0;                           //直角坐标 - x - 最小速度
-		result['cartXDistanceFormula'] = data['cartXDistanceFormula'];					//直角坐标 - x - 路程计算公式（字符串，可为空）
-		result['cartYSpeedType'] = data['cartYSpeedType'] || "只初速度";                //直角坐标 - y - 类型
-		result['cartYSpeedBase'] = data['cartYSpeedBase'] || 0;                         //直角坐标 - y - 初速度
-		result['cartYSpeedRandom'] = data['cartYSpeedRandom'] || 0;                     //直角坐标 - y - 速度随机波动量
-		result['cartYSpeedInc'] = data['cartYSpeedInc'] || 0;                           //直角坐标 - y - 加速度
-		result['cartYSpeedMax'] = data['cartYSpeedMax'] || 0;                           //直角坐标 - y - 最大速度
-		result['cartYSpeedMin'] = data['cartYSpeedMin'] || 0;                           //直角坐标 - y - 最小速度
-		result['cartYDistanceFormula'] = data['cartYDistanceFormula'];					//直角坐标 - y - 路程计算公式（字符串，可为空）
+		result['cartRotation'] = dataFrom['cartRotation'] || 0;								//直角坐标 - 整体坐标轴旋转角度
+		result['cartXSpeedType'] = dataFrom['cartXSpeedType'] || "只初速度";				//直角坐标 - x - 类型	
+		result['cartXSpeedBase'] = dataFrom['cartXSpeedBase'] || 0;                         //直角坐标 - x - 初速度
+		result['cartXSpeedRandom'] = dataFrom['cartXSpeedRandom'] || 0;                     //直角坐标 - x - 速度随机波动量
+		result['cartXSpeedInc'] = dataFrom['cartXSpeedInc'] || 0;                           //直角坐标 - x - 加速度
+		result['cartXSpeedMax'] = dataFrom['cartXSpeedMax'] || 0;                           //直角坐标 - x - 最大速度
+		result['cartXSpeedMin'] = dataFrom['cartXSpeedMin'] || 0;                           //直角坐标 - x - 最小速度
+		result['cartXDistanceFormula'] = dataFrom['cartXDistanceFormula'];					//直角坐标 - x - 路程计算公式（字符串，可为空）
+		result['cartYSpeedType'] = dataFrom['cartYSpeedType'] || "只初速度";                //直角坐标 - y - 类型
+		result['cartYSpeedBase'] = dataFrom['cartYSpeedBase'] || 0;                         //直角坐标 - y - 初速度
+		result['cartYSpeedRandom'] = dataFrom['cartYSpeedRandom'] || 0;                     //直角坐标 - y - 速度随机波动量
+		result['cartYSpeedInc'] = dataFrom['cartYSpeedInc'] || 0;                           //直角坐标 - y - 加速度
+		result['cartYSpeedMax'] = dataFrom['cartYSpeedMax'] || 0;                           //直角坐标 - y - 最大速度
+		result['cartYSpeedMin'] = dataFrom['cartYSpeedMin'] || 0;                           //直角坐标 - y - 最小速度
+		result['cartYDistanceFormula'] = dataFrom['cartYDistanceFormula'];					//直角坐标 - y - 路程计算公式（字符串，可为空）
 	}
 	//   ■ 轨道锚点（track）		
 	else if( result['planimetryMode'] == "轨道锚点模式" ){
-		result['trackSpeedType'] = data['trackSpeedType'] || "只初速度";				//轨道锚点 - 速度 - 类型
-		result['trackSpeedBase'] = data['trackSpeedBase'] || 0;                         //轨道锚点 - 速度 - 初速度
-		result['trackSpeedRandom'] = data['trackSpeedRandom'] || 0;                     //轨道锚点 - 速度 - 速度随机波动量
-		result['trackSpeedInc'] = data['trackSpeedInc'] || 0;                           //轨道锚点 - 速度 - 加速度
-		result['trackSpeedMax'] = data['trackSpeedMax'] || 0;                           //轨道锚点 - 速度 - 最大速度
-		result['trackSpeedMin'] = data['trackSpeedMin'] || 0;                           //轨道锚点 - 速度 - 最小速度
-		result['trackDistanceFormula'] = data['trackDistanceFormula'];					//轨道锚点 - 速度 - 路程计算公式（字符串，可为空）
-		result['trackPointTank'] = data['trackPointTank'] || [];                        //轨道锚点 - 轨道 - 锚点列表
-		result['trackRotation'] = data['trackRotation'] || 0;                           //轨道锚点 - 轨道 - 整体旋转角度
+		result['trackSpeedType'] = dataFrom['trackSpeedType'] || "只初速度";				//轨道锚点 - 速度 - 类型
+		result['trackSpeedBase'] = dataFrom['trackSpeedBase'] || 0;                         //轨道锚点 - 速度 - 初速度
+		result['trackSpeedRandom'] = dataFrom['trackSpeedRandom'] || 0;                     //轨道锚点 - 速度 - 速度随机波动量
+		result['trackSpeedInc'] = dataFrom['trackSpeedInc'] || 0;                           //轨道锚点 - 速度 - 加速度
+		result['trackSpeedMax'] = dataFrom['trackSpeedMax'] || 0;                           //轨道锚点 - 速度 - 最大速度
+		result['trackSpeedMin'] = dataFrom['trackSpeedMin'] || 0;                           //轨道锚点 - 速度 - 最小速度
+		result['trackDistanceFormula'] = dataFrom['trackDistanceFormula'];					//轨道锚点 - 速度 - 路程计算公式（字符串，可为空）
+		result['trackPointTank'] = dataFrom['trackPointTank'] || [];                        //轨道锚点 - 轨道 - 锚点列表
+		result['trackRotation'] = dataFrom['trackRotation'] || 0;                           //轨道锚点 - 轨道 - 整体旋转角度
 	}
 	//   ■ 两点式（twoPoint）
 	else if( result['planimetryMode'] == "两点式" ){
-		result['twoPointType'] = data['twoPointType'] || "不变化";						//两点式 - 类型（不变化/匀速变化/弹性变化/……）
-		result['twoPointDifferenceX'] = data['twoPointDifferenceX'] || 0;				//两点式 - 距离差值x（终点减起点）
-		result['twoPointDifferenceY'] = data['twoPointDifferenceY'] || 0;	            //两点式 - 距离差值y（终点减起点）
-		result['twoPointParabolaDir'] = data['twoPointParabolaDir'] || 0;	            //两点式 - 抛物线变化 - 初始方向（单位角度）
-		result['twoPointParabolaSpeed'] = data['twoPointParabolaSpeed'] || 0;	        //两点式 - 抛物线变化 - 初始速度
+		result['twoPointType'] = dataFrom['twoPointType'] || "不变化";						//两点式 - 类型（不变化/匀速变化/弹性变化/……）
+		result['twoPointDifferenceX'] = dataFrom['twoPointDifferenceX'] || 0;				//两点式 - 距离差值x（终点减起点）
+		result['twoPointDifferenceY'] = dataFrom['twoPointDifferenceY'] || 0;	            //两点式 - 距离差值y（终点减起点）
+		result['twoPointParabolaDir'] = dataFrom['twoPointParabolaDir'] || 0;	            //两点式 - 抛物线变化 - 初始方向（单位角度）
+		result['twoPointParabolaSpeed'] = dataFrom['twoPointParabolaSpeed'] || 0;	        //两点式 - 抛物线变化 - 初始速度
 	}
 	
 	
-	// > 随机因子（RandomFactor）
-	//		（若子插件设置参数时直接用了 Math.random()，那么此处的随机因子就没用了。）『随机因子-玩法用』
-	//		（注意，独立参数项之间，随机因子不可共用！会造成强关联的错误关系。）
+	// > 随机因子列表（randomFactorList）
+	//		『随机因子的迭代管理』『随机因子的迭代工具』：弹道核心不含任何迭代功能，需要外部插件自己管理随机因子。
 	if( result['planimetryMode'] == "极坐标模式" ){
-		result['polarSpeedRandomFactor'] = data['polarSpeedRandomFactor'] || Math.random();		//『随机因子-玩法用』
-		result['polarDirRandomFactor'] = data['polarDirRandomFactor'] || Math.random();			//『随机因子-玩法用』
+		result['polarSpeedRandomFactorList'] = [];
+		for( var i = 0; i < result['planimetryNum']; i++ ){
+			if( dataFrom['polarSpeedRandomFactorList'] !== undefined &&
+				dataFrom['polarSpeedRandomFactorList'][i] !== undefined ){
+				result['polarSpeedRandomFactorList'][i] = dataFrom['polarSpeedRandomFactorList'][i];
+			}else{
+				result['polarSpeedRandomFactorList'][i] = Math.random();  //『随机因子-玩法用』（可以被子插件覆盖赋值）
+			}
+		}
+		result['polarDirRandomFactorList'] = [];
+		for( var i = 0; i < result['planimetryNum']; i++ ){
+			if( dataFrom['polarDirRandomFactorList'] !== undefined &&
+				dataFrom['polarDirRandomFactorList'][i] !== undefined ){
+				result['polarDirRandomFactorList'][i] = dataFrom['polarDirRandomFactorList'][i];
+			}else{
+				result['polarDirRandomFactorList'][i] = Math.random();  //『随机因子-玩法用』（可以被子插件覆盖赋值）
+			}
+		}
 	}
 	else if( result['planimetryMode'] == "直角坐标模式" ){
-		result['cartXSpeedRandomFactor'] = data['cartXSpeedRandomFactor'] || Math.random();		//『随机因子-玩法用』
-		result['cartYSpeedRandomFactor'] = data['cartYSpeedRandomFactor'] || Math.random();		//『随机因子-玩法用』
+		result['cartXSpeedRandomFactorList'] = [];
+		for( var i = 0; i < result['planimetryNum']; i++ ){
+			if( dataFrom['cartXSpeedRandomFactorList'] !== undefined &&
+				dataFrom['cartXSpeedRandomFactorList'][i] !== undefined ){
+				result['cartXSpeedRandomFactorList'][i] = dataFrom['cartXSpeedRandomFactorList'][i];
+			}else{
+				result['cartXSpeedRandomFactorList'][i] = Math.random();  //『随机因子-玩法用』（可以被子插件覆盖赋值）
+			}
+		}
+		result['cartYSpeedRandomFactorList'] = [];
+		for( var i = 0; i < result['planimetryNum']; i++ ){
+			if( dataFrom['cartYSpeedRandomFactorList'] !== undefined &&
+				dataFrom['cartYSpeedRandomFactorList'][i] !== undefined ){
+				result['cartYSpeedRandomFactorList'][i] = dataFrom['cartYSpeedRandomFactorList'][i];
+			}else{
+				result['cartYSpeedRandomFactorList'][i] = Math.random();  //『随机因子-玩法用』（可以被子插件覆盖赋值）
+			}
+		}
 	}
 	else if( result['planimetryMode'] == "轨道锚点模式" ){
-		result['trackSpeedRandomFactor'] = data['trackSpeedRandomFactor'] || Math.random();		//『随机因子-玩法用』
+		result['trackSpeedRandomFactorList'] = [];
+		for( var i = 0; i < result['planimetryNum']; i++ ){
+			if( dataFrom['trackSpeedRandomFactorList'] !== undefined &&
+				dataFrom['trackSpeedRandomFactorList'][i] !== undefined ){
+				result['trackSpeedRandomFactorList'][i] = dataFrom['trackSpeedRandomFactorList'][i];
+			}else{
+				result['trackSpeedRandomFactorList'][i] = Math.random();  //『随机因子-玩法用』（可以被子插件覆盖赋值）
+			}
+		}
 	}
 	else if( result['planimetryMode'] == "两点式" ){
-		//（无随机因子）
-	}
-	
-	
-	// > 随机迭代次数（RandomIteration）
-	//		（若子插件设置参数时直接用了 Math.random()，那么此处的随机迭代次数就没用了。）『随机因子-玩法用』
-	if( result['planimetryMode'] == "极坐标模式" ){
-		result['polarSpeedRandomIterationList'] = data['polarSpeedRandomIterationList'];	//（这里直接用指针，迭代次数变化，推演跟着变）
-		result['polarDirRandomIterationList'] = data['polarDirRandomIterationList'];		//（可直接为空对象，节约配置参数存储空间）
-	}
-	else if( result['planimetryMode'] == "直角坐标模式" ){		
-		result['cartXSpeedRandomIterationList'] = data['cartXSpeedRandomIterationList'];	//（这里直接用指针，迭代次数变化，推演跟着变）
-		result['cartYSpeedRandomIterationList'] = data['cartYSpeedRandomIterationList'];	//（可直接为空对象，节约配置参数存储空间）
-	}
-	else if( result['planimetryMode'] == "轨道锚点模式" ){		
-		result['trackSpeedRandomIterationList'] = data['trackSpeedRandomIterationList'];	//（这里直接用指针，迭代次数变化，推演跟着变）
-																							//（可直接为空对象，节约配置参数存储空间）
-	}
-	else if( result['planimetryMode'] == "两点式" ){		
-		//（无随机迭代次数）
+		//（无）
 	}
 	
 	
 	// > 终止条件（terminate）
-	result['terminateRectEnabled'] = data['terminateRectEnabled'] || false;				//终止条件 - 矩形范围开关
-	if( result['terminateRectEnabled'] == true ){
-		if( data['terminateRect'] != undefined ){										//终止条件 - 矩形范围
-			result['terminateRect'] = JSON.parse(JSON.stringify( data['terminateRect'] ));  //『深拷贝-核心自定义数据』
+	result['terminateRectEnabled'] = dataFrom['terminateRectEnabled'] || false;		//终止条件 - 矩形范围开关
+	if( result['terminateRectEnabled'] == true ){									//
+		if( dataFrom['terminateRect'] != undefined ){								//终止条件 - 矩形范围
+			result['terminateRect'] = JSON.parse(JSON.stringify( dataFrom['terminateRect'] ));  //『深拷贝-核心自定义数据』
 		}else{
 			result['terminateRect'] = {'x':0,'y':0,'width':0,'height':0};
 		}
@@ -1175,11 +1161,11 @@ Drill_COBa_Manager.drill_COBa_setBallisticsPlanimetry = function( data ){
 // * 0B二维弹道 - 获取弹道总时间（私有）
 //==============================
 Drill_COBa_Manager.drill_COBa_getBallisticsPlanimetry_TotalTime = function(){
-	var data = this._drill_COBa_planimetryData;
-	var result = data['planimetryTime'];
-	result += data['planimetryDelay'];
-	result += data['planimetryEndDelay'];
-	result += data['planimetryOrderDelay'] * (data['planimetryNum']-1);
+	var dataFrom = this._drill_COBa_planimetryData;
+	var result = dataFrom['planimetryTime'];
+	result += dataFrom['planimetryDelay'];
+	result += dataFrom['planimetryEndDelay'];
+	result += dataFrom['planimetryOrderDelay'] * (dataFrom['planimetryNum']-1);
 	return result;
 }
 //==============================
@@ -1250,33 +1236,27 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 	/*-----------------二维弹道 - 极坐标模式------------------*/
 	if( data['planimetryMode'] == "极坐标模式" ){
 		
+		// > 极坐标模式 - 版本兼容（适配旧存档，防止NaN报错）
+		if( data['polarDirRate'] == undefined ){ data['polarDirRate'] = 0; }
+		
+		
 		// > 极坐标模式 - 起点值
 		obj_data['_drill_COBa_x'].push( org_x );
 		obj_data['_drill_COBa_y'].push( org_y );
 		
-		// > 极坐标模式 - 随机值（方向随机因子）
-		var randomDirValue = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['polarDirRandomFactor'], obj_index +12345 );
-		var randomDirValue_i = 1;
-		if( data['polarDirRandomIterationList'] != undefined ){
-			if( data['polarDirRandomIterationList'][ obj_index ] != undefined ){
-				randomDirValue_i = data['polarDirRandomIterationList'][ obj_index ];
-			}else{
-				randomDirValue_i = data['polarDirRandomIterationList'][0];
-			}
+		// > 极坐标模式 - 随机值 方向（来自 随机因子列表）
+		var randomDirValue = 0;
+		if( data['polarSpeedRandomFactorList'] !== undefined &&
+			data['polarSpeedRandomFactorList'][ obj_index ] !== undefined ){
+			randomDirValue = data['polarSpeedRandomFactorList'][ obj_index ];
 		}
-		randomDirValue = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( randomDirValue, data['planimetryNum']*randomDirValue_i +obj_index +12345 );
 		
-		// > 极坐标模式 - 随机值（速度随机因子）
-		var randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['polarSpeedRandomFactor'], obj_index +23456 );
-		var randomSpeed_i = 1;
-		if( data['polarSpeedRandomIterationList'] != undefined ){
-			if( data['polarSpeedRandomIterationList'][ obj_index ] != undefined ){
-				randomSpeed_i = data['polarSpeedRandomIterationList'][ obj_index ];
-			}else{
-				randomSpeed_i = data['polarSpeedRandomIterationList'][0];
-			}
+		// > 极坐标模式 - 随机值 速度（来自 随机因子列表）
+		var randomSpeed = 0;
+		if( data['polarDirRandomFactorList'] !== undefined &&
+			data['polarDirRandomFactorList'][ obj_index ] !== undefined ){
+			randomSpeed = data['polarDirRandomFactorList'][ obj_index ];
 		}
-		randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( randomSpeed, data['planimetryNum']*randomSpeed_i +obj_index +23456 );
 		
 		// > 极坐标模式 - 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -1290,13 +1270,14 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 			
 			// > 方向
 			dir = null;
-			p.index = obj_index;							//索引
+			p.index = obj_index;
 			p.time  = time;
 			p.ran   = randomDirValue;
 			p.num   = data['planimetryNum'];
-			p.d0    = data['polarDirFixed'];
+			p.d0      = data['polarDirFixed'];
 			p.sDegree = data['polarDirSectorDegree'];
 			p.sFace   = data['polarDirSectorFace'];
+			p.dv      = data['polarDirRate'];
 			
 			if( data['polarDirType'] == "固定方向"){
 				dir = this.drill_COBa_directionFunction_1( p );	
@@ -1375,29 +1356,19 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		obj_data['_drill_COBa_x'].push( org_x );
 		obj_data['_drill_COBa_y'].push( org_y );
 		
-		// > 直角坐标模式 - 随机值（X随机因子）
-		var x_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['cartXSpeedRandomFactor'], obj_index +34567 );
-		var x_randomSpeed_i = 1;
-		if( data['cartXSpeedRandomIterationList'] != undefined ){
-			if( data['cartXSpeedRandomIterationList'][ obj_index ] != undefined ){
-				x_randomSpeed_i = data['cartXSpeedRandomIterationList'][ obj_index ];
-			}else{
-				x_randomSpeed_i = data['cartXSpeedRandomIterationList'][0];
-			}
+		// > 直角坐标模式 - 随机值 X轴（来自 随机因子列表）
+		var x_randomSpeed = 0;
+		if( data['cartXSpeedRandomFactorList'] !== undefined &&
+			data['cartXSpeedRandomFactorList'][ obj_index ] !== undefined ){
+			x_randomSpeed = data['cartXSpeedRandomFactorList'][ obj_index ];
 		}
-		x_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( x_randomSpeed, data['planimetryNum']*x_randomSpeed_i +obj_index +34567 );
 		
-		// > 直角坐标模式 - 随机值（Y随机因子）
-		var y_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['cartYSpeedRandomFactor'], obj_index +45678 );
-		var y_randomSpeed_i = 1;
-		if( data['cartYSpeedRandomIterationList'] != undefined ){
-			if( data['cartYSpeedRandomIterationList'][ obj_index ] != undefined ){
-				y_randomSpeed_i = data['cartYSpeedRandomIterationList'][ obj_index ];
-			}else{
-				y_randomSpeed_i = data['cartYSpeedRandomIterationList'][0];
-			}
+		// > 直角坐标模式 - 随机值 Y轴（来自 随机因子列表）
+		var y_randomSpeed = 0;
+		if( data['cartYSpeedRandomFactorList'] !== undefined &&
+			data['cartYSpeedRandomFactorList'][ obj_index ] !== undefined ){
+			y_randomSpeed = data['cartYSpeedRandomFactorList'][ obj_index ];
 		}
-		y_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( y_randomSpeed, data['planimetryNum']*y_randomSpeed_i +obj_index +45678 );
 		
 		// > 直角坐标模式 - 变量定义（写这里是为优化性能，减少反复创建次数）
 		var p = {};				//参数容器
@@ -1494,17 +1465,12 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 		obj_data['_drill_COBa_x'].push( org_x );
 		obj_data['_drill_COBa_y'].push( org_y );
 		
-		// > 轨道锚点模式 - 随机值（随机因子）
-		var track_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( data['trackSpeedRandomFactor'], obj_index +56789 );
-		var track_randomSpeed_i = 1;
-		if( data['trackSpeedRandomIterationList'] != undefined ){
-			if( data['trackSpeedRandomIterationList'][ obj_index ] != undefined ){
-				track_randomSpeed_i = data['trackSpeedRandomIterationList'][ obj_index ];
-			}else{
-				track_randomSpeed_i = data['trackSpeedRandomIterationList'][0];
-			}
+		// > 轨道锚点模式 - 随机值 速度（来自 随机因子列表）
+		var track_randomSpeed = 0;
+		if( data['trackSpeedRandomFactorList'] !== undefined &&
+			data['trackSpeedRandomFactorList'][ obj_index ] !== undefined ){
+			track_randomSpeed = data['trackSpeedRandomFactorList'][ obj_index ];
 		}
-		track_randomSpeed = Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration( track_randomSpeed, data['planimetryNum']*track_randomSpeed_i +obj_index +56789 );
 		
 		// > 轨道锚点模式 - 轨道点初始化
 		if( data['trackPointTank'].length < 2 ){	//（至少要两个点才能计算）
@@ -1819,20 +1785,23 @@ Drill_COBa_Manager.drill_COBa_preBallisticsPlanimetry = function( obj_data, obj_
 //==============================
 Drill_COBa_Manager.drill_COBa_directionFunction_1 = function( p ){
 	var result =  p.d0;				//（固定方向）
+	result +=  p.dv * p.time;		//（方向角速率）
 	return result;
 }
 //==============================
 // * 0B二维弹道 - 公式 - 方向计算公式(方向类型) - 四周扩散(线性)
 //==============================
 Drill_COBa_Manager.drill_COBa_directionFunction_2 = function( p ){
-	var result =  p.d0 + 360 * p.index / p.num;	//（在一个圆圈里，线性放入固定数量的粒子）		
+	var result =  p.d0 + 360 * p.index / p.num;	//（在一个圆圈里，线性放入固定数量的粒子）
+	result +=  p.dv * p.time;
 	return result;
 }
 //==============================
 // * 0B二维弹道 - 公式 - 方向计算公式(方向类型) - 四周扩散(随机)
 //==============================
 Drill_COBa_Manager.drill_COBa_directionFunction_3 = function( p ){
-	var result =  p.d0 + 360 * p.ran;			
+	var result =  p.d0 + 360 * p.ran;
+	result +=  p.dv * p.time;
 	return result;
 }
 //==============================
@@ -1840,18 +1809,20 @@ Drill_COBa_Manager.drill_COBa_directionFunction_3 = function( p ){
 //==============================
 Drill_COBa_Manager.drill_COBa_directionFunction_4 = function( p ){
 	var result =  p.d0 + 360 * p.ran + 30 * Math.sin(p.time);
+	result +=  p.dv * p.time;
 	return result;											
 }
 //==============================
 // * 0B二维弹道 - 公式 - 方向计算公式(方向类型) - 扇形范围方向(线性)
 //==============================
 Drill_COBa_Manager.drill_COBa_directionFunction_5 = function( p ){		
-	var result =  p.sFace;		
+	var result =  p.sFace;
 	if( p.num > 1 ){
 		result =  p.sFace + p.sDegree * p.index / (p.num - 1) - p.sDegree/2;
 	}else{
 		result =  p.sFace;
-	}	
+	}
+	result +=  p.dv * p.time;
 	return result;
 }
 //==============================
@@ -1859,6 +1830,7 @@ Drill_COBa_Manager.drill_COBa_directionFunction_5 = function( p ){
 //==============================
 Drill_COBa_Manager.drill_COBa_directionFunction_6 = function( p ){		
 	var result =  p.sFace + p.sDegree * (p.ran - 0.5);		//（根据p.sDegree，算出波动范围方向，与朝向相加即可）
+	result += p.dv * p.time;
 	return result;
 }
 
@@ -1920,43 +1892,40 @@ Drill_COBa_Manager.drill_COBa_speedFunction_4 = function( p ){
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
-Drill_COBa_Manager.drill_COBa_setBallisticsOpacity_Private = function( data ){
+Drill_COBa_Manager.drill_COBa_setBallisticsOpacity_Private = function( dataFrom ){
 	var result = {};
 	
 	// > 透明度基础参数（opacity）
-	result['opacityNum'] = data['opacityNum'] || 1;					//透明度 - 子弹数量
-	result['opacityTime'] = data['opacityTime'] || 1;               //透明度 - 时长
-	result['opacityDelay'] = data['opacityDelay'] || 0;             //透明度 - 开始前延迟时间
-	result['opacityEndDelay'] = data['opacityEndDelay'] || 0;       //透明度 - 到终点后延迟时间
-	result['opacityOrderDelay'] = data['opacityOrderDelay'] || 0;	//透明度 - ID依次延迟时间
-	result['opacityMode'] = data['opacityMode'] || "目标值模式";    //透明度 - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
+	result['opacityNum'] = dataFrom['opacityNum'] || 1;					//透明度 - 子弹数量
+	result['opacityTime'] = dataFrom['opacityTime'] || 1;               //透明度 - 时长
+	result['opacityDelay'] = dataFrom['opacityDelay'] || 0;             //透明度 - 开始前延迟时间
+	result['opacityEndDelay'] = dataFrom['opacityEndDelay'] || 0;       //透明度 - 到终点后延迟时间
+	result['opacityOrderDelay'] = dataFrom['opacityOrderDelay'] || 0;	//透明度 - ID依次延迟时间
+	result['opacityMode'] = dataFrom['opacityMode'] || "目标值模式";    //透明度 - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
 	
 	
 	//   ■ 时间公式（o-t图）
 	if( result['opacityMode'] == "时间公式模式" ){
-		result['otFormula'] = data['otFormula'];					//时间公式 - 公式值
+		result['otFormula'] = dataFrom['otFormula'];					//时间公式 - 公式值
 	}
 	
 	//   ■ 时间锚点（anchor）		
 	if( result['opacityMode'] == "时间锚点模式" ){
-		result['anchorPointTank'] = data['anchorPointTank'];		//时间锚点 - 锚点列表
+		result['anchorPointTank'] = dataFrom['anchorPointTank'];		//时间锚点 - 锚点列表
 	}
 	
 	//   ■ 目标值（target）		
 	if( result['opacityMode'] == "目标值模式" ){
-		result['targetType'] = data['targetType'];					//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
-		result['targetDifference'] = data['targetDifference']; 		//目标值 - 距离差值（终点值减起点值）
+		result['targetType'] = dataFrom['targetType'];					//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = dataFrom['targetDifference']; 		//目标值 - 距离差值（终点值减起点值）
 	}
 	
-	// > 随机因子（RandomFactor）
-	result['randomFactor'] = data['randomFactor'];
-	
-	// > 随机迭代次数（RandomIteration）
-	result['randomIterationList'] = data['randomIterationList'];
+	// > 随机因子列表（randomFactorList）
+	result['randomFactorList'] = dataFrom['randomFactorList'];
 	
 	// > 终止条件（terminate）
-	result['terminateRangeEnabled'] = data['terminateRangeEnabled'];
-	result['terminateRange'] = data['terminateRange'];
+	result['terminateRangeEnabled'] = dataFrom['terminateRangeEnabled'];
+	result['terminateRange'] = dataFrom['terminateRange'];
 	
 	
 	// > 按一维弹道规则设置（私有）
@@ -1987,43 +1956,40 @@ Drill_COBa_Manager.drill_COBa_preBallisticsOpacity_Private = function( obj_data,
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
-Drill_COBa_Manager.drill_COBa_setBallisticsScaleX_Private = function( data ){
+Drill_COBa_Manager.drill_COBa_setBallisticsScaleX_Private = function( dataFrom ){
 	var result = {};
 	
 	// > 缩放X基础参数（scaleX）
-	result['scaleXNum'] = data['scaleXNum'] || 1;					//缩放X - 子弹数量
-	result['scaleXTime'] = data['scaleXTime'] || 1;                 //缩放X - 时长
-	result['scaleXDelay'] = data['scaleXDelay'] || 0;               //缩放X - 开始前延迟时间
-	result['scaleXEndDelay'] = data['scaleXEndDelay'] || 0;         //缩放X - 到终点后延迟时间
-	result['scaleXOrderDelay'] = data['scaleXOrderDelay'] || 0;		//缩放X - ID依次延迟时间
-	result['scaleXMode'] = data['scaleXMode'] || "目标值模式";      //缩放X - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
+	result['scaleXNum'] = dataFrom['scaleXNum'] || 1;					//缩放X - 子弹数量
+	result['scaleXTime'] = dataFrom['scaleXTime'] || 1;                 //缩放X - 时长
+	result['scaleXDelay'] = dataFrom['scaleXDelay'] || 0;               //缩放X - 开始前延迟时间
+	result['scaleXEndDelay'] = dataFrom['scaleXEndDelay'] || 0;         //缩放X - 到终点后延迟时间
+	result['scaleXOrderDelay'] = dataFrom['scaleXOrderDelay'] || 0;		//缩放X - ID依次延迟时间
+	result['scaleXMode'] = dataFrom['scaleXMode'] || "目标值模式";      //缩放X - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
 	
 	
 	//   ■ 时间公式（o-t图）
 	if( result['scaleXMode'] == "时间公式模式" ){
-		result['otFormula'] = data['otFormula'];					//时间公式 - 公式值
+		result['otFormula'] = dataFrom['otFormula'];					//时间公式 - 公式值
 	}
 	
 	//   ■ 时间锚点（anchor）		
 	if( result['scaleXMode'] == "时间锚点模式" ){
-		result['anchorPointTank'] = data['anchorPointTank'];		//时间锚点 - 锚点列表
+		result['anchorPointTank'] = dataFrom['anchorPointTank'];		//时间锚点 - 锚点列表
 	}
 	
 	//   ■ 目标值（target）		
 	if( result['scaleXMode'] == "目标值模式" ){
-		result['targetType'] = data['targetType'];					//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
-		result['targetDifference'] = data['targetDifference']; 		//目标值 - 距离差值（终点值减起点值）
+		result['targetType'] = dataFrom['targetType'];					//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = dataFrom['targetDifference']; 		//目标值 - 距离差值（终点值减起点值）
 	}
 	
-	// > 随机因子（RandomFactor）
-	result['randomFactor'] = data['randomFactor'];
-	
-	// > 随机迭代次数（RandomIteration）
-	result['randomIterationList'] = data['randomIterationList'];
+	// > 随机因子列表（randomFactorList）
+	result['randomFactorList'] = dataFrom['randomFactorList'];
 	
 	// > 终止条件（terminate）
-	result['terminateRangeEnabled'] = data['terminateRangeEnabled'];
-	result['terminateRange'] = data['terminateRange'];
+	result['terminateRangeEnabled'] = dataFrom['terminateRangeEnabled'];
+	result['terminateRange'] = dataFrom['terminateRange'];
 	
 	
 	// > 按一维弹道规则设置（私有）
@@ -2054,43 +2020,40 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleX_Private = function( obj_data, 
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
-Drill_COBa_Manager.drill_COBa_setBallisticsScaleY_Private = function( data ){
+Drill_COBa_Manager.drill_COBa_setBallisticsScaleY_Private = function( dataFrom ){
 	var result = {};
 	
 	// > 缩放Y基础参数（scaleY）
-	result['scaleYNum'] = data['scaleYNum'] || 1;					//缩放Y - 子弹数量
-	result['scaleYTime'] = data['scaleYTime'] || 1;                 //缩放Y - 时长
-	result['scaleYDelay'] = data['scaleYDelay'] || 0;               //缩放Y - 开始前延迟时间
-	result['scaleYEndDelay'] = data['scaleYEndDelay'] || 0;         //缩放Y - 到终点后延迟时间
-	result['scaleYOrderDelay'] = data['scaleYOrderDelay'] || 0;		//缩放Y - ID依次延迟时间
-	result['scaleYMode'] = data['scaleYMode'] || "目标值模式";      //缩放Y - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
+	result['scaleYNum'] = dataFrom['scaleYNum'] || 1;					//缩放Y - 子弹数量
+	result['scaleYTime'] = dataFrom['scaleYTime'] || 1;                 //缩放Y - 时长
+	result['scaleYDelay'] = dataFrom['scaleYDelay'] || 0;               //缩放Y - 开始前延迟时间
+	result['scaleYEndDelay'] = dataFrom['scaleYEndDelay'] || 0;         //缩放Y - 到终点后延迟时间
+	result['scaleYOrderDelay'] = dataFrom['scaleYOrderDelay'] || 0;		//缩放Y - ID依次延迟时间
+	result['scaleYMode'] = dataFrom['scaleYMode'] || "目标值模式";      //缩放Y - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
 	
 	
 	//   ■ 时间公式（o-t图）
 	if( result['scaleYMode'] == "时间公式模式" ){
-		result['otFormula'] = data['otFormula'];					//时间公式 - 公式值
+		result['otFormula'] = dataFrom['otFormula'];					//时间公式 - 公式值
 	}
 	
 	//   ■ 时间锚点（anchor）		
 	if( result['scaleYMode'] == "时间锚点模式" ){
-		result['anchorPointTank'] = data['anchorPointTank'];		//时间锚点 - 锚点列表
+		result['anchorPointTank'] = dataFrom['anchorPointTank'];		//时间锚点 - 锚点列表
 	}
 	
 	//   ■ 目标值（target）		
 	if( result['scaleYMode'] == "目标值模式" ){
-		result['targetType'] = data['targetType'];					//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
-		result['targetDifference'] = data['targetDifference']; 		//目标值 - 距离差值（终点值减起点值）
+		result['targetType'] = dataFrom['targetType'];					//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = dataFrom['targetDifference']; 		//目标值 - 距离差值（终点值减起点值）
 	}
 	
-	// > 随机因子（RandomFactor）
-	result['randomFactor'] = data['randomFactor'];
-	
-	// > 随机迭代次数（RandomIteration）
-	result['randomIterationList'] = data['randomIterationList'];
+	// > 随机因子列表（randomFactorList）
+	result['randomFactorList'] = dataFrom['randomFactorList'];
 	
 	// > 终止条件（terminate）
-	result['terminateRangeEnabled'] = data['terminateRangeEnabled'];
-	result['terminateRange'] = data['terminateRange'];
+	result['terminateRangeEnabled'] = dataFrom['terminateRangeEnabled'];
+	result['terminateRange'] = dataFrom['terminateRange'];
 	
 	
 	// > 按一维弹道规则设置（私有）
@@ -2121,43 +2084,40 @@ Drill_COBa_Manager.drill_COBa_preBallisticsScaleY_Private = function( obj_data, 
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
-Drill_COBa_Manager.drill_COBa_setBallisticsRotate_Private = function( data ){
+Drill_COBa_Manager.drill_COBa_setBallisticsRotate_Private = function( dataFrom ){
 	var result = {};
 	
 	// > 旋转角基础参数（rotate）
-	result['rotateNum'] = data['rotateNum'] || 1;					//旋转角 - 子弹数量
-	result['rotateTime'] = data['rotateTime'] || 1;                 //旋转角 - 时长
-	result['rotateDelay'] = data['rotateDelay'] || 0;               //旋转角 - 开始前延迟时间
-	result['rotateEndDelay'] = data['rotateEndDelay'] || 0;         //旋转角 - 到终点后延迟时间
-	result['rotateOrderDelay'] = data['rotateOrderDelay'] || 0;		//旋转角 - ID依次延迟时间
-	result['rotateMode'] = data['rotateMode'] || "目标值模式";      //旋转角 - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
+	result['rotateNum'] = dataFrom['rotateNum'] || 1;					//旋转角 - 子弹数量
+	result['rotateTime'] = dataFrom['rotateTime'] || 1;                 //旋转角 - 时长
+	result['rotateDelay'] = dataFrom['rotateDelay'] || 0;               //旋转角 - 开始前延迟时间
+	result['rotateEndDelay'] = dataFrom['rotateEndDelay'] || 0;         //旋转角 - 到终点后延迟时间
+	result['rotateOrderDelay'] = dataFrom['rotateOrderDelay'] || 0;		//旋转角 - ID依次延迟时间
+	result['rotateMode'] = dataFrom['rotateMode'] || "目标值模式";      //旋转角 - 透明度模式（时间公式模式/时间锚点模式/目标值模式）
 	
 	
 	//   ■ 时间公式（o-t图）
 	if( result['rotateMode'] == "时间公式模式" ){
-		result['otFormula'] = data['otFormula'];					//时间公式 - 公式值
+		result['otFormula'] = dataFrom['otFormula'];					//时间公式 - 公式值
 	}
 	
 	//   ■ 时间锚点（anchor）		
 	if( result['rotateMode'] == "时间锚点模式" ){
-		result['anchorPointTank'] = data['anchorPointTank'];		//时间锚点 - 锚点列表
+		result['anchorPointTank'] = dataFrom['anchorPointTank'];		//时间锚点 - 锚点列表
 	}
 	
 	//   ■ 目标值（target）		
 	if( result['rotateMode'] == "目标值模式" ){
-		result['targetType'] = data['targetType'];					//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
-		result['targetDifference'] = data['targetDifference']; 		//目标值 - 距离差值（终点值减起点值）
+		result['targetType'] = dataFrom['targetType'];					//目标值 - 类型（瞬间变化/匀速变化/增减速变化/弹性变化）
+		result['targetDifference'] = dataFrom['targetDifference']; 		//目标值 - 距离差值（终点值减起点值）
 	}
 	
-	// > 随机因子（RandomFactor）
-	result['randomFactor'] = data['randomFactor'];
-	
-	// > 随机迭代次数（RandomIteration）
-	result['randomIterationList'] = data['randomIterationList'];
+	// > 随机因子列表（randomFactorList）
+	result['randomFactorList'] = dataFrom['randomFactorList'];
 	
 	// > 终止条件（terminate）
-	result['terminateRangeEnabled'] = data['terminateRangeEnabled'];
-	result['terminateRange'] = data['terminateRange'];
+	result['terminateRangeEnabled'] = dataFrom['terminateRangeEnabled'];
+	result['terminateRange'] = dataFrom['terminateRange'];
 	
 	
 	// > 按一维弹道规则设置（私有）
@@ -2190,106 +2150,91 @@ Drill_COBa_Manager.drill_COBa_preBallisticsRotate_Private = function( obj_data, 
 //			
 //			说明：	弹道 参数名称 有交叉，但不影响整体使用。正常存储/处理即可。
 //==============================
-Drill_COBa_Manager.drill_COBa_setBallisticsMove_Private = function( data ){
+Drill_COBa_Manager.drill_COBa_setBallisticsMove_Private = function( dataFrom ){
 	var result = {};
 	
 	// > 移动基础参数（movement）
-	result['movementNum'] = data['movementNum'] || 1;								//移动 - 子弹数量
-	result['movementTime'] = data['movementTime'] || 1;             				//移动 - 时长
-	result['movementDelay'] = data['movementDelay'] || 0;           				//移动 - 开始前延迟时间
-	result['movementEndDelay'] = data['movementEndDelay'] || 0;     				//移动 - 到终点后延迟时间
-	result['movementOrderDelay'] = data['movementOrderDelay'] || 0;					//移动 - ID依次延迟时间
-	result['movementMode'] = data['movementMode'] || "极坐标模式";  				//移动 - 移动模式
+	result['movementNum'] = dataFrom['movementNum'] || 1;								//移动 - 子弹数量
+	result['movementTime'] = dataFrom['movementTime'] || 1;             				//移动 - 时长
+	result['movementDelay'] = dataFrom['movementDelay'] || 0;           				//移动 - 开始前延迟时间
+	result['movementEndDelay'] = dataFrom['movementEndDelay'] || 0;     				//移动 - 到终点后延迟时间
+	result['movementOrderDelay'] = dataFrom['movementOrderDelay'] || 0;					//移动 - ID依次延迟时间
+	result['movementMode'] = dataFrom['movementMode'] || "极坐标模式";  				//移动 - 移动模式
 	
 	//   ■ 极坐标（polar）		
 	if( result['movementMode'] == "极坐标模式" ){	//（这样写是为了减少参数数量，便于存储）
-		result['polarSpeedType'] = data['polarSpeedType'];							//极坐标 - 速度 - 类型（只初速度/初速度+波动量/……）
-		result['polarSpeedBase'] = data['polarSpeedBase'];      					//极坐标 - 速度 - 初速度
-		result['polarSpeedRandom'] = data['polarSpeedRandom'];  					//极坐标 - 速度 - 速度随机波动量
-		result['polarSpeedInc'] = data['polarSpeedInc'];        					//极坐标 - 速度 - 加速度
-		result['polarSpeedMax'] = data['polarSpeedMax'];        					//极坐标 - 速度 - 最大速度
-		result['polarSpeedMin'] = data['polarSpeedMin'];        					//极坐标 - 速度 - 最小速度
-		result['polarDistanceFormula'] = data['polarDistanceFormula']; 				//极坐标 - 速度 - 路程计算公式
-		result['polarDirType'] = data['polarDirType'];         						//极坐标 - 方向 - 类型
-		result['polarDirFixed'] = data['polarDirFixed'];              				//极坐标 - 方向 - 固定方向
-		result['polarDirSectorFace'] = data['polarDirSectorFace'];    				//极坐标 - 方向 - 扇形朝向
-		result['polarDirSectorDegree'] = data['polarDirSectorDegree'];				//极坐标 - 方向 - 扇形角度
-		result['polarDirFormula'] = data['polarDirFormula'];   						//极坐标 - 方向 - 方向计算公式
+		result['polarSpeedType'] = dataFrom['polarSpeedType'];							//极坐标 - 速度 - 类型（只初速度/初速度+波动量/……）
+		result['polarSpeedBase'] = dataFrom['polarSpeedBase'];      					//极坐标 - 速度 - 初速度
+		result['polarSpeedRandom'] = dataFrom['polarSpeedRandom'];  					//极坐标 - 速度 - 速度随机波动量
+		result['polarSpeedInc'] = dataFrom['polarSpeedInc'];        					//极坐标 - 速度 - 加速度
+		result['polarSpeedMax'] = dataFrom['polarSpeedMax'];        					//极坐标 - 速度 - 最大速度
+		result['polarSpeedMin'] = dataFrom['polarSpeedMin'];        					//极坐标 - 速度 - 最小速度
+		result['polarDistanceFormula'] = dataFrom['polarDistanceFormula']; 				//极坐标 - 速度 - 路程计算公式
+		result['polarDirType'] = dataFrom['polarDirType'];         						//极坐标 - 方向 - 类型
+		result['polarDirFixed'] = dataFrom['polarDirFixed'];              				//极坐标 - 方向 - 固定方向
+		result['polarDirSectorFace'] = dataFrom['polarDirSectorFace'];    				//极坐标 - 方向 - 扇形朝向
+		result['polarDirSectorDegree'] = dataFrom['polarDirSectorDegree'];				//极坐标 - 方向 - 扇形角度
+		result['polarDirRate'] = dataFrom['polarDirRate'];                              //极坐标 - 方向 - 方向角速率
+		result['polarDirFormula'] = dataFrom['polarDirFormula'];   						//极坐标 - 方向 - 方向计算公式
 	}
 	//   ■ 直角坐标（cartesian）
 	else if( result['movementMode'] == "直角坐标模式" ){			
-		result['cartRotation'] = data['cartRotation'];								//直角坐标 - 整体坐标轴旋转角度
-		result['cartXSpeedType'] = data['cartXSpeedType'];							//直角坐标 - x - 类型（只初速度/初速度+波动量/……）
-		result['cartXSpeedBase'] = data['cartXSpeedBase'];     						//直角坐标 - x - 初速度
-		result['cartXSpeedRandom'] = data['cartXSpeedRandom']; 						//直角坐标 - x - 速度随机波动量
-		result['cartXSpeedInc'] = data['cartXSpeedInc'];       						//直角坐标 - x - 加速度
-		result['cartXSpeedMax'] = data['cartXSpeedMax'];       						//直角坐标 - x - 最大速度
-		result['cartXSpeedMin'] = data['cartXSpeedMin'];       						//直角坐标 - x - 最小速度
-		result['cartXDistanceFormula'] = data['cartXDistanceFormula'];				//直角坐标 - x - 路程计算公式
-		result['cartYSpeedType'] = data['cartYSpeedType'];     						//直角坐标 - y - 类型（只初速度/初速度+波动量/……）
-		result['cartYSpeedBase'] = data['cartYSpeedBase'];     						//直角坐标 - y - 初速度
-		result['cartYSpeedRandom'] = data['cartYSpeedRandom']; 						//直角坐标 - y - 速度随机波动量
-		result['cartYSpeedInc'] = data['cartYSpeedInc'];       						//直角坐标 - y - 加速度
-		result['cartYSpeedMax'] = data['cartYSpeedMax'];       						//直角坐标 - y - 最大速度
-		result['cartYSpeedMin'] = data['cartYSpeedMin'];       						//直角坐标 - y - 最小速度
-		result['cartYDistanceFormula'] = data['cartYDistanceFormula']; 				//直角坐标 - y - 路程计算公式
+		result['cartRotation'] = dataFrom['cartRotation'];								//直角坐标 - 整体坐标轴旋转角度
+		result['cartXSpeedType'] = dataFrom['cartXSpeedType'];							//直角坐标 - x - 类型（只初速度/初速度+波动量/……）
+		result['cartXSpeedBase'] = dataFrom['cartXSpeedBase'];     						//直角坐标 - x - 初速度
+		result['cartXSpeedRandom'] = dataFrom['cartXSpeedRandom']; 						//直角坐标 - x - 速度随机波动量
+		result['cartXSpeedInc'] = dataFrom['cartXSpeedInc'];       						//直角坐标 - x - 加速度
+		result['cartXSpeedMax'] = dataFrom['cartXSpeedMax'];       						//直角坐标 - x - 最大速度
+		result['cartXSpeedMin'] = dataFrom['cartXSpeedMin'];       						//直角坐标 - x - 最小速度
+		result['cartXDistanceFormula'] = dataFrom['cartXDistanceFormula'];				//直角坐标 - x - 路程计算公式
+		result['cartYSpeedType'] = dataFrom['cartYSpeedType'];     						//直角坐标 - y - 类型（只初速度/初速度+波动量/……）
+		result['cartYSpeedBase'] = dataFrom['cartYSpeedBase'];     						//直角坐标 - y - 初速度
+		result['cartYSpeedRandom'] = dataFrom['cartYSpeedRandom']; 						//直角坐标 - y - 速度随机波动量
+		result['cartYSpeedInc'] = dataFrom['cartYSpeedInc'];       						//直角坐标 - y - 加速度
+		result['cartYSpeedMax'] = dataFrom['cartYSpeedMax'];       						//直角坐标 - y - 最大速度
+		result['cartYSpeedMin'] = dataFrom['cartYSpeedMin'];       						//直角坐标 - y - 最小速度
+		result['cartYDistanceFormula'] = dataFrom['cartYDistanceFormula']; 				//直角坐标 - y - 路程计算公式
 	}
 	//   ■ 轨道锚点（track）		
 	else if( result['movementMode'] == "轨道锚点模式" ){			
-		result['trackSpeedType'] = data['trackSpeedType'];							//轨道锚点 - 速度 - 类型
-		result['trackSpeedBase'] = data['trackSpeedBase'];     						//轨道锚点 - 速度 - 初速度
-		result['trackSpeedRandom'] = data['trackSpeedRandom']; 						//轨道锚点 - 速度 - 速度随机波动量
-		result['trackSpeedInc'] = data['trackSpeedInc'];       						//轨道锚点 - 速度 - 加速度
-		result['trackSpeedMax'] = data['trackSpeedMax'];       						//轨道锚点 - 速度 - 最大速度
-		result['trackSpeedMin'] = data['trackSpeedMin'];       						//轨道锚点 - 速度 - 最小速度
-		result['trackDistanceFormula'] = data['trackDistanceFormula'];				//轨道锚点 - 速度 - 路程计算公式
-		result['trackPointTank'] = data['trackPointTank'];   						//轨道锚点 - 轨道 - 锚点列表
-		result['trackRotation'] = data['trackRotation'];       						//轨道锚点 - 轨道 - 整体旋转角度
+		result['trackSpeedType'] = dataFrom['trackSpeedType'];							//轨道锚点 - 速度 - 类型
+		result['trackSpeedBase'] = dataFrom['trackSpeedBase'];     						//轨道锚点 - 速度 - 初速度
+		result['trackSpeedRandom'] = dataFrom['trackSpeedRandom']; 						//轨道锚点 - 速度 - 速度随机波动量
+		result['trackSpeedInc'] = dataFrom['trackSpeedInc'];       						//轨道锚点 - 速度 - 加速度
+		result['trackSpeedMax'] = dataFrom['trackSpeedMax'];       						//轨道锚点 - 速度 - 最大速度
+		result['trackSpeedMin'] = dataFrom['trackSpeedMin'];       						//轨道锚点 - 速度 - 最小速度
+		result['trackDistanceFormula'] = dataFrom['trackDistanceFormula'];				//轨道锚点 - 速度 - 路程计算公式
+		result['trackPointTank'] = dataFrom['trackPointTank'];   						//轨道锚点 - 轨道 - 锚点列表
+		result['trackRotation'] = dataFrom['trackRotation'];       						//轨道锚点 - 轨道 - 整体旋转角度
 	}
 	//   ■ 两点式（twoPoint）
 	else if( result['movementMode'] == "两点式" ){
-		result['twoPointType'] = data['twoPointType'];								//两点式 - 类型（不变化/匀速变化/弹性变化/……）
-		result['twoPointDifferenceX'] = data['twoPointDifferenceX'];				//两点式 - 距离差值x（终点减起点）
-		result['twoPointDifferenceY'] = data['twoPointDifferenceY'];	            //两点式 - 距离差值y（终点减起点）
-		result['twoPointParabolaDir'] = data['twoPointParabolaDir'];	            //两点式 - 抛物线变化 - 初始方向（单位角度）
-		result['twoPointParabolaSpeed'] = data['twoPointParabolaSpeed'];	        //两点式 - 抛物线变化 - 初始速度
+		result['twoPointType'] = dataFrom['twoPointType'];								//两点式 - 类型（不变化/匀速变化/弹性变化/……）
+		result['twoPointDifferenceX'] = dataFrom['twoPointDifferenceX'];				//两点式 - 距离差值x（终点减起点）
+		result['twoPointDifferenceY'] = dataFrom['twoPointDifferenceY'];	            //两点式 - 距离差值y（终点减起点）
+		result['twoPointParabolaDir'] = dataFrom['twoPointParabolaDir'];	            //两点式 - 抛物线变化 - 初始方向（单位角度）
+		result['twoPointParabolaSpeed'] = dataFrom['twoPointParabolaSpeed'];	        //两点式 - 抛物线变化 - 初始速度
 	}
 	
-	// > 随机因子（RandomFactor）
+	// > 随机因子列表（randomFactorList）
 	if( result['movementMode'] == "极坐标模式" ){
-		result['polarSpeedRandomFactor'] = data['polarSpeedRandomFactor'];
-		result['polarDirRandomFactor'] = data['polarDirRandomFactor'];
+		result['polarSpeedRandomFactorList'] = dataFrom['polarSpeedRandomFactorList'];
+		result['polarDirRandomFactorList'] = dataFrom['polarDirRandomFactorList'];
 	}
 	else if( result['movementMode'] == "直角坐标模式" ){
-		result['cartXSpeedRandomFactor'] = data['cartXSpeedRandomFactor'];
-		result['cartYSpeedRandomFactor'] = data['cartYSpeedRandomFactor'];
+		result['cartXSpeedRandomFactorList'] = dataFrom['cartXSpeedRandomFactorList'];
+		result['cartYSpeedRandomFactorList'] = dataFrom['cartYSpeedRandomFactorList'];
 	}
 	else if( result['movementMode'] == "轨道锚点模式" ){
-		result['trackSpeedRandomFactor'] = data['trackSpeedRandomFactor'];
+		result['trackSpeedRandomFactorList'] = dataFrom['trackSpeedRandomFactorList'];
 	}
 	else if( result['movementMode'] == "两点式" ){
-		//（无随机因子）
-	}
-	
-	// > 随机迭代次数（RandomIteration）
-	if( result['movementMode'] == "极坐标模式" ){
-		result['polarSpeedRandomIterationList'] = data['polarSpeedRandomIterationList'];
-		result['polarDirRandomIterationList'] = data['polarDirRandomIterationList'];
-	}
-	else if( result['movementMode'] == "直角坐标模式" ){
-		result['cartXSpeedRandomIterationList'] = data['cartXSpeedRandomIterationList'];
-		result['cartYSpeedRandomIterationList'] = data['cartYSpeedRandomIterationList'];
-	}
-	else if( result['movementMode'] == "轨道锚点模式" ){
-		result['trackSpeedRandomIterationList'] = data['trackSpeedRandomIterationList'];
-	}
-	else if( result['movementMode'] == "两点式" ){
-		//（无随机迭代次数）
+		//（无）
 	}
 	
 	// > 终止条件（terminate）
-	result['terminateRectEnabled'] = data['terminateRectEnabled'];
-	result['terminateRect'] = data['terminateRect'];
+	result['terminateRectEnabled'] = dataFrom['terminateRectEnabled'];
+	result['terminateRect'] = dataFrom['terminateRect'];
 	
 	
 	
@@ -2301,11 +2246,11 @@ Drill_COBa_Manager.drill_COBa_setBallisticsMove_Private = function( data ){
 	result['planimetryOrderDelay'] = result['movementOrderDelay'];
 	result['planimetryMode'] = result['movementMode'];
 	if( result['movementMode'] == "两点式" ){
-		if( result['twoPointType'] == "不移动" ){ result['twoPointType'] = "不变化"; }
-		else if( result['twoPointType'] == "瞬间移动" ){ result['twoPointType'] = "瞬间变化"; }
-		else if( result['twoPointType'] == "匀速移动" ){ result['twoPointType'] = "匀速变化"; }
+		if(      result['twoPointType'] == "不移动"     ){ result['twoPointType'] = "不变化";     }
+		else if( result['twoPointType'] == "瞬间移动"   ){ result['twoPointType'] = "瞬间变化";   }
+		else if( result['twoPointType'] == "匀速移动"   ){ result['twoPointType'] = "匀速变化";   }
 		else if( result['twoPointType'] == "增减速移动" ){ result['twoPointType'] = "增减速变化"; }
-		else if( result['twoPointType'] == "弹性移动" ){ result['twoPointType'] = "弹性变化"; }
+		else if( result['twoPointType'] == "弹性移动"   ){ result['twoPointType'] = "弹性变化";   }
 		else if( result['twoPointType'] == "抛物线移动" ){ result['twoPointType'] = "抛物线变化"; }
 	}
 	return this.drill_COBa_setBallisticsPlanimetry( result );
@@ -2360,37 +2305,6 @@ Drill_COBa_Manager.drill_COBa_convertPointListToString_Private = function( point
 	}
 	return str;
 };
-//==============================
-// * 0M弹道工具函数 - 数学工具 - 生成随机数（随机种子）（私有）
-//==============================
-Drill_COBa_Manager.drill_COBa_Math1D_getRandomInSeed_Private = function( seed ){
-	var new_ran = ( seed * 9301 + 49297 ) % 233280;
-	new_ran = new_ran / 233280.0;
-	return new_ran;
-};
-//==============================
-// * 0M弹道工具函数 - 数学工具 - 生成随机数（迭代）（私有）
-//==============================
-Drill_COBa_Manager.drill_COBa_Math1D_getRandomInIteration_Private = function( org_ran, iteration ){
-	var prime = this.drill_COBa_Math1D_primeList[ iteration % this.drill_COBa_Math1D_primeList.length ];
-	var temp_ran = ( (org_ran + iteration) * 9301 + 49297 ) % 233280;
-	temp_ran = temp_ran / prime;
-	var new_ran = (temp_ran + org_ran * iteration * prime) %1;
-	return new_ran;
-	//var new_ran = (25214903917 * (org_ran + iteration)) & ((1 << 48) - 1);
-	//return new_ran %1;
-};
-//==============================
-// * 0M弹道工具函数 - 数学工具 - 质数表（1000以内）
-//==============================
-Drill_COBa_Manager.drill_COBa_Math1D_primeList = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,
-	73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,
-	191,193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283,293,307,
-	311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419,421,431,433,
-	439,443,449,457,461,463,467,479,487,491,499,503,509,521,523,541,547,557,563,569,571,
-	577,587,593,599,601,607,613,617,619,631,641,643,647,653,659,661,673,677,683,691,701,
-	709,719,727,733,739,743,751,757,761,769,773,787,797,809,811,821,823,827,829,839,853,
-	857,859,863,877,881,883,887,907,911,919,929,937,941,947,953,967,971,977,983,991,997];
 
 
 //==============================
@@ -2684,11 +2598,11 @@ Drill_COBa_ExtendTool.drill_COBa_Planimetry_sprite_update = function( sprite, SD
 		if( c_data['change_endDelay'] != undefined ){ b_data['planimetryEndDelay'] = c_data['change_endDelay']; }
 		
 		b_data['twoPointType'] = c_data['change_type'];
-		if( b_data['twoPointType'] == "不移动" ){ b_data['twoPointType'] = "不变化"; }
-		else if( b_data['twoPointType'] == "瞬间移动" ){ b_data['twoPointType'] = "瞬间变化"; }
-		else if( b_data['twoPointType'] == "匀速移动" ){ b_data['twoPointType'] = "匀速变化"; }
+		if(      b_data['twoPointType'] == "不移动"     ){ b_data['twoPointType'] = "不变化";     }
+		else if( b_data['twoPointType'] == "瞬间移动"   ){ b_data['twoPointType'] = "瞬间变化";   }
+		else if( b_data['twoPointType'] == "匀速移动"   ){ b_data['twoPointType'] = "匀速变化";   }
 		else if( b_data['twoPointType'] == "增减速移动" ){ b_data['twoPointType'] = "增减速变化"; }
-		else if( b_data['twoPointType'] == "弹性移动" ){ b_data['twoPointType'] = "弹性变化"; }
+		else if( b_data['twoPointType'] == "弹性移动"   ){ b_data['twoPointType'] = "弹性变化";   }
 		else if( b_data['twoPointType'] == "抛物线移动" ){ b_data['twoPointType'] = "抛物线变化"; }
 		
 		b_data['twoPointDifferenceX'] = c_data['tar_valueA'] - org_valueA;

@@ -1203,7 +1203,7 @@ Drill_CODM_PerspectiveMarker.prototype.drill_updatePosition = function(){
 		var pic = $gameScreen.picture( this._drill_bindingPictureId );
 		if( pic == undefined ){ return; }
 		
-		// > 【图片 - 图片优化核心】『图片数据最终变换值』
+		// > 【图片 - 图片优化核心】『数据最终变换值-子插件调用』
 		xx = pic.x();
 		yy = pic.y();
 		if( Imported.Drill_CoreOfPicture == true ){

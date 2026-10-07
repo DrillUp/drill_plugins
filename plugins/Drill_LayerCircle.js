@@ -3949,7 +3949,7 @@ Scene_Map.prototype.drill_LCi_updateDestroy = function(){
 // **						->控制器标记销毁
 // **						->控制器是否销毁
 // **					
-// **					->A主体『界面装饰最终变换值』『变换特性的规范』
+// **					->A主体『基础特性和变换特性』
 // **						->基础特性
 // **							>  资源名
 // **							>  显示/隐藏
@@ -3958,7 +3958,7 @@ Scene_Map.prototype.drill_LCi_updateDestroy = function(){
 // **							>  层级
 // **							>  堆叠级
 // **						->其它特性
-// **					->B变换特性『变换特性-单贴图』
+// **					->B变换特性『变换特性-单贴图』『数据最终变换值-类定义』
 // **						>  锚点X
 // **						>  锚点Y
 // **						>  位置X
@@ -5175,7 +5175,7 @@ Drill_LCi_Controller.prototype.drill_controller_getCameraYAcc = function(){
 // **					->C对象绑定
 // **						->设置控制器
 // **						->贴图初始化（手动）
-// **					->D指令叠加变化-控制器用
+// **					->D指令叠加变化-控制器用『弹道-图像用』
 // **					->E延迟指令
 // **					->F周期指令
 // **					->G自变化效果
@@ -5350,13 +5350,15 @@ Drill_LCi_Sprite.prototype.drill_sprite_initAttr = function(){
 	*/
 	
 	// > 主体贴图
-	this.anchor.x = 0.5;
-	this.anchor.y = 0.5;
 	this.visible = this._drill_controller.drill_controller_isVisible();		//贴图 - 显示/隐藏
 																			//贴图 - 暂停/继续（无）
 	this.blendMode = this._drill_controller._drill_blendMode;				//贴图 - 混合模式
 	this.layerIndex = this._drill_controller._drill_layerIndex;				//贴图 - 层级
 	this.zIndex = this._drill_controller._drill_zIndex;						//贴图 - 堆叠级
+	
+	// > 主体贴图 - 锚点
+	this.anchor.x = 0.5;
+	this.anchor.y = 0.5;
 	
 	// > 圈贴图
 	var temp_sprite = new Sprite(); 
@@ -5411,22 +5413,23 @@ Drill_LCi_Sprite.prototype.drill_sprite_initChange = function(){
 //==============================
 Drill_LCi_Sprite.prototype.drill_sprite_updateChange = function(){
 	
+	// > 贴图 - 锚点
+	//		（见 drill_sprite_initAttr ）
+	
 	// > 贴图 - 锚点（圈贴图）
-	//		（锚点只能放 圈贴图 才能有效）
+	//		（功能 修改中心锚点 ）
 	this._drill_childCircleSprite.anchor.x = this._drill_controller._drill_change_anchor_x;
 	this._drill_childCircleSprite.anchor.y = this._drill_controller._drill_change_anchor_y;
 	
 	
 	// > 贴图 - 位置
-	var xx = this._drill_controller.drill_controller_finalTransform_x();
-	var yy = this._drill_controller.drill_controller_finalTransform_y();
-	this.x = xx;
-	this.y = yy;
+	this.x = this._drill_controller.drill_controller_finalTransform_x();
+	this.y = this._drill_controller.drill_controller_finalTransform_y();
 	
 	
 	// > 贴图 - 缩放
-	this._drill_layerSprite.scale.x  = this._drill_controller.drill_controller_finalTransform_scaleX();
-	this._drill_layerSprite.scale.y  = this._drill_controller.drill_controller_finalTransform_scaleY();
+	this._drill_layerSprite.scale.x = this._drill_controller.drill_controller_finalTransform_scaleX();
+	this._drill_layerSprite.scale.y = this._drill_controller.drill_controller_finalTransform_scaleY();
 	
 	// > 贴图 - 缩放（圈贴图）
 	//	（无）
@@ -5437,8 +5440,8 @@ Drill_LCi_Sprite.prototype.drill_sprite_updateChange = function(){
 	
 	
 	// > 贴图 - 斜切
-	this._drill_layerSprite.skew.x   = this._drill_controller.drill_controller_finalTransform_skewX();
-	this._drill_layerSprite.skew.y   = this._drill_controller.drill_controller_finalTransform_skewY();
+	this._drill_layerSprite.skew.x = this._drill_controller.drill_controller_finalTransform_skewX();
+	this._drill_layerSprite.skew.y = this._drill_controller.drill_controller_finalTransform_skewY();
 	
 	// > 贴图 - 斜切（圈贴图）
 	//	（无）

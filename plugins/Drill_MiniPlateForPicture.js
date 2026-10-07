@@ -1864,7 +1864,7 @@ Sprite_Picture.prototype.drill_MPFP_updatePosition = function() {
 	var picture = this.picture();
 	var bean = picture._drill_MPFP_bean;
 	
-	// > 【图片 - 图片优化核心】『图片数据最终变换值』
+	// > 【图片 - 图片优化核心】『数据最终变换值-子插件调用』
 	var xx = this.x;
 	var yy = this.y;
 	if( Imported.Drill_CoreOfPicture == true ){

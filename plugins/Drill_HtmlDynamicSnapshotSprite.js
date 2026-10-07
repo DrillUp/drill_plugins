@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.5]        游戏窗体 - 天窗层的多层动态快照
+ * @plugindesc [v1.6]        游戏窗体 - 天窗层的多层动态快照
  * @author Drill_up
  * 
  * @Drill_LE_param "动态快照层-%d"
@@ -63,6 +63,47 @@
  * ……
  *
  * 动态快照本身不需要资源，遮罩资源放在Special__layer文件夹下。
+ * 
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 绑定临时快照
+ * 你可以通过插件指令手动修改各个属性：
+ * 
+ * 插件指令：>天窗层动态快照 : 临时快照 : 建立屏幕截图
+ * 
+ * 插件指令：>天窗层动态快照 : 动态快照[11] : 绑定临时快照
+ * 插件指令：>天窗层动态快照 : 动态快照变量[21] : 绑定临时快照
+ * 插件指令：>天窗层动态快照 : 批量动态快照[7,8] : 绑定临时快照
+ * 插件指令：>天窗层动态快照 : 批量动态快照变量[21,22] : 绑定临时快照
+ * 
+ * 插件指令：>天窗层动态快照 : 动态快照[11] : 绑定临时快照
+ * 插件指令：>天窗层动态快照 : 动态快照[11] : 绑定临时快照(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层动态快照 : 动态快照[11] : 解绑临时快照
+ * 插件指令：>天窗层动态快照 : 动态快照[11] : 解绑临时快照(延迟) : 延迟执行时间[20]
+ * 
+ * 1.前半部分（动态快照[11]）和 后半部分（绑定临时快照）
+ *   的参数可以随意组合。一共有4*4种组合方式。
+ * 2.你需要先建立屏幕截图，再绑定临时快照。
+ *   "绑定临时快照"指：停用当前的实时游戏画面，改为显示临时快照（静态的截图）。
+ *   "解绑临时快照"即：恢复当前的实时游戏画面。
+ * 3.注意，临时快照只能作为临时贴图使用，无法保存到存档中。
+ * 4.因为动态快照在天窗层，所以截图后，图像能跨界面使用。
+ * 
+ * -----------------------------------------------------------------------------
+ * ----可选设定 - 保存文件
+ * 你可以通过插件指令手动修改各个属性：
+ * 
+ * 插件指令：>天窗层动态快照 : 临时快照 : 建立屏幕截图
+ * 插件指令：>天窗层动态快照 : 临时快照 : 保存到文件
+ * 插件指令：>天窗层动态快照 : 打开保存的文件路径
+ * 
+ * 插件指令：>天窗层动态快照 : 临时快照 : 建立屏幕截图(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层动态快照 : 临时快照 : 保存到文件(延迟) : 延迟执行时间[20]
+ * 插件指令：>天窗层动态快照 : 打开保存的文件路径(延迟) : 延迟执行时间[20]
+ * 
+ * 1.注意，此插件指令只在PC端有效。
+ * 2.此处"(延迟)"的指令跨界面。延迟时间内，即使从地图切换到战斗界面，也能生效。
+ * 
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 修改单属性
@@ -370,6 +411,8 @@
  * 再次改进了结构。
  * [v1.5]
  * 改进了天窗层帧刷新的结构。
+ * [v1.6]
+ * 添加了 临时快照 的功能。
  * 
  * 
  * 
@@ -379,6 +422,11 @@
  * @off 关闭
  * @desc 一般建议 关闭 存储。注意，此开关详细介绍去看看文档说明。
  * @default false
+ * 
+ * @param 临时快照文件设置
+ * @desc 使用插件指令"保存到文件"时，快照文件的设置。
+ * @type struct<DrillFile>
+ * @default {"文件夹路径":"save/游戏截图/","文件名":"截图","文件名是否包含日期":"true","文件名是否包含时分秒":"true","文件类型":"png","图像质量":"90"}
  * 
  * @param ---动态快照层组 1至20---
  * @default 
@@ -1611,6 +1659,50 @@
  * @default
  * 
  */
+/*~struct~DrillFile:
+ * 
+ * @param 文件夹路径
+ * @desc 格式为"aaa/bbb/"，文件夹不存在时会自动创建，创建在游戏根目录下。
+ * @default save/游戏截图/
+ * 
+ * @param 文件名
+ * @desc 执行截图保存后的文件名。
+ * @default 截图
+ *
+ * @param 文件名是否包含日期
+ * @parent 文件名
+ * @type boolean
+ * @on 包含
+ * @off 不包含
+ * @desc true - 包含，false - 不包含
+ * @default true
+ *
+ * @param 文件名是否包含时分秒
+ * @parent 文件名
+ * @type boolean
+ * @on 包含
+ * @off 不包含
+ * @desc true - 包含，false - 不包含
+ * @default true
+ * 
+ * @param 文件类型
+ * @type select
+ * @option png
+ * @value png
+ * @option jpg
+ * @value jpg
+ * @desc 存储的文件类型。
+ * @default png
+ * 
+ * @param 图像质量
+ * @parent 文件类型
+ * @type number
+ * @min 1
+ * @max 100
+ * @desc 文件类型为jpg时有效，可设置1-100的图像质量设置。（png是固定100的图像质量）
+ * @default 90
+ * 
+ */
 /*~struct~HDSSSpriteData:
  * 
  * @param 标签
@@ -1901,6 +1993,10 @@
 //				->基础特性
 //				->自动销毁
 //			
+//			->☆静态快照容器
+//			->☆静态快照的保存
+//			->☆静态快照的延迟指令
+//			
 //			->动态快照控制器【Drill_HDSS_Controller】
 //			->动态快照贴图【Drill_HDSS_Sprite】
 //			
@@ -2110,6 +2206,33 @@
 		}
 	}
 	
+	//==============================
+	// * 静态数据 - 文件设置
+	//				（~struct~DrillFile）
+	//==============================
+	DrillUp.drill_HDSS_initFile = function( dataFrom ){
+		var data = {};
+		
+		data['url_path'] = String( dataFrom["文件夹路径"] || "save/游戏截图/");  //『文件载体-文件路径』
+		
+		data['file_name'] = String( dataFrom["文件名"] || "游戏截图");  //『文件载体-文件路径』
+		data['file_name_with_date'] = String( dataFrom["文件名是否包含日期"] || "true") == "true";
+		data['file_name_with_time'] = String( dataFrom["文件名是否包含时分秒"] || "true") == "true";
+		
+		data['file_type'] = String( dataFrom["文件类型"] || "png");
+		data['image_quality'] = Number( dataFrom["图像质量"] || 90);
+		
+		return data;
+	}
+	/*-----------------文件设置------------------*/
+	if( DrillUp.parameters["临时快照文件设置"] != undefined &&
+		DrillUp.parameters["临时快照文件设置"] != "" ){
+		var data = JSON.parse( DrillUp.parameters["临时快照文件设置"] );
+		DrillUp.g_HDSS_fileSettings = DrillUp.drill_HDSS_initFile( data );
+	}else{
+		DrillUp.g_HDSS_fileSettings = DrillUp.drill_HDSS_initFile( {} );
+	}
+	
 	/*-----------------杂项------------------*/
 	DrillUp.g_HDSS_saveEnabled = String(DrillUp.parameters["是否开启参数存储"] || "false") == "true" ;
 	
@@ -2158,6 +2281,72 @@ Game_Interpreter.prototype.drill_HDSS_pluginCommand = function( command, args ){
 //==============================
 DrillUp.drill_HDSS_globalPluginCommand = function( command, args, gameInterpreter ){
 	if( command === ">天窗层动态快照" ){ // >天窗层动态快照 : 动态快照[1] : 显示
+		
+		/*-----------------临时快照------------------*/
+		if( args.length == 4 ){
+			var unit = String(args[1]);
+			var type = String(args[3]);
+			if( unit == "临时快照" ){
+				if( type == "建立屏幕截图" ){
+					DrillUp.drill_HDSS_createStaticSnap();
+					return;
+				}
+				if( type == "保存到文件" ){
+					DrillUp.drill_HDSS_saveStaticSnap();
+					return;
+				}
+			}
+		}
+		if( args.length == 2 ){
+			var type = String(args[1]);
+			if( type == "打开保存的文件路径" ){
+				DrillUp.drill_HDSS_openUrl();
+				return;
+			}
+		}
+		
+		if( args.length == 6 ){
+			var unit = String(args[1]);
+			var type = String(args[3]);
+			var delay_time = String(args[5]);
+			if( unit == "临时快照" ){
+				if( type == "建立屏幕截图(延迟)" ){
+					delay_time = delay_time.replace("延迟执行时间[","");
+					delay_time = delay_time.replace("]","");
+					delay_time = Number( delay_time ) -1;
+					DrillUp.drill_HDSS_setDelayingCommand_StaticSnap(
+						"drill_HDSS_createStaticSnap",
+						[], delay_time
+					);
+					return;
+				}
+				if( type == "保存到文件(延迟)" ){
+					delay_time = delay_time.replace("延迟执行时间[","");
+					delay_time = delay_time.replace("]","");
+					delay_time = Number( delay_time ) -1;
+					DrillUp.drill_HDSS_setDelayingCommand_StaticSnap(
+						"drill_HDSS_saveStaticSnap",
+						[], delay_time
+					);
+					return;
+				}
+			}
+		}
+		if( args.length == 4 ){
+			var type = String(args[1]);
+			var delay_time = String(args[3]);
+			if( type == "打开保存的文件路径(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time ) -1;
+				DrillUp.drill_HDSS_setDelayingCommand_StaticSnap(
+					"drill_HDSS_openUrl",
+					[], delay_time
+				);
+				return;
+			}
+		}
+		
 	
 		/*-----------------对象组获取------------------*/
 		var controllers = null;
@@ -2213,6 +2402,45 @@ DrillUp.drill_HDSS_globalPluginCommand = function( command, args, gameInterprete
 			}
 		}
 		if( controllers == null ){ return; }
+		
+		/*-----------------绑定临时快照------------------*/
+		if( args.length == 4 ){
+			var type = String(args[3]);
+			if( type == "绑定临时快照" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setStaticSnapId( DrillUp.drill_HDSS_getLastStaticSnapId() );
+				}
+			}
+			if( type == "解绑临时快照" ){
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setStaticSnapId( -1 );
+				}
+			}
+		}
+		if( args.length == 6 ){
+			var type = String(args[3]);
+			var delay_time = String(args[5]);
+			if( type == "绑定临时快照(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time ) -1;
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_HDSS_Controller.METHOD__drill_controller_setStaticSnapId, [-2], delay_time
+					);
+				}
+			}
+			if( type == "解绑临时快照(延迟)" ){
+				delay_time = delay_time.replace("延迟执行时间[","");
+				delay_time = delay_time.replace("]","");
+				delay_time = Number( delay_time ) -1;
+				for( var k=0; k < controllers.length; k++ ){
+					controllers[k].drill_controller_setDelayingCommand(
+						Drill_HDSS_Controller.METHOD__drill_controller_setStaticSnapId, [-1], delay_time
+					);
+				}
+			}
+		}
 		
 		/*-----------------常规指令------------------*/
 		if( args.length == 4 ){
@@ -3430,9 +3658,10 @@ var _drill_HDSS_requestUpdate = SceneManager.requestUpdate;
 SceneManager.requestUpdate = function(){
 	
     if( !this._stopped ){
-		this.drill_HDSS_updateController();			//帧刷新 - 控制器
-		this.drill_HDSS_updateAttr();				//帧刷新 - 基础特性
-		this.drill_HDSS_updateDestroy();			//帧刷新 - 自动销毁
+		DrillUp.drill_HDSS_updateStaticSnapCommand();	//帧刷新 - 静态快照的延迟指令
+		this.drill_HDSS_updateController();				//帧刷新 - 控制器
+		this.drill_HDSS_updateAttr();					//帧刷新 - 基础特性
+		this.drill_HDSS_updateDestroy();				//帧刷新 - 自动销毁
     }
 	
 	// > 原函数
@@ -3507,6 +3736,245 @@ SceneManager.drill_HDSS_updateDestroy = function(){
 
 
 //=============================================================================
+// ** ☆静态快照容器『天窗层bitmap临时容器』
+//
+//			说明：	> 此模块提供 静态快照 的创建。
+//					> 暂时不考虑销毁Bitmap情况，因为本身贴图占内存就小。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 静态快照容器 - 参数
+//==============================
+DrillUp._drill_HDSS_curStaticSnapId = -1;			//静态快照 计数器
+DrillUp._drill_HDSS_curStaticSnapTank = [];			//静态快照 贴图容器
+//==============================
+// * 静态快照容器 - 创建快照
+//
+//			说明：	> 每创建一次，计数器都+1，确保设置的都为最新创建的Bitmap。
+//					> 由于Bitmap是现做的，所以该容器不考虑保存读取的情况。
+//==============================
+DrillUp.drill_HDSS_createStaticSnap = function() {
+	
+	// > 计数器+1
+	this._drill_HDSS_curStaticSnapId += 1;
+	var bitmap_id = this._drill_HDSS_curStaticSnapId;
+	
+	// > 创建Bitmap
+	var bitmap = SceneManager.snap();
+	this._drill_HDSS_curStaticSnapTank[ bitmap_id ] = bitmap;
+	
+	return bitmap_id;
+}
+//==============================
+// * 静态快照容器 - 获取 快照（开放函数）
+//==============================
+DrillUp.drill_HDSS_getStaticSnap = function( id ){
+	if( id == -1 ){ return null; }
+	return this._drill_HDSS_curStaticSnapTank[ id ];
+}
+//==============================
+// * 静态快照容器 - 获取 上一个创建的快照（开放函数）
+//==============================
+DrillUp.drill_HDSS_getLastStaticSnap = function() {
+	if( this._drill_HDSS_curStaticSnapId == -1 ){ return null; }
+	return this._drill_HDSS_curStaticSnapTank[ this._drill_HDSS_curStaticSnapId ];
+}
+//==============================
+// * 静态快照容器 - 获取 上一个创建的快照ID（开放函数）
+//==============================
+DrillUp.drill_HDSS_getLastStaticSnapId = function() {
+	return this._drill_HDSS_curStaticSnapId;
+}
+
+
+//=============================================================================
+// ** ☆静态快照的保存
+//
+//			说明：	> 此模块提供 保存 静态快照文件 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 静态快照的保存 - 保存到文件
+//==============================
+DrillUp.drill_HDSS_saveStaticSnap = function() {
+    
+	// > 资源对象
+	var bitmap = this.drill_HDSS_getLastStaticSnap();
+	if( bitmap == null ){ return; }
+	
+	// > 名称设置
+	var settings = DrillUp.g_HDSS_fileSettings;
+	var file_name = settings['file_name'];
+	if( settings['file_name_with_date'] == true ){
+		file_name += " ";
+		file_name += new Date().drill_HDSS_getDateTextByFormat("yyyy年MM月dd日");
+	}
+	if( settings['file_name_with_time'] == true ){
+		file_name += " ";
+		file_name += new Date().drill_HDSS_getDateTextByFormat("HH时mm分ss秒");
+	}
+	
+	// > 执行保存
+	this.drill_HDSS_saveBitmap( bitmap, settings['url_path'], file_name, settings['file_type'], settings['image_quality'] );
+};
+//==============================
+// * 静态快照的保存 - 时间格式化（真实时间）
+//==============================
+Date.prototype.drill_HDSS_getDateTextByFormat = function( fmt ){
+	var o = {
+		"M+": this.getMonth() + 1,						//月份 
+		"d+": this.getDate(),							//日 
+		"H+": this.getHours(),							//小时 
+		"m+": this.getMinutes(),						//分 
+		"s+": this.getSeconds(),						//秒 
+		"q+": Math.floor((this.getMonth() + 3) / 3),	//季度 
+		"S":  this.getMilliseconds()					//毫秒 
+	};
+	if( /(y+)/.test(fmt) ){
+		fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+	}
+	for( var k in o ){
+		if( new RegExp("(" + k + ")").test(fmt) ){
+			fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+		}
+	}
+	return fmt;
+}
+//==============================
+// * 静态快照的保存 - 执行保存
+//
+//			参数：	> bitmap        资源对象
+//					> url_path      文件夹路径（"snapshot/"）
+//					> file_name     文件名
+//					> file_type     文件类型（"png"或"jpg"）
+//					> image_quality 图片质量（0~100，只jpg时有效）
+//==============================
+DrillUp.drill_HDSS_saveBitmap = function( bitmap, url_path, file_name, file_type, image_quality ){
+	if( typeof(require) === "undefined" ){ return; }
+	if( file_type != "png" && file_type != "jpg" ){ return; }
+	
+	// > 图片质量（只jpg时有效）
+	image_quality = Math.min( image_quality, 100 ) * 0.01;
+	
+	// > 获取数据
+	var data = bitmap.canvas.toDataURL( file_type, image_quality );
+	
+	// > 去掉数据头
+	if( file_type == "png" ){
+		data = data.replace( /^data:image\/png;base64,/, "" );
+	}
+	if( file_type == "jpg" ){
+		data = data.replace( /^data:image\/jpeg;base64,/, "" );
+	}
+	
+	// > 路径解析
+	var fs = require('fs');  //『文件载体-fs』
+	var fileRoot = this.drill_HDSS_parentDirectoryPath();
+	var dirPath = fileRoot + url_path;
+	
+	// > 文件夹路径自动创建『文件载体-生成文件夹』
+	if(!fs.existsSync(dirPath) ){
+		fs.mkdirSync(dirPath);
+	}
+	
+	// > 如果已存在，则数字加1再存
+	var filePath = fileRoot + url_path + file_name + "." + file_type;
+	for( var i=2; i < 100; i++ ){
+		if( fs.existsSync(filePath) == true ){
+			filePath = fileRoot + url_path + file_name + " " + String(i) + "." + file_type;
+			continue;
+		}
+		break;
+	}
+	
+	// > 写入『文件载体-写入文件』
+	fs.writeFileSync( filePath, data, 'base64' );
+}
+//==============================
+// * 静态快照的保存 - 『文件载体-文件路径』 - 游戏根目录（开放函数）
+//==============================
+DrillUp.drill_HDSS_parentDirectoryPath = function() {
+	if( typeof(require) === "undefined" ){ return ""; }
+	var path = require('path');  //『文件载体-fs』
+	var base = path.dirname(process.mainModule.filename);
+	return path.join(base, '/');
+};
+//==============================
+// * 静态快照的保存 - 打开保存的文件路径（开放函数）
+//==============================
+DrillUp.drill_HDSS_openUrl = function() {
+	if( typeof(require) === "undefined" ){ return; }
+	var fileRoot = this.drill_HDSS_parentDirectoryPath();
+	var filePath = fileRoot + DrillUp.g_HDSS_fileSettings['url_path'];
+	
+	var path = require('path');  //『文件载体-fs』
+	var exec = require('child_process').exec;
+	exec('explorer ' + path.resolve(filePath) );
+};
+
+
+//=============================================================================
+// ** ☆静态快照的延迟指令
+//
+//			说明：	> 此模块提供 保存 静态快照文件 功能。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 静态快照的延迟指令 - 参数
+//==============================
+DrillUp._drill_HDSS_StaticSnapCommandTank = [];
+//==============================
+// * 静态快照的延迟指令 - 帧刷新 - 时间流逝
+//==============================
+DrillUp.drill_HDSS_updateStaticSnapCommand = function() {
+	
+	// > 帧刷新 时间流逝
+	for(var i = 0; i < this._drill_HDSS_StaticSnapCommandTank.length; i++ ){
+		var dc_data = this._drill_HDSS_StaticSnapCommandTank[i];
+		
+		// > 时间-1
+		dc_data['left_time'] -= 1;
+	}
+	
+	// > 执行延迟指令
+	for(var i = 0; i < this._drill_HDSS_StaticSnapCommandTank.length; i++ ){
+		var dc_data = this._drill_HDSS_StaticSnapCommandTank[i];
+		if( dc_data['left_time'] < 0 ){
+			var method = dc_data['method'];
+			var paramList = dc_data['paramList'];
+			
+			if( method == "drill_HDSS_createStaticSnap" ){
+				this.drill_HDSS_createStaticSnap();
+			}else if( method == "drill_HDSS_saveStaticSnap" ){
+				this.drill_HDSS_saveStaticSnap();
+			}else if( method == "drill_HDSS_openUrl" ){
+				this.drill_HDSS_openUrl();
+			}
+		}
+	}
+	
+	// > 销毁延迟指令
+	for(var i = this._drill_HDSS_StaticSnapCommandTank.length-1; i >= 0; i-- ){
+		var dc_data = this._drill_HDSS_StaticSnapCommandTank[i];
+		if( dc_data['left_time'] < 0 ){
+			this._drill_HDSS_StaticSnapCommandTank.splice( i, 1 );
+		}
+	}
+};
+//==============================
+// * 静态快照的延迟指令 - 添加延迟指令
+//==============================
+DrillUp.drill_HDSS_setDelayingCommand_StaticSnap = function( method, paramList, delay_time ){
+	var dc_data = {};
+	dc_data['method'] = method;
+	dc_data['paramList'] = paramList;
+	dc_data['left_time'] = delay_time;
+	this._drill_HDSS_StaticSnapCommandTank.push( dc_data );
+};
+
+
+
+//=============================================================================
 // ** 动态快照控制器【Drill_HDSS_Controller】
 // **		
 // **		作用域：	地图界面、战斗界面、菜单界面
@@ -3521,7 +3989,7 @@ SceneManager.drill_HDSS_updateDestroy = function(){
 // **						->控制器标记销毁
 // **						->控制器是否销毁
 // **					
-// **					->A主体『界面装饰最终变换值』『变换特性的规范』
+// **					->A主体『基础特性和变换特性』
 // **						->基础特性
 // **							x> 资源名
 // **							>  显示/隐藏
@@ -3530,7 +3998,7 @@ SceneManager.drill_HDSS_updateDestroy = function(){
 // **							x> 层级
 // **							>  堆叠级
 // **						->其它特性
-// **					->B变换特性『变换特性-单贴图』
+// **					->B变换特性『变换特性-单贴图』『数据最终变换值-类定义』
 // **						>  锚点X
 // **						>  锚点Y
 // **						>  位置X
@@ -3559,6 +4027,8 @@ SceneManager.drill_HDSS_updateDestroy = function(){
 // **						> 主体贴图>闪烁效果
 // **						> 主体贴图>摇晃效果
 // **						> 层贴图>缩放效果
+// **					
+// **					->O临时快照
 // **					
 // **		说明：	> 该类可存储。
 // **				> 注意，该类不能放 物体指针、贴图指针 。
@@ -3597,6 +4067,8 @@ Drill_HDSS_Controller.prototype.drill_controller_update = function(){
 	this.drill_controller_updateDelayingCommand();				//帧刷新 - E延迟指令 - 执行延迟指令
 	this.drill_controller_updatePeriodizeCommand();				//帧刷新 - F周期指令 - 执行延迟指令
 	this.drill_controller_updateEffect();						//帧刷新 - G自变化效果
+	
+	this.drill_controller_updateStaticSnap();					//帧刷新 - O临时快照
 	
 	this.drill_controller_updateCheckNaN();						//帧刷新 - C校验值
 }
@@ -3660,6 +4132,8 @@ Drill_HDSS_Controller.METHOD__drill_controller_setVisible                   = 11
 Drill_HDSS_Controller.METHOD__drill_controller_setPause                     = 12;
 Drill_HDSS_Controller.METHOD__drill_controller_periodizeCommand_setPause    = 13;
 Drill_HDSS_Controller.METHOD__drill_controller_periodizeCommand_clear       = 14;
+
+Drill_HDSS_Controller.METHOD__drill_controller_setStaticSnapId              = 19;
 
 Drill_HDSS_Controller.METHOD__drill_controller_setBlendMode                 = 21;
 Drill_HDSS_Controller.METHOD__drill_controller_setZIndex                    = 23;
@@ -3812,6 +4286,8 @@ Drill_HDSS_Controller.drill_controller_initData = function( data ){
 	if( data['effect_zoom'] == undefined ){ data['effect_zoom'] = "关闭" };							//G自变化效果 - 缩放效果
 	if( data['effect_zoomSpeed'] == undefined ){ data['effect_zoomSpeed'] = 1.0 };					//G自变化效果 - 缩放速度
 	if( data['effect_zoomRange'] == undefined ){ data['effect_zoomRange'] = 0.2 };					//G自变化效果 - 缩放幅度范围
+	
+	// > O临时快照（无）
 }
 //==============================
 // * 控制器 - 初始化子功能『控制器与贴图』
@@ -3824,6 +4300,7 @@ Drill_HDSS_Controller.prototype.drill_controller_initChild = function(){
 	this.drill_controller_initDelayingCommand();	//初始化子功能 - E延迟指令
 	this.drill_controller_initPeriodizeCommand();	//初始化子功能 - F周期指令
 	this.drill_controller_initEffect();				//初始化子功能 - G自变化效果
+	this.drill_controller_initStaticSnap();			//初始化子功能 - O临时快照
 }
 //==============================
 // * 控制器 - 重设数据（私有）
@@ -4259,6 +4736,10 @@ Drill_HDSS_Controller.prototype.drill_controller_updateDelayingCommand = functio
 				case Drill_HDSS_Controller.METHOD__drill_controller_setVisible:
 					this.drill_controller_setVisible( paramList[0] );
 					break;
+					
+				case Drill_HDSS_Controller.METHOD__drill_controller_setStaticSnapId:
+					this.drill_controller_setStaticSnapId( paramList[0] );
+					break;
 				
 				case Drill_HDSS_Controller.METHOD__drill_controller_setBlendMode:
 					this.drill_controller_setBlendMode( paramList[0] );
@@ -4330,6 +4811,8 @@ Drill_HDSS_Controller.prototype.drill_controller_setDelayingCommand = function( 
 		case Drill_HDSS_Controller.METHOD__drill_controller_setPause:
 		case Drill_HDSS_Controller.METHOD__drill_controller_periodizeCommand_setPause:
 		case Drill_HDSS_Controller.METHOD__drill_controller_periodizeCommand_clear:
+		
+		case Drill_HDSS_Controller.METHOD__drill_controller_setStaticSnapId:
 		
 		case Drill_HDSS_Controller.METHOD__drill_controller_setBlendMode:
 		case Drill_HDSS_Controller.METHOD__drill_controller_setZIndex:
@@ -4455,6 +4938,10 @@ Drill_HDSS_Controller.prototype.drill_controller_updatePeriodizeCommand = functi
 				case Drill_HDSS_Controller.METHOD__drill_controller_setVisible:
 					this.drill_controller_setVisible( paramList[0] );
 					break;
+					
+				case Drill_HDSS_Controller.METHOD__drill_controller_setStaticSnapId:
+					this.drill_controller_setStaticSnapId( paramList[0] );
+					break;
 				
 				case Drill_HDSS_Controller.METHOD__drill_controller_setBlendMode:
 					this.drill_controller_setBlendMode( paramList[0] );
@@ -4517,6 +5004,8 @@ Drill_HDSS_Controller.prototype.drill_controller_setPeriodizeCommand = function(
 	switch( method ){
 		case Drill_HDSS_Controller.METHOD__drill_controller_setVisible:
 		case Drill_HDSS_Controller.METHOD__drill_controller_setPause:
+		
+		case Drill_HDSS_Controller.METHOD__drill_controller_setStaticSnapId:
 		
 		case Drill_HDSS_Controller.METHOD__drill_controller_setBlendMode:
 		case Drill_HDSS_Controller.METHOD__drill_controller_setZIndex:
@@ -4603,6 +5092,26 @@ Drill_HDSS_Controller.prototype.drill_controller_updateEffect = function(){
 }
 
 
+//==============================
+// * O临时快照 - 初始化子功能
+//==============================
+Drill_HDSS_Controller.prototype.drill_controller_initStaticSnap = function(){
+	this._drill_lastStaticSnapId = -1;
+}
+//==============================
+// * O临时快照 - 帧刷新
+//==============================
+Drill_HDSS_Controller.prototype.drill_controller_updateStaticSnap = function(){
+	//（无）
+}
+//==============================
+// * O临时快照 - 设置临时快照ID（开放函数）
+//==============================
+Drill_HDSS_Controller.prototype.drill_controller_setStaticSnapId = function( id ){
+	this._drill_lastStaticSnapId = id;
+}
+
+
 
 //=============================================================================
 // ** 动态快照贴图【Drill_HDSS_Sprite】
@@ -4621,10 +5130,12 @@ Drill_HDSS_Controller.prototype.drill_controller_updateEffect = function(){
 // **					->C对象绑定
 // **						->设置控制器
 // **						->贴图初始化（手动）
-// **					->D指令叠加变化-控制器用
+// **					->D指令叠加变化-控制器用『弹道-图像用』
 // **					->E延迟指令
 // **					->F周期指令
 // **					->G自变化效果
+// **					
+// **					->O临时快照
 // **					
 // **		说明：	> 你必须在创建贴图后，手动初始化。（还需要先设置 控制器 ）
 // **
@@ -4664,6 +5175,8 @@ Drill_HDSS_Sprite.prototype.update = function(){
 													//帧刷新 - E延迟指令（无）
 													//帧刷新 - F周期指令（无）
 	this.drill_sprite_updateEffect();				//帧刷新 - G自变化效果
+	
+	this.drill_sprite_updateStaticSnap();			//帧刷新 - O临时快照
 }
 
 //##############################
@@ -4694,6 +5207,7 @@ Drill_HDSS_Sprite.prototype.drill_sprite_initChild = function(){
 	this.drill_sprite_initDelayingCommand();	//初始化子功能 - E延迟指令
 	this.drill_sprite_initPeriodizeCommand();	//初始化子功能 - F周期指令
 	this.drill_sprite_initEffect();				//初始化子功能 - G自变化效果
+	this.drill_sprite_initStaticSnap();			//初始化子功能 - O临时快照
 };
 
 //##############################
@@ -4806,16 +5320,19 @@ Drill_HDSS_Sprite.prototype.drill_sprite_initAttr = function(){
 	*/
 	
 	// > 主体贴图
-	this.anchor.x = 0.5;
-	this.anchor.y = 0.5;
 	this.visible = this._drill_controller.drill_controller_isVisible();		//贴图 - 显示/隐藏
 																			//贴图 - 暂停/继续（无）
 	this.blendMode = this._drill_controller._drill_blendMode;				//贴图 - 混合模式
 																			//贴图 - 层级（无）
 	this.zIndex = this._drill_controller._drill_zIndex;						//贴图 - 堆叠级
 	
+	// > 主体贴图 - 锚点
+	this.anchor.x = 0.5;
+	this.anchor.y = 0.5;
+	
 	// > 圈贴图
 	var temp_sprite = new Sprite(); 
+	temp_sprite._drill_orgTexture = temp_sprite.texture;		//（原bitmap的材质）
 	temp_sprite.texture = Graphics.drill_CODS_getTexture();		//（动态快照的材质）
 	temp_sprite.anchor.x = 0.5;
 	temp_sprite.anchor.y = 0.5;
@@ -4875,28 +5392,29 @@ Drill_HDSS_Sprite.prototype.drill_sprite_initChange = function(){
 //==============================
 Drill_HDSS_Sprite.prototype.drill_sprite_updateChange = function(){
 	
+	// > 贴图 - 锚点
+	//		（见 drill_sprite_initAttr ）
+	
 	// > 贴图 - 锚点（圈贴图）
-	//		（锚点只能放 圈贴图 才能有效）
+	//		（功能 修改中心锚点 ）
 	this._drill_childCircleSprite.anchor.x = this._drill_controller._drill_change_anchor_x;
 	this._drill_childCircleSprite.anchor.y = this._drill_controller._drill_change_anchor_y;
 	
 	
 	// > 贴图 - 位置
-	var xx = this._drill_controller.drill_controller_finalTransform_x();
-	var yy = this._drill_controller.drill_controller_finalTransform_y();
-	this.x = xx;
-	this.y = yy;
+	this.x = this._drill_controller.drill_controller_finalTransform_x();
+	this.y = this._drill_controller.drill_controller_finalTransform_y();
 	
 	// > 贴图 - 位置（遮罩）
 	if( this._drill_layerSprite.mask != undefined ){
-		this._drill_layerSprite.mask.x = -1 * xx;	//（由于遮罩不能套 主体贴图，所以只能进行相反的位移适配）
-		this._drill_layerSprite.mask.y = -1 * yy;
+		this._drill_layerSprite.mask.x = -1 * this._drill_controller.drill_controller_finalTransform_x();	//（由于遮罩不能套 主体贴图，所以只能进行相反的位移适配）
+		this._drill_layerSprite.mask.y = -1 * this._drill_controller.drill_controller_finalTransform_y();
 	}
 	
 	
 	// > 贴图 - 缩放
-	this._drill_layerSprite.scale.x  = this._drill_controller.drill_controller_finalTransform_scaleX();
-	this._drill_layerSprite.scale.y  = this._drill_controller.drill_controller_finalTransform_scaleY();
+	this._drill_layerSprite.scale.x = this._drill_controller.drill_controller_finalTransform_scaleX();
+	this._drill_layerSprite.scale.y = this._drill_controller.drill_controller_finalTransform_scaleY();
 	
 	// > 贴图 - 缩放（圈贴图）
 	//	（无）
@@ -4907,8 +5425,8 @@ Drill_HDSS_Sprite.prototype.drill_sprite_updateChange = function(){
 	
 	
 	// > 贴图 - 斜切
-	this._drill_layerSprite.skew.x   = this._drill_controller.drill_controller_finalTransform_skewX();
-	this._drill_layerSprite.skew.y   = this._drill_controller.drill_controller_finalTransform_skewY();
+	this._drill_layerSprite.skew.x = this._drill_controller.drill_controller_finalTransform_skewX();
+	this._drill_layerSprite.skew.y = this._drill_controller.drill_controller_finalTransform_skewY();
 	
 	// > 贴图 - 斜切（圈贴图）
 	//	（无）
@@ -5159,6 +5677,39 @@ Drill_HDSS_Sprite.prototype.drill_sprite_updateEffect = function(){
 		var value = range * Math.sin( cur_time * speed /180*Math.PI );
 		this._drill_layerSprite.scale.x += value;
 		this._drill_layerSprite.scale.y += value;
+	}
+}
+
+
+//==============================
+// * O临时快照 - 初始化子功能
+//==============================
+Drill_HDSS_Sprite.prototype.drill_sprite_initStaticSnap = function(){
+	this._drill_sprite_lastStaticSnapId = -1;
+}
+//==============================
+// * O临时快照 - 帧刷新
+//==============================
+Drill_HDSS_Sprite.prototype.drill_sprite_updateStaticSnap = function(){
+	if( this._drill_sprite_lastStaticSnapId != this._drill_controller._drill_lastStaticSnapId ){
+		this._drill_sprite_lastStaticSnapId =  this._drill_controller._drill_lastStaticSnapId;
+		
+		// > 解绑临时快照
+		if( this._drill_sprite_lastStaticSnapId == -1 ){
+			this._drill_childCircleSprite.bitmap = null;
+			this._drill_childCircleSprite.texture = Graphics.drill_CODS_getTexture();
+			
+		// > 绑定临时快照（执行时取最新的快照）
+		}else if( this._drill_sprite_lastStaticSnapId == -2 ){
+			this._drill_childCircleSprite.texture = this._drill_childCircleSprite._drill_orgTexture;
+			this._drill_childCircleSprite.bitmap = DrillUp.drill_HDSS_getLastStaticSnap();
+			this._drill_sprite_lastStaticSnapId = DrillUp.drill_HDSS_getLastStaticSnapId();  //（-2值表示最新的上一个快照值，赋值后覆盖）
+			
+		// > 绑定临时快照（常规）
+		}else{
+			this._drill_childCircleSprite.texture = this._drill_childCircleSprite._drill_orgTexture;
+			this._drill_childCircleSprite.bitmap = DrillUp.drill_HDSS_getStaticSnap( this._drill_sprite_lastStaticSnapId );
+		}
 	}
 }
 

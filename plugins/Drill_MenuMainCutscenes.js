@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        主菜单 - 主菜单面板的动画转场
+ * @plugindesc [v1.3]        主菜单 - 主菜单面板的动画转场
  * @author Drill_up
  * 
  * 
@@ -31,8 +31,8 @@
  * 细节：
  *   (1.切换主菜单面板时，游戏默认不播放 淡出淡入动画 。
  *   (2.没有动画时，玩家能看到菜单加载的过程。
- *      如果菜单加载卡1秒以上，玩家能明显感觉到菜单加载的卡顿。
- *      这时候用淡出淡入动画可以缓解这种卡顿感。
+ *      这个加载过程如果菜单卡1秒以上，玩家能明显感觉菜单加载不好。
+ *      为解决这个问题，用淡出淡入动画可以缓解这种卡顿感。
  * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 淡出淡入动画
@@ -83,6 +83,8 @@
  * 修复了该插件会导致存档时的截图为蓝黑色的问题。
  * [v1.2]
  * 改进了帧刷新的结构。
+ * [v1.3]
+ * 完善了节点结构。
  * 
  * 
  * 
@@ -178,6 +180,8 @@
 //		
 //		★必要注意事项：
 //			1.动画转场 【不管】 公共事件的执行。
+//			2.该插件不管辖『⊙主菜单面板的等待』，并且功能也与等待无关。
+//			  但由于该插件的存在，能让玩家完美忽视进入主菜单界面的2帧等待。
 //
 //		★其它说明细节：
 //			暂无
@@ -427,85 +431,109 @@ var _drill_MMCut_COCut_setFadeData = Scene_Base.prototype.drill_COCut_setFadeDat
 Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_sceneName, fade_type, is_white ){
 	_drill_MMCut_COCut_setFadeData.call( this, cur_sceneName, tar_sceneName, fade_type, is_white );
 	
-	// > 执行淡出（地图界面 -> 主菜单界面）『动画转场的界面』
-	//		（进入菜单时界面截图）
+	// > 节点A
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Menu" &&
 		fade_type == "淡出" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_MMCut_fadeStart_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时（天窗层的贴图）
-		}else{
-			SceneManager.drill_MMCut_setFadeSprite( "淡出", $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
-			
-			this.drill_COCut_setFadeColor( "" );	//（进入菜单时要截图，此处颜色设为透明）
-			this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeStart_time );
-			this.drill_COCut_submitFade( true );
-		}
+		this.drill_MMCut_stepA( is_white );
 		return;
 	}
 	
-	// > 执行淡入（地图界面 -> 主菜单界面）『动画转场的界面』
-	//		（进入菜单时界面截图）
+	// > 节点B
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Menu" &&
 		fade_type == "淡入" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_MMCut_fadeStart_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时（天窗层的贴图）
-		}else{
-			SceneManager.drill_MMCut_setFadeSprite( "淡入", $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
-			
-			this.drill_COCut_setFadeColor( "" );	//（进入菜单时要截图，此处颜色设为透明）
-			this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeStart_time );
-			this.drill_COCut_submitFade( true );
-		}
+		this.drill_MMCut_stepB( is_white );
 		return;
 	}
 	
 	
-	// > 执行淡出（主菜单界面 -> 地图界面）『动画转场的界面』
-	//		（离开菜单时）
+	// > 节点C
 	if( cur_sceneName == "Scene_Menu" &&
 		tar_sceneName == "Scene_Map" &&
 		fade_type == "淡出" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_MMCut_fadeEnd_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_MMCut_fadeEnd_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeEnd_time );
-			this.drill_COCut_submitFade( true );
-		}
+		this.drill_MMCut_stepC( is_white );
 		return;
 	}
 	
-	// > 执行淡入（主菜单界面 -> 地图界面）『动画转场的界面』
-	//		（离开菜单时）
+	// > 节点D
 	if( cur_sceneName == "Scene_Menu" &&
 		tar_sceneName == "Scene_Map" &&
 		fade_type == "淡入" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_MMCut_fadeEnd_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_MMCut_fadeEnd_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeEnd_time );
-			this.drill_COCut_submitFade( true );
-		}
+		this.drill_MMCut_stepD( is_white );
 		return;
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点A（淡出）（地图界面 -> 主菜单界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_MMCut_stepA = function( is_white ){
+	//	（进入菜单时，含界面截图）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_MMCut_fadeStart_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时（天窗层的贴图）
+	}else{
+		SceneManager.drill_MMCut_setFadeSprite( "淡出", $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
+		
+		this.drill_COCut_setFadeColor( "" );	//（进入菜单时要截图，此处颜色设为透明）
+		this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeStart_time );
+		this.drill_COCut_submitFade( true );
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点B（淡入）（地图界面 -> 主菜单界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_MMCut_stepB = function( is_white ){
+	//	（进入菜单时，含界面截图）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_MMCut_fadeStart_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时（天窗层的贴图）
+	}else{
+		SceneManager.drill_MMCut_setFadeSprite( "淡入", $gameSystem._drill_MMCut_fadeStart_color, $gameSystem._drill_MMCut_fadeStart_time );
+		
+		this.drill_COCut_setFadeColor( "" );	//（进入菜单时要截图，此处颜色设为透明）
+		this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeStart_time );
+		this.drill_COCut_submitFade( true );
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点C（淡出）（主菜单界面 -> 地图界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_MMCut_stepC = function( is_white ){
+	//	（离开菜单时）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_MMCut_fadeEnd_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		this.drill_COCut_setFadeColor( $gameSystem._drill_MMCut_fadeEnd_color );
+		this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeEnd_time );
+		this.drill_COCut_submitFade( true );
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点D（淡入）（主菜单界面 -> 地图界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_MMCut_stepD = function( is_white ){
+	//	（离开菜单时）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_MMCut_fadeEnd_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		this.drill_COCut_setFadeColor( $gameSystem._drill_MMCut_fadeEnd_color );
+		this.drill_COCut_setFadeTime( $gameSystem._drill_MMCut_fadeEnd_time );
+		this.drill_COCut_submitFade( true );
 	}
 }
 

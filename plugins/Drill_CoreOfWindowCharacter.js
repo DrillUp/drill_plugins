@@ -3066,16 +3066,16 @@ Window_Base.prototype.convertEscapeCharacters = function( text ){
     text = text.replace(/\\/g, '\x1b');							//单个下划线转 Escape字符
     text = text.replace(/\x1b\x1b/g, '\\');						//两个下划线转 下划线字符
     text = text.replace(/\x1bV\[(\d+)\]/gi, function(){		//'\v[0]'转变量值
-        return $gameVariables.value(parseInt(arguments[1]));
+        //return $gameVariables.value(parseInt(arguments[1]));
     }.bind(this));
     text = text.replace(/\x1bV\[(\d+)\]/gi, function(){		//'\v[\v[0]]'二转变量值
-        return $gameVariables.value(parseInt(arguments[1]));
+        //return $gameVariables.value(parseInt(arguments[1]));
     }.bind(this));
     text = text.replace(/\x1bN\[(\d+)\]/gi, function(){		//'\n[5]'角色名字
-        return this.actorName(parseInt(arguments[1]));
+        //return this.actorName(parseInt(arguments[1]));
     }.bind(this));
     text = text.replace(/\x1bP\[(\d+)\]/gi, function(){		//'\p[1]'玩家队员名字
-        return this.partyMemberName(parseInt(arguments[1]));
+        //return this.partyMemberName(parseInt(arguments[1]));
     }.bind(this));
     text = text.replace(/\x1bG/gi, TextManager.currencyUnit);	//'\g'金钱单位
     return text;
@@ -3159,7 +3159,7 @@ Window_Base.prototype.obtainEscapeParam = function( textState ){
     var arr = /^\[\d+\]/.exec(textState.text.slice(textState.index));
     if( arr ){
         textState.index += arr[0].length;
-        return parseInt(arr[0].slice(1));
+        //return parseInt(arr[0].slice(1));
     }else{
         return '';
     }

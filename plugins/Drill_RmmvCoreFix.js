@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.3]        系统 - rmmv核心漏洞修复
+ * @plugindesc [v1.4]        系统 - rmmv核心漏洞修复
  * @author Drill_up
  * 
  * @help  
@@ -55,7 +55,7 @@
  *      但关闭遮罩可能会对一些游戏特效造成影响，你可以在地图中放置一个事件，
  *      让玩家来自己来决定要不要关闭遮罩功能。
  * 
- * 漏洞4-偶尔1像素缝隙抖动问题：
+ * 漏洞4-偶尔一像素缝隙抖动问题：
  *   (1.此漏洞来源于 YEP核心插件 。
  *      文档也有说明，可见："0.问题解答集合（FAQ） > Rmmv中的罕见问题.docx"
  *   (2.目前已知 危害到了镜头插件、对话框插件。
@@ -64,6 +64,15 @@
  *   (4.解决方案：更新示例中的YEP_CoreEngine插件，
  *      或者打开YEP_CoreEngine插件，删除函数Yanfly.Core.Sprite_updateTransform。
  * 
+ * 漏洞5-文件名乱码问题：
+ *   (1.此漏洞来源于 h5底层 。
+ *      文档也有说明，可见："0.问题解答集合（FAQ） > Rmmv中的罕见问题.docx"
+ *   (2.此bug与玩家的电脑环境有关，来自于 硬件环境+nodejs 的兼容问题。
+ *      游戏启动后，随着时间推移，概率出现 "URIError" 错误，或乱码文件名。
+ *   (3.影响：游戏发布后，部分电脑配置比较特殊的玩家会遇到这种bug，
+ *      无法正常进行游戏。
+ *   (4.解决方案：添加此插件即可修复漏洞，降低报错、闪退的几率。
+ * 
  * -----------------------------------------------------------------------------
  * ----可选设定 - 插件指令
  * 你可以通过插件指令手动控制开关：
@@ -71,7 +80,8 @@
  * 插件指令：>rmmv核心漏洞修复 : 遮罩底层开关 : 启用
  * 插件指令：>rmmv核心漏洞修复 : 遮罩底层开关 : 禁用
  * 
- * 1.遮罩底层开关在示例中 特效管理层 有事件可以控制。
+ * 1."遮罩底层开关" 对应 "漏洞3-地图中行走图拉扯与背景错位"，
+ *   在示例中 特效管理层 有事件可以控制。
  *   你可以去示例里面看看 遮罩底层 被关闭后的效果。（至少能消除拉扯的恶性bug）
  * 
  * -----------------------------------------------------------------------------
@@ -104,7 +114,9 @@
  * [v1.2]
  * 添加了 遮罩底层开关 。
  * [v1.3]
- * 添加了 偶尔1像素缝隙抖动问题 的检测。
+ * 添加了 偶尔一像素缝隙抖动问题 的检测。
+ * [v1.4]
+ * 修复了 文件名乱码问题。
  * 
  */
 //<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -131,10 +143,11 @@
 //			->☆插件指令
 //			->☆存储数据
 //
-//			->☆核心漏洞修复 - 瞬间卡屏问题
-//			->☆核心漏洞修复 - 错误的声音数组
-//			->☆核心漏洞修复 - 地图中行走图拉扯与背景错位
-//			->☆核心漏洞修复 - 偶尔1像素缝隙抖动问题
+//			->☆核心漏洞修复 - 漏洞1-瞬间卡屏问题
+//			->☆核心漏洞修复 - 漏洞2-错误的声音数组
+//			->☆核心漏洞修复 - 漏洞3-地图中行走图拉扯与背景错位
+//			->☆核心漏洞修复 - 漏洞4-偶尔一像素缝隙抖动问题
+//			->☆核心漏洞修复 - 漏洞5-文件名乱码问题
 //
 //
 //		★家谱：
@@ -194,6 +207,13 @@ Game_Interpreter.prototype.pluginCommand = function( command, args ){
 Game_Interpreter.prototype.drill_RCF_pluginCommand = function( command, args ){
 	if( command === ">rmmv核心漏洞修复" ){
 		
+		/*-----------------漏洞1-瞬间卡屏问题------------------*/
+		//（无）
+		
+		/*-----------------漏洞2-错误的声音数组------------------*/
+		//（无）
+		
+		/*-----------------漏洞3-地图中行走图拉扯与背景错位------------------*/
 		if( args.length == 4 ){
 			var type = String(args[1]);
 			var temp1 = String(args[3]);
@@ -206,6 +226,12 @@ Game_Interpreter.prototype.drill_RCF_pluginCommand = function( command, args ){
 				}
 			}
 		}
+		
+		/*-----------------漏洞4-偶尔一像素缝隙抖动问题------------------*/
+		//（无）
+		
+		/*-----------------漏洞5-文件名乱码问题------------------*/
+		//（无）
 	}
 }
 
@@ -277,7 +303,20 @@ Game_System.prototype.drill_RCF_checkSysData = function() {
 //==============================
 Game_System.prototype.drill_RCF_initSysData_Private = function() {
 	
+	// > 漏洞1-瞬间卡屏问题
+	//	（无）
+	
+	// > 漏洞2-错误的声音数组
+	//	（无）
+	
+	// > 漏洞3-地图中行走图拉扯与背景错位
 	this._drill_RCF_maskEnabled = true;		//遮罩底层开关（默认启用，玩家需根据电脑情况自己关闭遮罩）
+	
+	// > 漏洞4-偶尔一像素缝隙抖动问题
+	//	（无）
+	
+	// > 漏洞5-文件名乱码问题
+	//	（无）
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -290,10 +329,17 @@ Game_System.prototype.drill_RCF_checkSysData_Private = function() {
 	}
 };
 
-	
+
+
 //=============================================================================
-// ** ☆核心漏洞修复 - 瞬间卡屏问题
+// ** ☆核心漏洞修复 - 漏洞1-瞬间卡屏问题
+//			
+//			说明：	> 此模块修复单一功能的漏洞。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+//==============================
+// * 瞬间卡屏问题 - 执行渲染场景（覆写）
+//==============================
 Graphics.render = function( stage ){
     if( this._skipCount <= 0 ){		// "=== 0" 的符号bug修复
         var startTime = Date.now();
@@ -317,12 +363,18 @@ Graphics.render = function( stage ){
 
 
 //=============================================================================
-// ** ☆核心漏洞修复 - 错误的声音数组
+// ** ☆核心漏洞修复 - 漏洞2-错误的声音数组
+//			
+//			说明：	> 此模块修复单一功能的漏洞。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+//==============================
+// * 错误的声音数组 - 播放se音效（覆写）
+//==============================
 AudioManager.playSe = function(se) {
     if( se.name ){
         this._seBuffers = this._seBuffers.filter(function(audio) {
-            //return audio.isPlaying();						//bug：每次塞入，都会清除之前的audio
+            //return audio.isPlaying();						//（bug：每次塞入，都会清除之前的audio）
             return !audio.isReady() || audio.isPlaying();	//（修复：这样可以确保不会清除未准备好的声音对象）
         });
         var buffer = this.createBuffer('se', se.name);
@@ -331,11 +383,18 @@ AudioManager.playSe = function(se) {
         this._seBuffers.push(buffer);
     }
 };
-	
-	
+
+
+
 //=============================================================================
-// ** ☆核心漏洞修复 - 地图中行走图拉扯与背景错位
+// ** ☆核心漏洞修复 - 漏洞3-地图中行走图拉扯与背景错位
+//			
+//			说明：	> 此模块修复单一功能的漏洞。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
+//==============================
+// * 地图中行走图拉扯与背景错位 - 遮罩定义（覆写）
+//==============================
 Object.defineProperty(Sprite.prototype, 'mask', {
 	get: function(){
 		return this._mask;
@@ -370,21 +429,289 @@ Object.defineProperty(Sprite.prototype, 'mask', {
 });
 
 
+
 //=============================================================================
-// ** ☆核心漏洞修复 - 偶尔1像素缝隙抖动问题
+// ** ☆核心漏洞修复 - 漏洞4-偶尔一像素缝隙抖动问题
+//			
+//			说明：	> 此模块修复单一功能的漏洞。
+//					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
-// * 偶尔1像素缝隙抖动问题 - 报错 - 漏洞函数警告
+// * 偶尔一像素缝隙抖动问题 - 报错 - 漏洞函数警告
 //==============================
 DrillUp.drill_RCF_getPluginTip_TransformBugWarning = function(){
-	return "【" + DrillUp.g_RCF_PluginTip_curName + "】\n注意，检测到函数Yanfly.Core.Sprite_updateTransform，该函数会破坏pixi渲染底层，从而引入像素抖动问题。\n目前已知危害到了镜头插件、对话框插件。\n去看看文档 \"0.问题解答集合（FAQ） > Rmmv中的罕见问题.docx\" 的章节 \"偶尔1像素缝隙抖动问题\" 来解决。";
+	return "【" + DrillUp.g_RCF_PluginTip_curName + "】\n注意，检测到函数Yanfly.Core.Sprite_updateTransform，该函数会破坏pixi渲染底层，从而引入像素抖动问题。\n目前已知危害到了镜头插件、对话框插件。\n去看看文档 \"0.问题解答集合（FAQ） > Rmmv中的罕见问题.docx\" 的章节 \"偶尔一像素缝隙抖动问题\" 来解决。";
 };
 //==============================
-// * 偶尔1像素缝隙抖动问题 - 报错 - 漏洞函数警告 - 检测『非整数坐标抖动问题』
+// * 偶尔一像素缝隙抖动问题 - 报错 - 漏洞函数警告 - 执行检查『非整数坐标抖动问题』
 //==============================
 if( typeof(Yanfly) != "undefined" && 
 	Yanfly.Core != undefined && 
 	Yanfly.Core.Sprite_updateTransform != undefined ){
 	alert( DrillUp.drill_RCF_getPluginTip_TransformBugWarning() );
 };
+
+
+
+//=============================================================================
+// ** ☆核心漏洞修复 - 漏洞5-文件名乱码问题
+//			
+//			说明：	> 此模块修复单一功能的漏洞。
+//					（插件完整的功能目录去看看：功能结构树）
+//=============================================================================
+//==============================
+// * 文件名乱码问题 - URI加密
+//
+//			说明：	> 纯JS实现的encodeURIComponent。
+//					> 性能已经不重要了，别报错就行。
+//==============================
+DrillUp.drill_RCF_encodeURIComponent = function( _temp_str ){
+	_temp_str = String(_temp_str);
+	var _temp_strLen = _temp_str.length;
+	if( _temp_strLen == undefined ){ return ""; }
+	var _temp_R = "";
+	var _temp_k = 0;
+	
+	var unescapedSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.!~*'()";
+	while( _temp_k < _temp_strLen ){
+		
+		var _temp_C = _temp_str.charAt(_temp_k);
+		if( unescapedSet.indexOf(_temp_C) !== -1 ){
+			_temp_R += _temp_C;
+			_temp_k += 1;
+			continue;
+		}
+		
+		// > 获取码点（处理代理对）
+		var _temp_cp = _temp_str.codePointAt(_temp_k);
+		var _temp_count = 1;
+		if( _temp_cp > 0xFFFF ){
+			_temp_count = 2;
+		}
+		
+		// > 检查孤立代理项
+		//		（codePointAt 对孤立代理返回的就是代理码点本身）
+		//		（需要判断它是否是合法的代理对）
+		if( _temp_cp >= 0xD800 && _temp_cp <= 0xDFFF ){
+			if( _temp_count === 1 ){
+				throw new URIError("URI malformed ("+_temp_str+")");
+			}
+		}
+		_temp_k += _temp_count;
+		
+		// > 转 UTF-8字节数组
+		var octet_list = DrillUp.drill_RCF_utf8Encode( _temp_cp );
+		for( var i = 0; i < octet_list.length; i++ ){
+			var octet = octet_list[i];
+			var hex = octet.toString(16).toUpperCase().padStart(2, "0");
+			_temp_R += "%" + hex;
+		}
+	}
+	return _temp_R;
+};
+//==============================
+// * 文件名乱码问题 - URI加密 - 码点 转 UTF-8字节数组
+//==============================
+DrillUp.drill_RCF_utf8Encode = function( _temp_cp ){
+	var _temp_result = [];
+	if( _temp_cp < 0x80 ){
+		_temp_result.push( _temp_cp );
+	}else if( _temp_cp < 0x800 ){
+		_temp_result.push( 0xC0 | (_temp_cp >> 6)   );
+		_temp_result.push( 0x80 | (_temp_cp & 0x3F) );
+	}else if( _temp_cp < 0x10000 ){
+		_temp_result.push( 0xE0 | ( _temp_cp >> 12) );
+		_temp_result.push( 0x80 | ((_temp_cp >> 6) & 0x3F) );
+		_temp_result.push( 0x80 | ( _temp_cp & 0x3F) );
+	}else{
+		_temp_result.push( 0xF0 | ( _temp_cp >> 18) );
+		_temp_result.push( 0x80 | ((_temp_cp >> 12) & 0x3F) );
+		_temp_result.push( 0x80 | ((_temp_cp >> 6) & 0x3F) );
+		_temp_result.push( 0x80 | ( _temp_cp & 0x3F) );
+	}
+	return _temp_result;
+};
+//==============================
+// * 文件名乱码问题 - URI加密（覆写）
+//
+//			说明：	> 性能已经不重要了，别报错就行。
+//==============================
+encodeURIComponent = DrillUp.drill_RCF_encodeURIComponent;
+
+//==============================
+// * 文件名乱码问题 - URI解密
+//
+//			说明：	> 纯JS实现的decodeURIComponent。
+//					> 性能已经不重要了，别报错就行。
+//==============================
+DrillUp.drill_RCF_decodeURIComponent = function( _temp_str ){
+	_temp_str = String(_temp_str);
+	var _temp_strLen = _temp_str.length;
+	if( _temp_strLen == undefined ){ return ""; }
+	
+	var _temp_R = "";
+	var _temp_k = 0;
+	
+	while( _temp_k < _temp_strLen ){
+		var _temp_C = _temp_str.charAt(_temp_k);
+		if( _temp_C !== "%" ){
+			_temp_R += _temp_C;
+			_temp_k++;
+			continue;
+		}
+		
+		// > 需要至少 3 个字符：%XX
+		if( _temp_k + 2 >= _temp_strLen ){
+			throw new URIError("URI malformed ("+_temp_str+")");
+		}
+		
+		// > 解析第一个字节
+		var hexDigits = _temp_str.charAt(_temp_k+1) + _temp_str.charAt(_temp_k+2);
+		var _temp_B = DrillUp.drill_RCF_HexStringToNumber(hexDigits, 16);
+		_temp_k += 3;
+		
+		// > 单字节，直接输出
+		if( _temp_B < 0x80 ){
+			_temp_R += String.fromCharCode(_temp_B);
+			
+		// > 多字节 UTF-8 序列
+		}else{
+			if( _temp_B < 0xC0 || _temp_B > 0xFD ){
+				
+				//（DEBUG测试）
+				console.log("_temp_B=", _temp_B);
+				console.log("出错位置 k=", _temp_k);
+				console.log("hexDigits=", JSON.stringify(hexDigits));
+				console.log("完整字符串=", JSON.stringify(_temp_str));
+				console.log("完整 charCode 序列=", Array.from(_temp_str).map(c => c.charCodeAt(0).toString(16)).join(" "));
+				console.log("字符串长度=", _temp_str.length);
+				throw new URIError("URI malformed ("+_temp_str+")");
+			}
+	
+			// > 计算前导 1 的个数
+			var _temp_n = 0;
+			var _temp_value = _temp_B;
+			while( _temp_value & 0x80 ){
+				_temp_n++;
+				_temp_value <<= 1;
+			}
+			if( _temp_n === 1 || _temp_n > 4 ){
+				throw new URIError("URI malformed ("+_temp_str+")");
+			}
+	
+			var octet_list = [];
+			octet_list.push(_temp_B);
+			for( var i = 1; i < _temp_n; i++ ){
+				if( _temp_k >= _temp_strLen || _temp_str.charAt(_temp_k) !== "%" ){
+					throw new URIError("URI malformed ("+_temp_str+")");
+				}
+				if( _temp_k + 2 >= _temp_strLen ){
+					throw new URIError("URI malformed ("+_temp_str+")");
+				}
+				hexDigits = _temp_str.charAt(_temp_k+1) + _temp_str.charAt(_temp_k+2);
+				_temp_B = DrillUp.drill_RCF_HexStringToNumber(hexDigits, 16);
+				if( _temp_B < 0x80 || _temp_B > 0xBF ){
+					
+					//（DEBUG测试）
+					console.log("_temp_B=", _temp_B);
+					console.log("出错位置 k=", _temp_k);
+					console.log("hexDigits=", JSON.stringify(hexDigits));
+					console.log("完整字符串=", JSON.stringify(_temp_str));
+					console.log("完整 charCode 序列=", Array.from(_temp_str).map(c => c.charCodeAt(0).toString(16)).join(" "));
+					console.log("字符串长度=", _temp_str.length);
+					throw new URIError("URI malformed ("+_temp_str+")");
+				}
+				_temp_k += 3;
+				octet_list.push(_temp_B);
+			}
+			
+			// > 转 码点
+			var _temp_cp = DrillUp.drill_RCF_utf8Decode(octet_list);
+			if( _temp_cp === null ){
+				throw new URIError("URI malformed ("+_temp_str+")");
+			}
+			
+			// > 码点转字符串（处理代理对）
+			if( _temp_cp > 0xFFFF ){
+				var high = Math.floor((_temp_cp - 0x10000) / 0x400) + 0xD800;
+				var low = ((_temp_cp - 0x10000) % 0x400) + 0xDC00;
+				_temp_R += String.fromCharCode(high, low);
+			}else{
+				_temp_R += String.fromCharCode(_temp_cp);
+			}
+		}
+	}
+	return _temp_R;
+};
+//==============================
+// * 文件名乱码问题 - URI解密 - 十六进制字符串 转 数字
+//			
+//			标签：	> 『十六进制的转义』
+//			说明：	> 插件单独实现的转换函数。
+//==============================
+DrillUp.drill_RCF_HexStringToNumber = function( hex_str ){
+	var result = 0;
+	for( var i = 0; i < hex_str.length; i++ ){
+		var c = hex_str.charCodeAt(i);
+		var digit = 0;
+		if( c >= 48 && c <= 57 ){         //0~9
+			digit = c - 48;
+		}else if( c >= 65 && c <= 70 ){   //A~F
+			digit = c - 55;
+		}else if( c >= 97 && c <= 102 ){  //a~f
+			digit = c - 87;
+		}
+		result = result * 16 + digit;     //（每*16，位数+1）
+	}
+	return result;
+};
+//==============================
+// * 文件名乱码问题 - URI解密 - UTF-8字节数组 转 码点
+//==============================
+DrillUp.drill_RCF_utf8Decode = function( octet_list ){
+	var _temp_n = octet_list.length;
+	
+	// > 110xxxxx 10xxxxxx
+	if( _temp_n === 2 ){
+		if( (octet_list[0] & 0xE0) !== 0xC0 ){ return null; }
+		if( (octet_list[1] & 0xC0) !== 0x80 ){ return null; }
+		var cp = ((octet_list[0] & 0x1F) << 6) | (octet_list[1] & 0x3F);
+		if( cp < 0x80 ){ return null; }  // 过长编码
+		return cp;
+	}
+	
+	// > 1110xxxx 10xxxxxx 10xxxxxx
+	if( _temp_n === 3 ){
+		if( (octet_list[0] & 0xF0) !== 0xE0 ){ return null; }
+		if( (octet_list[1] & 0xC0) !== 0x80 ){ return null; }
+		if( (octet_list[2] & 0xC0) !== 0x80 ){ return null; }
+		var cp = ((octet_list[0] & 0x0F) << 12) |
+				 ((octet_list[1] & 0x3F) << 6) |
+				 ( octet_list[2] & 0x3F);
+		if( cp < 0x800 ){ return null; }  // 过长编码
+		if( cp >= 0xD800 && cp <= 0xDFFF ){ return null; }  // 代理区
+		return cp;
+	}
+	
+	// > 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+	if( _temp_n === 4 ){
+		if( (octet_list[0] & 0xF8) !== 0xF0 ){ return null; }
+		if( (octet_list[1] & 0xC0) !== 0x80 ){ return null; }
+		if( (octet_list[2] & 0xC0) !== 0x80 ){ return null; }
+		if( (octet_list[3] & 0xC0) !== 0x80 ){ return null; }
+		var cp = ((octet_list[0] & 0x07) << 18) |
+				 ((octet_list[1] & 0x3F) << 12) |
+				 ((octet_list[2] & 0x3F) << 6) |
+				 ( octet_list[3] & 0x3F);
+		if( cp < 0x10000 || cp > 0x10FFFF ){ return null; }
+		return cp;
+	}
+	return null;
+};
+//==============================
+// * 文件名乱码问题 - URI解密（覆写）
+//
+//			说明：	> 性能已经不重要了，别报错就行。
+//==============================
+decodeURIComponent = DrillUp.drill_RCF_decodeURIComponent;
 

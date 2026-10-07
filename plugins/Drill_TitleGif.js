@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.9]        标题 - 多层标题GIF
+ * @plugindesc [v2.0]        标题 - 多层标题GIF
  * @author Drill_up，mamamiyas
  * 
  * @Drill_LE_param "GIF-%d"
@@ -130,6 +130,8 @@
  * 感谢朋友 mamamiyas 提供的预加载方法和思路。翻新了GIF预加载的类型。
  * [v1.9]
  * 再次改进了结构。
+ * [v2.0]
+ * 修复了第一次显示GIF图时会闪一下图的bug。
  *
  *
  * @param 全局存储的文件路径
@@ -1636,7 +1638,7 @@ Scene_Title.prototype.drill_TGi_updateAttr = function(){
 // **						->控制器标记销毁
 // **						->控制器是否销毁
 // **					
-// **					->A主体『界面装饰最终变换值』『变换特性的规范』
+// **					->A主体『基础特性和变换特性』
 // **						->基础特性
 // **							>  资源名
 // **							>  显示/隐藏
@@ -1645,7 +1647,7 @@ Scene_Title.prototype.drill_TGi_updateAttr = function(){
 // **							>  层级
 // **							>  堆叠级
 // **						->其它特性
-// **					->B变换特性『变换特性-单贴图』
+// **					->B变换特性『变换特性-单贴图』『数据最终变换值-类定义』
 // **						>  锚点X
 // **						>  锚点Y
 // **						>  位置X
@@ -1883,15 +1885,8 @@ Drill_TGi_Controller.prototype.drill_controller_GIF_setFrame = function( cur_fra
 	this._drill_GIF_time = cur_frame * data['interval'];
 	if( this._drill_GIF_time < 0 ){ this._drill_GIF_time = 0; }
 	
-	// > 刷新索引
-	var inter = this._drill_GIF_time;
-	inter = inter / data['interval'];
-	inter = Math.floor(inter);
-	inter = inter % data['src_img_gif'].length;
-	if( data['back_run'] == true ){
-		inter = data['src_img_gif'].length - 1 - inter;
-	}
-	this._drill_GIF_index = Math.floor(inter);
+	// > 刷新索引值
+	this.drill_controller_GIF_refreshIndex();
 };
 //==============================
 // * O播放GIF - 锁定帧/解锁帧（开放函数）
@@ -1913,8 +1908,13 @@ Drill_TGi_Controller.prototype.drill_controller_GIF_setOncePlay = function( once
 	var data = this.drill_data();
 	this._drill_GIF_oncePlay = true;
 	this._drill_GIF_onceType = once_type;
-	this._drill_GIF_time = 0;
 	this._drill_GIF_onceTarTime = data['src_img_gif'].length * data['interval'];
+	
+	// > 设置帧
+	this._drill_GIF_time = 0;
+	
+	// > 刷新索引值
+	this.drill_controller_GIF_refreshIndex();
 };
 
 //##############################
@@ -2900,21 +2900,14 @@ Drill_TGi_Controller.prototype.drill_controller_updateGIF = function(){
 	// > 单次播放
 	if( this._drill_GIF_oncePlay == true ){
 		
-		// > 播放GIF
-		var inter = this._drill_GIF_time;
-		inter = inter / data['interval'];
-		inter = Math.floor(inter);
-		inter = inter % data['src_img_gif'].length;
-		if( this._drill_GIF_onceType == "backRun" ){
-			inter = data['src_img_gif'].length - 1 - inter;
-		}
-		this._drill_GIF_index = Math.floor(inter);
+		// > 单次播放 - 刷新索引值
+		this.drill_controller_GIF_refreshIndex();
 		
-		// > 时间+1（放后面）
+		// > 单次播放 - 时间+1（放后面）
 		this._drill_GIF_time += 1;
 		
-		// > 播放完毕后，锁定帧
-		if( this._drill_GIF_time > this._drill_GIF_onceTarTime ){
+		// > 单次播放 - 播放完毕后，锁定帧
+		if( this._drill_GIF_time >= this._drill_GIF_onceTarTime ){
 			this._drill_GIF_oncePlay = false;
 			this.drill_controller_GIF_setLocked( true );
 		}
@@ -2925,18 +2918,43 @@ Drill_TGi_Controller.prototype.drill_controller_updateGIF = function(){
 	// > 锁定帧时（注意，锁定帧时 _drill_GIF_index 不刷新）
 	if( this._drill_GIF_lockEnabled == true ){ return; }
 	
-	// > 播放GIF
-	var inter = this._drill_GIF_time;
-	inter = inter / data['interval'];
-	inter = Math.floor(inter);
-	inter = inter % data['src_img_gif'].length;
-	if( data['back_run'] == true ){
-		inter = data['src_img_gif'].length - 1 - inter;
-	}
-	this._drill_GIF_index = Math.floor(inter);
+	// > 刷新索引值
+	this.drill_controller_GIF_refreshIndex();
 	
 	// > 时间+1（放后面）
 	this._drill_GIF_time += 1;
+}
+//==============================
+// * O播放GIF - 刷新索引值
+//==============================
+Drill_TGi_Controller.prototype.drill_controller_GIF_refreshIndex = function(){
+	var data = this.drill_data();
+	
+	var interval = data['interval'];
+	var len = data['src_img_gif'].length;
+	var isBackrun = false;
+	if( this._drill_GIF_oncePlay == true ){
+		if( this._drill_GIF_onceType == "backRun" ){  //（单次播放时，按设置来。forwardRun正向播放/backRun反向播放）
+			isBackrun = true;
+		}
+	}else{
+		if( data['back_run'] == true ){  //（默认时，按参数来）
+			isBackrun = true;
+		}
+	}
+	
+	// > 刷新索引
+	var num = this._drill_GIF_time / interval;
+	num = Math.floor(num);
+	num = num % len;
+	
+	// > 刷新索引 - 倒放时
+	if( isBackrun == true ){
+		num = len-1 -num;
+	}
+	
+	// > 刷新索引 - 赋值
+	this._drill_GIF_index = Math.floor(num);
 }
 
 //==============================
@@ -3002,7 +3020,7 @@ Drill_TGi_Controller.prototype.drill_controller_updateRandomPos = function(){
 // **					->C对象绑定
 // **						->设置控制器
 // **						->贴图初始化（手动）
-// **					->D指令叠加变化-控制器用
+// **					->D指令叠加变化-控制器用『弹道-图像用』
 // **					->E延迟指令
 // **					->F周期指令
 // **					->G自变化效果
@@ -3197,13 +3215,15 @@ Drill_TGi_Sprite.prototype.drill_sprite_initAttr = function(){
 	*/
 	
 	// > 主体贴图
-	this.anchor.x = 0.5;
-	this.anchor.y = 0.5;
 	this.visible = this._drill_controller.drill_controller_isVisible();		//贴图 - 显示/隐藏
 																			//贴图 - 暂停/继续（无）
 	this.blendMode = this._drill_controller._drill_blendMode;				//贴图 - 混合模式
 	this.layerIndex = this._drill_controller._drill_layerIndex;				//贴图 - 层级
 	this.zIndex = this._drill_controller._drill_zIndex;						//贴图 - 堆叠级
+	
+	// > 主体贴图 - 锚点
+	this.anchor.x = 0.5;
+	this.anchor.y = 0.5;
 	
 	// > 圈贴图
 	var temp_sprite = new Sprite(); 
@@ -3258,22 +3278,23 @@ Drill_TGi_Sprite.prototype.drill_sprite_initChange = function(){
 //==============================
 Drill_TGi_Sprite.prototype.drill_sprite_updateChange = function(){
 	
+	// > 贴图 - 锚点
+	//		（见 drill_sprite_initAttr ）
+	
 	// > 贴图 - 锚点（圈贴图）
-	//		（锚点只能放 圈贴图 才能有效）
+	//		（功能 修改中心锚点 ）
 	this._drill_childGIFSprite.anchor.x = this._drill_controller._drill_change_anchor_x;
 	this._drill_childGIFSprite.anchor.y = this._drill_controller._drill_change_anchor_y;
 	
 	
 	// > 贴图 - 位置
-	var xx = this._drill_controller.drill_controller_finalTransform_x();
-	var yy = this._drill_controller.drill_controller_finalTransform_y();
-	this.x = xx;
-	this.y = yy;
+	this.x = this._drill_controller.drill_controller_finalTransform_x();
+	this.y = this._drill_controller.drill_controller_finalTransform_y();
 	
 	
 	// > 贴图 - 缩放
-	this._drill_layerSprite.scale.x  = this._drill_controller.drill_controller_finalTransform_scaleX();
-	this._drill_layerSprite.scale.y  = this._drill_controller.drill_controller_finalTransform_scaleY();
+	this._drill_layerSprite.scale.x = this._drill_controller.drill_controller_finalTransform_scaleX();
+	this._drill_layerSprite.scale.y = this._drill_controller.drill_controller_finalTransform_scaleY();
 	
 	// > 贴图 - 缩放（圈贴图）
 	//	（无）
@@ -3284,8 +3305,8 @@ Drill_TGi_Sprite.prototype.drill_sprite_updateChange = function(){
 	
 	
 	// > 贴图 - 斜切
-	this._drill_layerSprite.skew.x   = this._drill_controller.drill_controller_finalTransform_skewX();
-	this._drill_layerSprite.skew.y   = this._drill_controller.drill_controller_finalTransform_skewY();
+	this._drill_layerSprite.skew.x = this._drill_controller.drill_controller_finalTransform_skewX();
+	this._drill_layerSprite.skew.y = this._drill_controller.drill_controller_finalTransform_skewY();
 	
 	// > 贴图 - 斜切（圈贴图）
 	//	（无）

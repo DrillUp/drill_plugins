@@ -713,7 +713,7 @@ DataManager.drill_GIM_getDevice_OSType_windows = function(){
 				
 				if( text.indexOf("10.0") === 0 ){
 					// > Windows 10
-					var buildNumber = parseInt(text.split(".")[2]);
+					var buildNumber = Number(text.split(".")[2]);
 					if( buildNumber < 22000 ){
 						return "windows10";
 					}

@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        战斗 - 战斗界面的动画转场
+ * @plugindesc [v1.2]        战斗 - 战斗界面的动画转场
  * @author Drill_up
  * 
  * 
@@ -14,7 +14,7 @@
  * 如果你有兴趣，也可以来看看更多我写的drill插件哦ヽ(*。>Д<)o゜
  * https://rpg.blue/thread-409713-1-1.html
  * =============================================================================
- * 使得你可以自定义 战斗界面 的所有动画转场效果。
+ * 使得你可以自定义 战斗界面 的动画转场效果。
  * 
  * -----------------------------------------------------------------------------
  * ----插件扩展
@@ -111,6 +111,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 改进了内部结构。
+ * [v1.2]
+ * 完善了节点结构。
  * 
  * 
  * 
@@ -333,10 +335,10 @@
 	DrillUp.g_BECut_fadeEnd_time = Number(DrillUp.parameters["战斗结束-淡出淡入时长"] || 48);
 	
 	/*-----------------战斗开始对话------------------*/
-	DrillUp.g_BECut_enableMessage = String(DrillUp.parameters["是否显示对话"] || "true") === "true";
-	DrillUp.g_BECut_enableMessage_emerge = String(DrillUp.parameters["是否显示对话-敌人出现"] || "true") === "true";
-	DrillUp.g_BECut_enableMessage_preemptive = String(DrillUp.parameters["是否显示对话-先发制人"] || "true") === "true";
-	DrillUp.g_BECut_enableMessage_surprise = String(DrillUp.parameters["是否显示对话-被偷袭"] || "true") === "true";
+	DrillUp.g_BECut_message_enabled = String(DrillUp.parameters["是否显示对话"] || "true") === "true";
+	DrillUp.g_BECut_message_emerge = String(DrillUp.parameters["是否显示对话-敌人出现"] || "true") === "true";
+	DrillUp.g_BECut_message_preemptive = String(DrillUp.parameters["是否显示对话-先发制人"] || "true") === "true";
+	DrillUp.g_BECut_message_surprise = String(DrillUp.parameters["是否显示对话-被偷袭"] || "true") === "true";
 	
 	
 //=============================================================================
@@ -429,10 +431,10 @@ Game_System.prototype.drill_BECut_initSysData_Private = function() {
 	this._drill_BECut_fadeEnd_time = DrillUp.g_BECut_fadeEnd_time;
 	
 	// > 战斗开始对话
-	this._drill_BECut_enableMessage = DrillUp.g_BECut_enableMessage;
-	this._drill_BECut_enableMessage_emerge = DrillUp.g_BECut_enableMessage_emerge;
-	this._drill_BECut_enableMessage_preemptive = DrillUp.g_BECut_enableMessage_preemptive;
-	this._drill_BECut_enableMessage_surprise = DrillUp.g_BECut_enableMessage_surprise;
+	this._drill_BECut_message_enabled = DrillUp.g_BECut_message_enabled;
+	this._drill_BECut_message_emerge = DrillUp.g_BECut_message_emerge;
+	this._drill_BECut_message_preemptive = DrillUp.g_BECut_message_preemptive;
+	this._drill_BECut_message_surprise = DrillUp.g_BECut_message_surprise;
 };
 //==============================
 // * 存储数据 - 载入存档时检查数据（私有）
@@ -440,7 +442,7 @@ Game_System.prototype.drill_BECut_initSysData_Private = function() {
 Game_System.prototype.drill_BECut_checkSysData_Private = function() {
 	
 	// > 旧存档数据自动补充
-	if( this._drill_BECut_enableMessage == undefined ){
+	if( this._drill_BECut_message_enabled == undefined ){
 		this.drill_BECut_initSysData();
 	}
 	
@@ -542,40 +544,40 @@ Game_Interpreter.prototype.drill_BECut_pluginCommand = function( command, args )
 			/*-----------------战斗开始对话------------------*/
 			if( type == "战斗开始对话" ){
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_BECut_enableMessage = true;
+					$gameSystem._drill_BECut_message_enabled = true;
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_BECut_enableMessage = false;
+					$gameSystem._drill_BECut_message_enabled = false;
 				}
 				if( temp1 == "恢复默认" ){
-					$gameSystem._drill_BECut_enableMessage = DrillUp.g_BECut_enableMessage;
-					$gameSystem._drill_BECut_enableMessage_emerge = DrillUp.g_BECut_enableMessage_emerge;
-					$gameSystem._drill_BECut_enableMessage_preemptive = DrillUp.g_BECut_enableMessage_preemptive;
-					$gameSystem._drill_BECut_enableMessage_surprise = DrillUp.g_BECut_enableMessage_surprise;
+					$gameSystem._drill_BECut_message_enabled = DrillUp.g_BECut_message_enabled;
+					$gameSystem._drill_BECut_message_emerge = DrillUp.g_BECut_message_emerge;
+					$gameSystem._drill_BECut_message_preemptive = DrillUp.g_BECut_message_preemptive;
+					$gameSystem._drill_BECut_message_surprise = DrillUp.g_BECut_message_surprise;
 				}
 			}
 			if( type == "战斗开始对话-敌人出现" ){
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_BECut_enableMessage_emerge = true;
+					$gameSystem._drill_BECut_message_emerge = true;
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_BECut_enableMessage_emerge = false;
+					$gameSystem._drill_BECut_message_emerge = false;
 				}
 			}
 			if( type == "战斗开始对话-先发制人" ){
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_BECut_enableMessage_preemptive = true;
+					$gameSystem._drill_BECut_message_preemptive = true;
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_BECut_enableMessage_preemptive = false;
+					$gameSystem._drill_BECut_message_preemptive = false;
 				}
 			}
 			if( type == "战斗开始对话-被偷袭" ){
 				if( temp1 == "启用" || temp1 == "开启" || temp1 == "打开" || temp1 == "启动" ){
-					$gameSystem._drill_BECut_enableMessage_surprise = true;
+					$gameSystem._drill_BECut_message_surprise = true;
 				}
 				if( temp1 == "关闭" || temp1 == "禁用" ){
-					$gameSystem._drill_BECut_enableMessage_surprise = false;
+					$gameSystem._drill_BECut_message_surprise = false;
 				}
 			}
 		}
@@ -597,81 +599,155 @@ var _drill_BECut_COCut_setFadeData = Scene_Base.prototype.drill_COCut_setFadeDat
 Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_sceneName, fade_type, is_white ){
 	_drill_BECut_COCut_setFadeData.call( this, cur_sceneName, tar_sceneName, fade_type, is_white );
 	
-	// > 执行淡出（地图界面 -> 战斗界面）『动画转场的界面』
-	//		（战斗开始时）（不区分 is_white 参数）
+	// > 节点A
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Battle" &&
 		fade_type == "淡出" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_BECut_fadeStart_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeStart_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeStart_time );
-			this.drill_COCut_submitFade( true );
-		}
+		this.drill_BECut_stepA( is_white );
 		return;
 	}
-	
-	// > 执行淡入（地图界面 -> 战斗界面）『动画转场的界面』
-	//		（战斗开始时）（不区分 is_white 参数）
+	// > 节点B
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Battle" &&
 		fade_type == "淡入" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_BECut_fadeStart_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeStart_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeStart_time );
-			this.drill_COCut_submitFade( true );
-		}
+		this.drill_BECut_stepB( is_white );
 		return;
 	}
 	
 	
-	// > 执行淡出（战斗界面 -> 地图界面/战斗失败界面）『动画转场的界面』
-	//		（战斗结束时）（不区分 is_white 参数）
+	// > 节点C
 	if( cur_sceneName == "Scene_Battle" &&
-		(tar_sceneName == "Scene_Map" || tar_sceneName == "Scene_Gameover") &&
+		tar_sceneName == "Scene_Map" &&
 		fade_type == "淡出" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
-			this.drill_COCut_submitFade( true );
-		}
+		this.drill_BECut_stepC( is_white );
+		return;
+	}
+	// > 节点D
+	if( cur_sceneName == "Scene_Battle" &&
+		tar_sceneName == "Scene_Map" &&
+		fade_type == "淡入" ){
+		this.drill_BECut_stepD( is_white );
 		return;
 	}
 	
-	// > 执行淡入（战斗界面 -> 地图界面/战斗失败界面）『动画转场的界面』
-	//		（战斗结束时）（不区分 is_white 参数）
+	
+	// > 节点E
 	if( cur_sceneName == "Scene_Battle" &&
-		(tar_sceneName == "Scene_Map" || tar_sceneName == "Scene_Gameover") &&
-		fade_type == "淡入" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
-			this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
-			this.drill_COCut_submitFade( true );
-		}
+		tar_sceneName == "Scene_Gameover" &&
+		fade_type == "淡出" ){
+		this.drill_BECut_stepE( is_white );
 		return;
+	}
+	// > 节点F
+	if( cur_sceneName == "Scene_Battle" &&
+		tar_sceneName == "Scene_Gameover" &&
+		fade_type == "淡入" ){
+		this.drill_BECut_stepF( is_white );
+		return;
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点A（淡出）（地图界面 -> 战斗界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_BECut_stepA = function( is_white ){
+	//  （战斗开始时）（不区分 is_white 参数）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_BECut_fadeStart_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeStart_color );
+		this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeStart_time );
+		this.drill_COCut_submitFade( true );
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点B（淡入）（地图界面 -> 战斗界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_BECut_stepB = function( is_white ){
+	//  （战斗开始时）（不区分 is_white 参数）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_BECut_fadeStart_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeStart_color );
+		this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeStart_time );
+		this.drill_COCut_submitFade( true );
+	}
+}
+
+//==============================
+// * 淡出淡入动画 - 节点C（淡出）（战斗界面 -> 地图界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_BECut_stepC = function( is_white ){
+	//  （战斗结束时）（不区分 is_white 参数）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
+		this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
+		this.drill_COCut_submitFade( true );
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点D（淡入）（战斗界面 -> 地图界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_BECut_stepD = function( is_white ){
+	//  （战斗结束时）（不区分 is_white 参数）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
+		this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
+		this.drill_COCut_submitFade( true );
+	}
+}
+
+//==============================
+// * 淡出淡入动画 - 节点E（淡出）（战斗界面 -> 战斗失败界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_BECut_stepE = function( is_white ){
+	//  （战斗结束时）（不区分 is_white 参数）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
+		this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
+		this.drill_COCut_submitFade( true );
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点F（淡入）（战斗界面 -> 战斗失败界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_BECut_stepF = function( is_white ){
+	//  （战斗结束时）（不区分 is_white 参数）
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_BECut_fadeEnd_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		this.drill_COCut_setFadeColor( $gameSystem._drill_BECut_fadeEnd_color );
+		this.drill_COCut_setFadeTime( $gameSystem._drill_BECut_fadeEnd_time );
+		this.drill_COCut_submitFade( true );
 	}
 }
 
@@ -824,13 +900,21 @@ Scene_Map.prototype.startFlashForEncounter = function( duration ){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
+// * 遇敌动画 - 是否开启遇敌动画（开放函数）
+//
+//			说明：	> 该函数可继承。
+//==============================
+Game_System.prototype.drill_BECut_isAnimEnabled = function(){
+	return this._drill_BECut_anim_enabled;
+};
+//==============================
 // * 遇敌动画 - 帧刷新 屏幕单色贴图
 //==============================
 var _drill_BECut_updateScreenSprites = Spriteset_Base.prototype.updateScreenSprites;
 Spriteset_Base.prototype.updateScreenSprites = function(){
 	
 	// > 遇敌动画开关
-	if( $gameSystem._drill_BECut_anim_enabled == false ){ return; }
+	if( $gameSystem.drill_BECut_isAnimEnabled() == false ){ return; }
 	
 	// > 原函数
     _drill_BECut_updateScreenSprites.call(this);
@@ -842,7 +926,7 @@ var _drill_BECut_updatePosition = Spriteset_Base.prototype.updatePosition;
 Spriteset_Base.prototype.updatePosition = function(){
 	
 	// > 遇敌动画开关
-	if( $gameSystem._drill_BECut_anim_enabled == false ){ return; }
+	if( $gameSystem.drill_BECut_isAnimEnabled() == false ){ return; }
 	
 	// > 原函数
     _drill_BECut_updatePosition.call(this);
@@ -854,10 +938,10 @@ var _drill_BECut_startEncounterEffect = Scene_Map.prototype.startEncounterEffect
 Scene_Map.prototype.startEncounterEffect = function() {
 	
 	// > 遇敌动画开关
-	if( $gameSystem._drill_BECut_anim_enabled == false ){
+	if( $gameSystem.drill_BECut_isAnimEnabled() == false ){
 		
-		BattleManager.playBattleBgm();		//（直接执行淡出流程）
-		this.startFadeOut(this.fadeSpeed());
+		BattleManager.playBattleBgm();			//（播放战斗bgm）
+		this.startFadeOut(this.fadeSpeed());	//（直接执行淡出流程）
 		
 		return; 
 	}
@@ -892,7 +976,7 @@ var _drill_BECut_playBattleStart = SoundManager.playBattleStart;
 SoundManager.playBattleStart = function() {
     
 	// > 遇敌动画开关
-	if( $gameSystem._drill_BECut_anim_enabled == false ){ return; }
+	if( $gameSystem.drill_BECut_isAnimEnabled() == false ){ return; }
 	
 	// > 原函数
 	_drill_BECut_playBattleStart.call(this);
@@ -931,6 +1015,14 @@ BattleManager.displayStartMessages = function(){
 //					（插件完整的功能目录去看看：功能结构树）
 //=============================================================================
 //==============================
+// * 战斗开始对话 - 是否显示对话（开放函数）
+//
+//			说明：	> 该函数可继承。
+//==============================
+Game_System.prototype.drill_BECut_isMessageEnabled = function(){
+	return this._drill_BECut_message_enabled;
+};
+//==============================
 // * 战斗开始对话 - 最后继承1级
 //==============================
 var _drill_BECut_scene_initialize = SceneManager.initialize;
@@ -943,10 +1035,10 @@ SceneManager.initialize = function() {
 	BattleManager.displayStartMessages = function(){
 		
 		// > 是否显示对话
-		if( $gameSystem._drill_BECut_enableMessage == false ){ return; }
+		if( $gameSystem.drill_BECut_isMessageEnabled() == false ){ return; }
 		
 		// > 信息 - 敌人出现
-		if( $gameSystem._drill_BECut_enableMessage_emerge == true ){
+		if( $gameSystem._drill_BECut_message_emerge == true ){
 			
 			for(var i = 0; i < $gameTroop._enemies.length; i++ ){
 				var enemy = $gameTroop._enemies[i];
@@ -960,13 +1052,13 @@ SceneManager.initialize = function() {
 		if( this._preemptive ){
 			
 			// > 信息 - 先发制人
-			if( $gameSystem._drill_BECut_enableMessage_preemptive == true ){
+			if( $gameSystem._drill_BECut_message_preemptive == true ){
 				$gameMessage.add( TextManager.preemptive.format($gameParty.name()) );
 			}
 		}else if( this._surprise ){
 			
 			// > 信息 - 被偷袭
-			if( $gameSystem._drill_BECut_enableMessage_surprise == true ){
+			if( $gameSystem._drill_BECut_message_surprise == true ){
 				$gameMessage.add( TextManager.surprise.format($gameParty.name()) );
 			}
 		}

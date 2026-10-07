@@ -2279,7 +2279,7 @@ Scene_Map.prototype.drill_PASl_updateDrawBeanRangeBitmap = function() {
 		var color_line = "rgb(200,255,230)";
 		
 		// > 绘制 - 矩形中心点
-		var xx = picture.drill_COPi_finalTransform_x();  //【图片-图片优化核心】『图片数据最终变换值』
+		var xx = picture.drill_COPi_finalTransform_x();  //【图片-图片优化核心】『数据最终变换值-子插件调用』
 		var yy = picture.drill_COPi_finalTransform_y();
 		temp_bitmap.drawCircle( xx, yy, 11, color_line );
 		temp_bitmap.drawCircle( xx, yy, 5, "#ff0000" );

@@ -810,6 +810,11 @@
  * @desc 类型为"扇形范围方向"时，扇形弧的角度数。
  * @default 90.0
  * 
+ * @param 方向角速率
+ * @parent 方向类型
+ * @desc 前面参数都是指定方向的初始值，而该参数指方向的变化速率。随着时间推移，方向会逐渐偏转。
+ * @default 0.0
+ * 
  * @param 方向计算公式
  * @parent 方向类型
  * @type note
@@ -1213,6 +1218,7 @@
 		data['polarDirFixed'] = Number( dataFrom["固定方向"] || 0);
 		data['polarDirSectorFace'] = Number( dataFrom["扇形朝向"] || 0);
 		data['polarDirSectorDegree'] = Number( dataFrom["扇形角度"] || 0);
+		data['polarDirRate'] = Number( dataFrom["方向角速率"] || 0);
 		temp_str = String( dataFrom["方向计算公式"] || "\"return 0\"" );
 		temp_str = temp_str.substring(1,temp_str.length-1);
 		temp_str = temp_str.replace(/\\n/g,"\n");
@@ -2220,12 +2226,6 @@ Game_Temp.prototype.drill_BFTT_createByBuffer = function( pos, time ){
 		alert( DrillUp.drill_BFTT_getPluginTip_DataIsEmpty() );
 		return;
 	}
-	//text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {	// 不需要转，窗口绘制直接支持 \v[2]、\str[21]
-	//	return $gameVariables.value(parseInt(arguments[1]));
-	//}.bind(this));
-	//text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {
-	//	return $gameVariables.value(parseInt(arguments[1]));
-	//}.bind(this));
 	data['s_data']['context'] = text;
 	
 	this._drill_BFTT_commandSeq.push( data );

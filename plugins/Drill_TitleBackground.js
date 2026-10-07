@@ -1522,7 +1522,7 @@ Scene_Title.prototype.drill_TBa_updateAttr = function(){
 // **						->控制器标记销毁
 // **						->控制器是否销毁
 // **					
-// **					->A主体『界面装饰最终变换值』『变换特性的规范』
+// **					->A主体『基础特性和变换特性』
 // **						->基础特性
 // **							>  资源名
 // **							>  显示/隐藏
@@ -1531,7 +1531,7 @@ Scene_Title.prototype.drill_TBa_updateAttr = function(){
 // **							>  层级
 // **							>  堆叠级
 // **						->其它特性
-// **					->B变换特性『变换特性-平铺贴图』
+// **					->B变换特性『变换特性-平铺贴图』『数据最终变换值-类定义』
 // **						>  位置X
 // **						>  位置Y
 // **						>  移动速度X
@@ -1592,7 +1592,7 @@ Drill_TBa_Controller.prototype.drill_controller_update = function(){
 	if( this.drill_controller_isPause() == true ){ return; }
 	this.drill_controller_updateAttr();							//帧刷新 - A主体
 	this.drill_controller_updateChange_Position();				//帧刷新 - B变换特性 - 平移
-	this.drill_controller_updateChange_MoveRange();				//帧刷新 - B变换特性 - 平铺范围
+	this.drill_controller_updateChange_MoveRange();				//帧刷新 - B变换特性 - 平铺矩形
 	this.drill_controller_updateCommandChange();				//帧刷新 - D指令叠加变化
 	this.drill_controller_updateDelayingCommand();				//帧刷新 - E延迟指令 - 执行延迟指令
 	this.drill_controller_updatePeriodizeCommand();				//帧刷新 - F周期指令 - 执行延迟指令
@@ -1942,18 +1942,16 @@ Drill_TBa_Controller.prototype.drill_controller_initChange = function(){
 	this._drill_change_rotate = data['parentRotate'];	//（平铺的旋转角度）
 	
 	
-	// > 变换值 - 『平铺范围』
-	var ww = Graphics.boxWidth;
-	var hh = Graphics.boxHeight;
-	this._drill_move_x = -1 * ww*0.5;	//（一个平移到中心的矩形）
-	this._drill_move_y = -1 * hh*0.5;
-	this._drill_move_w = ww;
-	this._drill_move_h = hh;
-	this._drill_move_originOffsetX = 0;	//（矩形大小变换时，位移修正值）
+	// > 变换值 - 矩形大小『平铺矩形与中心锚点』 - 初始化
+	this._drill_move_x = 0;
+	this._drill_move_y = 0;
+	this._drill_move_w = 0;
+	this._drill_move_h = 0;
+	this._drill_move_originOffsetX = 0;
 	this._drill_move_originOffsetY = 0;
 	
-	// > 变换值 - 『平铺范围』 - 强制帧刷新（确保范围值初始化）
-	this.drill_controller_updateChange_MoveRange();
+	// > 变换值 - 矩形大小『平铺矩形与中心锚点』 - 刷新平铺矩形
+	this.drill_controller_refreshMoveRange();
 }
 //==============================
 // * B变换特性 - 帧刷新 位置
@@ -1987,6 +1985,22 @@ Drill_TBa_Controller.prototype.drill_controller_finalTransform_selfXSpeed = func
 //##############################
 Drill_TBa_Controller.prototype.drill_controller_finalTransform_selfYSpeed = function(){
 	return this._drill_change_selfYSpeed;
+}
+//##############################
+// * B变换特性 - 数据最终变换值 - 平铺宽度【标准函数】
+//
+//			说明：	> 『平铺矩形与中心锚点』平铺贴图的锚点在中心，只需要修改高度宽度即可。
+//##############################
+Drill_TBa_Controller.prototype.drill_controller_finalTransform_tilingWidth = function(){
+	return Graphics.boxWidth;
+}
+//##############################
+// * B变换特性 - 数据最终变换值 - 平铺高度【标准函数】
+//
+//			说明：	> 『平铺矩形与中心锚点』平铺贴图的锚点在中心，只需要修改高度宽度即可。
+//##############################
+Drill_TBa_Controller.prototype.drill_controller_finalTransform_tilingHeight = function(){
+	return Graphics.boxHeight;
 }
 //##############################
 // * B变换特性 - 数据最终变换值 - 缩放X【标准函数】
@@ -2025,17 +2039,26 @@ Drill_TBa_Controller.prototype.drill_controller_finalTransform_rotate = function
 	return this._drill_change_rotate;
 }
 //==============================
-// * B变换特性 - 帧刷新 平铺范围
+// * B变换特性 - 帧刷新 平铺矩形
 //==============================
 Drill_TBa_Controller.prototype.drill_controller_updateChange_MoveRange = function(){
 	if( this._drill_change_rotate == 0 && 
 		this._drill_change_skewX == 0 && 
 		this._drill_change_skewY == 0 ){ return; }
+		
+	// > 刷新平铺矩形
+	this.drill_controller_refreshMoveRange();
+}
+//==============================
+// * B变换特性 - 刷新平铺矩形『平铺矩形与中心锚点』
+//==============================
+Drill_TBa_Controller.prototype.drill_controller_refreshMoveRange = function(){
 	
-	// > 矩形变换后的外接矩形
-	//		（这个函数用于获取 旋转+斜切 变换后的矩形高宽）
-	var ww = Graphics.boxWidth;
-	var hh = Graphics.boxHeight;
+	// > 外接矩形 - 矩形变换后的外接矩形
+	//		（获取 旋转+斜切 变换后的矩形高宽，不含 缩放 ）
+	//		（此外接矩形与镜头无关，是平铺贴图自己的 旋转+斜切 变换兼容）
+	var ww = this.drill_controller_finalTransform_tilingWidth();
+	var hh = this.drill_controller_finalTransform_tilingHeight();
 	var rect = $gameTemp.drill_TBa_Math2D_getRectWithTransform(
 		0, 0,
 		ww, hh,
@@ -2047,25 +2070,30 @@ Drill_TBa_Controller.prototype.drill_controller_updateChange_MoveRange = functio
 		this._drill_change_skewY
 	);
 	
-	// > 高宽 - 计算外接矩形高宽
+	// > 外接矩形 - 斜切的补正
 	var rww = rect.w - rect.x;
 	var rhh = rect.h - rect.y;
-	if( rww < ww ){ rww = ww; }
-	if( rhh < hh ){ rhh = hh; }
-	
-	// > 高宽 - 斜切的补正
 	rww *= (1 + Math.abs(this._drill_change_skewY) );
 	rhh *= (1 + Math.abs(this._drill_change_skewX) );
 	
-	// > 高宽 - 设置矩形
-	this._drill_move_x = -1 * rww*0.5;
-	this._drill_move_y = -1 * rhh*0.5;
+	
+	// > 矩形大小 - 限制最小值
+	if( rww < ww ){ rww = ww; }
+	if( rhh < hh ){ rhh = hh; }
+	
+	// > 矩形大小 - 限制最大值（8x8倍游戏画面）
+	if( rww > Graphics.boxWidth *8 ){ rww = Graphics.boxWidth *8; }  //（游戏画面宽度，常量）
+	if( rhh > Graphics.boxHeight*8 ){ rhh = Graphics.boxHeight*8; }  //（游戏画面高度，常量）
+	
+	// > 矩形大小 - 设置 矩形
+	this._drill_move_x = rww * (-0.5);
+	this._drill_move_y = rhh * (-0.5);
 	this._drill_move_w = rww;
 	this._drill_move_h = rhh;
 	
-	// > 高宽 - 位移修正值
-	this._drill_move_originOffsetX = (rww - ww)* (-0.5);	//（矩形大小变换时，要额外加位移修正，确保旋转时不会乱转）
-	this._drill_move_originOffsetY = (rhh - hh)* (-0.5);
+	// > 矩形大小 - 设置 位移修正值
+	this._drill_move_originOffsetX = (rww - ww) * (-0.5);	//（矩形大小变换时，要额外加位移修正，确保旋转时不会乱转）
+	this._drill_move_originOffsetY = (rhh - hh) * (-0.5);
 }
 //==============================
 // * B变换特性 - 数学工具 - 矩形变换后的外接矩形
@@ -2845,7 +2873,7 @@ Drill_TBa_Controller.prototype.drill_controller_updateEffect = function(){
 // **					->C对象绑定
 // **						->设置控制器
 // **						->贴图初始化（手动）
-// **					->D指令叠加变化-控制器用
+// **					->D指令叠加变化-控制器用『弹道-图像用』
 // **					->E延迟指令
 // **					->F周期指令
 // **					->G自变化效果
@@ -3014,8 +3042,6 @@ Drill_TBa_Sprite.prototype.drill_sprite_initAttr = function(){
 	*/
 	
 	// > 主体贴图
-	this.x = 0;
-	this.y = 0;
 	this.visible = this._drill_controller.drill_controller_isVisible();		//贴图 - 显示/隐藏
 																			//贴图 - 暂停/继续（无）
 	this.blendMode = this._drill_controller._drill_blendMode;				//贴图 - 混合模式
@@ -3024,18 +3050,26 @@ Drill_TBa_Sprite.prototype.drill_sprite_initAttr = function(){
 	
 	// > 平铺贴图
 	var temp_layer = new TilingSprite();
-	temp_layer.move(0, 0, Graphics.width, Graphics.height);		//（填满游戏窗口）
+	temp_layer.move(0, 0, Graphics.boxWidth, Graphics.boxHeight);  //（填满游戏画面宽度，常量）
 	temp_layer.bitmap = ImageManager.loadBitmap( data['src_img_file'], data['src_img'], data['tint'], data['smooth'] );
 	temp_layer.origin.x = data['x'];
 	temp_layer.origin.y = data['y'];
 	temp_layer.blendMode = this._drill_controller._drill_blendMode;
 	this._drill_layerSprite = temp_layer;
 	
-	// > 平铺范围（平铺的旋转角度用）
+	// > 平铺贴图 - 矩形大小『平铺矩形与中心锚点』
 	this._drill_spriteMove_x = 0;
 	this._drill_spriteMove_y = 0;
 	this._drill_spriteMove_w = 0;
 	this._drill_spriteMove_h = 0;
+	
+	// > 主体贴图 - 锚点『平铺矩形与中心锚点』
+	this.anchor.x = 0.5;
+	this.anchor.y = 0.5;
+	
+	// > 主体贴图 - 位置『平铺矩形与中心锚点』
+	this.x = Graphics.boxWidth  *0.5;  //（游戏画面宽度，常量）
+	this.y = Graphics.boxHeight *0.5;  //（游戏画面高度，常量）
 	
 	this.addChild( this._drill_layerSprite );
 }
@@ -3074,23 +3108,16 @@ Drill_TBa_Sprite.prototype.drill_sprite_initChange = function(){
 Drill_TBa_Sprite.prototype.drill_sprite_updateChange = function(){
 	
 	// > 贴图 - 锚点
-	this.anchor.x = 0.5;
-	this.anchor.y = 0.5;
+	//		（见 drill_sprite_initAttr ）
 	
-	// > 贴图 - 位置
-	this.x = Graphics.boxWidth  *0.5;
-	this.y = Graphics.boxHeight *0.5;
-	
-	// > 贴图 - 位置（平铺贴图）
-	var xx = this._drill_controller.drill_controller_finalTransform_x();
-	var yy = this._drill_controller.drill_controller_finalTransform_y();
-	this._drill_layerSprite.origin.x = xx;
-	this._drill_layerSprite.origin.y = yy;
+	// > 贴图 - 位置（平铺贴图）『平铺矩形与中心锚点』（平移，不影响矩形大小）
+	this._drill_layerSprite.origin.x = this._drill_controller.drill_controller_finalTransform_x();
+	this._drill_layerSprite.origin.y = this._drill_controller.drill_controller_finalTransform_y();
 	
 	// > 贴图 - 缩放
 	//	（无）
 	
-	// > 贴图 - 缩放（平铺贴图）
+	// > 贴图 - 缩放（平铺贴图）『平铺矩形与中心锚点』（缩放，不影响矩形大小）
 	this._drill_layerSprite.tileTransform.scale.x = this._drill_controller.drill_controller_finalTransform_scaleX();
 	this._drill_layerSprite.tileTransform.scale.y = this._drill_controller.drill_controller_finalTransform_scaleY();
 	
@@ -3104,8 +3131,7 @@ Drill_TBa_Sprite.prototype.drill_sprite_updateChange = function(){
 	// > 贴图 - 旋转
 	this.rotation = this._drill_controller.drill_controller_finalTransform_rotate() *Math.PI/180;
 	
-	
-	// > 贴图 - 平铺范围（平铺贴图）（旋转+斜切 的影响，影响矩形大小）
+	// > 贴图 - 矩形大小『平铺矩形与中心锚点』（旋转+斜切 的影响，影响矩形大小）
 	if( this._drill_spriteMove_x != this._drill_controller._drill_move_x ||
 		this._drill_spriteMove_y != this._drill_controller._drill_move_y ||
 		this._drill_spriteMove_w != this._drill_controller._drill_move_w ||

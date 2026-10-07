@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.2]        系统 - 粒子核心
+ * @plugindesc [v1.3]        系统 - 粒子核心
  * @author Drill_up
  * 
  * 
@@ -79,6 +79,8 @@
  * 添加了粒子 彩虹化 功能。
  * [v1.2]
  * 优化改进了粒子底层结构，定义了基础粒子和复杂粒子。
+ * [v1.3]
+ * 改进了 随机因子 的功能。
  *
  */
  
@@ -417,10 +419,27 @@ if( Imported.Drill_CoreOfBallistics ){
 // **						->控制器标记销毁
 // **						->控制器是否销毁
 // **					
-// **					->A主体
-// **					->B变换特性
+// **					->A主体『基础特性和变换特性』
+// **						->基础特性
+// **							>  资源名（O贴图加载）
+// **							>  显示/隐藏
+// **							>  暂停/继续
+// **							>  混合模式
+// **							>  层级
+// **							>  堆叠级
+// **						->其它特性
+// **					->B变换特性『变换特性-粒子贴图』『数据最终变换值-类定义』
+// **						>  整体平移X
+// **						>  整体平移Y
+// **						>  整体透明度
+// **						>  整体旋转
+// **						>  粒子平移X
+// **						>  粒子平移Y
+// **						>  粒子缩放X
+// **						>  粒子缩放Y
+// **						>  粒子旋转
 // **					->C校验值
-// **					->D指令叠加变化『变换特性-粒子贴图』
+// **					->D指令叠加变化
 // **						> 主体贴图-整体移动到
 // **						> 主体贴图-整体透明度
 // **						> 主体贴图-整体旋转
@@ -1591,27 +1610,30 @@ Drill_COPa_BasicPar_Controller.prototype.drill_controller_initBallisticsMove = f
 	temp_b_move['polarSpeedType'] = b_data["par_speedMode"];					//极坐标 - 速度 - 类型
 	temp_b_move['polarSpeedBase'] = b_data["par_speedBase"];					//极坐标 - 速度 - 初速度
 	temp_b_move['polarSpeedRandom'] = b_data["par_speedRandom"];				//极坐标 - 速度 - 速度随机波动量
-	temp_b_move['polarSpeedInc'] = null;										//极坐标 - 速度 - 加速度
-	temp_b_move['polarSpeedMax'] = null;										//极坐标 - 速度 - 最大速度
-	temp_b_move['polarSpeedMin'] = null;										//极坐标 - 速度 - 最小速度
+	temp_b_move['polarSpeedInc'] = null;										//极坐标 - 速度 - 加速度  （目前不考虑太复杂的弹道）
+	temp_b_move['polarSpeedMax'] = null;										//极坐标 - 速度 - 最大速度（目前不考虑太复杂的弹道）
+	temp_b_move['polarSpeedMin'] = null;										//极坐标 - 速度 - 最小速度（目前不考虑太复杂的弹道）
 	temp_b_move['polarDistanceFormula'] = null;									//极坐标 - 速度 - 路程计算公式
 	temp_b_move['polarDirType'] = b_data["par_dirMode"];						//极坐标 - 方向 - 类型
 	temp_b_move['polarDirFixed'] = b_data["par_dirFix"];						//极坐标 - 方向 - 固定方向
 	temp_b_move['polarDirSectorFace'] = b_data["par_dirSectorFace"];			//极坐标 - 方向 - 扇形朝向
 	temp_b_move['polarDirSectorDegree'] = b_data["par_dirSectorDegree"];		//极坐标 - 方向 - 扇形角度
+	temp_b_move['polarDirRate'] = null;											//极坐标 - 方向 - 方向角速率（目前不考虑太复杂的弹道）
 	temp_b_move['polarDirFormula'] = null;										//极坐标 - 方向 - 方向计算公式
 	
-	// > 随机因子（RandomFactor）
+	// > 随机因子列表（randomFactorList）
 	//		（每个粒子对应一个随机因子，掌握一条弹道。）
-	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系。）
-	temp_b_move['polarSpeedRandomFactor'] = this._drill_randomFactor_speed;		//极坐标 - 速度 - 随机因子
-	temp_b_move['polarDirRandomFactor'] = this._drill_randomFactor_dir;			//极坐标 - 方向 - 随机因子
-	
-	// > 随机迭代次数（RandomIteration）
-	//		（每个粒子对应一个随机迭代次数，变换弹道用。）
-	temp_b_move['polarSpeedRandomIterationList'] = this._drill_parList_randomIteration;
-	temp_b_move['polarDirRandomIterationList'] = this._drill_parList_randomIteration;
-	
+	//		（注意，独立参数项之间，随机因子不可共用。会造成强关联的错误关系，所以需要迭代。）
+	temp_b_move['polarSpeedRandomFactorList'] = [];
+	temp_b_move['polarDirRandomFactorList'] = [];
+	for( var i = 0; i < this._drill_parList_randomIteration.length; i++ ){
+		var cur_iteration = this._drill_parList_randomIteration[i];
+		cur_iteration = cur_iteration*i +41*i +2000;
+		var ran_speed = this.drill_controller_Math1D_getRandomInIteration( this._drill_randomFactor_speed, cur_iteration );
+		var ran_dir = this.drill_controller_Math1D_getRandomInIteration( this._drill_randomFactor_dir, cur_iteration );
+		temp_b_move['polarSpeedRandomFactorList'][i] = ran_speed;
+		temp_b_move['polarDirRandomFactorList'][i] = ran_dir;
+	}
 	
 	// > 控制器存储弹道配置
 	this._drill_ballistics_move = $gameTemp.drill_COBa_setBallisticsMove( temp_b_move );
@@ -1710,13 +1732,15 @@ Drill_COPa_BasicPar_Controller.prototype.drill_controller_initBallisticsOpacity 
 
 //==============================
 // * I随机因子 - 初始化子功能
-//
-//			说明：	> 粒子用随机因子 与 弹道用随机因子 相似，但不是同一个参数。
+//			
+//			标签：	> 『随机因子的迭代管理』
+//			说明：	> 只需提供一个随机因子，经过迭代管理，就能使得插件所有相关的随机数受控。
 //==============================
 Drill_COPa_BasicPar_Controller.prototype.drill_controller_initRandom = function() {
 	var data = this.drill_data();
 	
-	// > 粒子用 随机因子
+	// > 随机因子
+	//		（影响：初始随机缩放值、初始随机旋转角度、圆内矩形内随机出现、数字雨的随机初始帧）
 	this._drill_randomFactor_parListOfRan = Math.random();	//『随机因子-图像用』
 	if( data['seed_enable'] == true ){
 		this._drill_randomFactor_parListOfRan = data['seed_value'] *31 %1;
@@ -1733,12 +1757,12 @@ Drill_COPa_BasicPar_Controller.prototype.drill_controller_curRandom = function( 
 	return this.drill_controller_Math1D_getRandomInIteration( this._drill_randomFactor_parListOfRan, iteration );
 };
 //==============================
-// * I随机因子 - 数学工具 - 生成随机数（随机种子）
+// * I随机因子 - 数学工具 - 生成随机数-随机种子
 //			
 //			参数：	> seed 数字	（正整数）
 //			返回：	> 数字 		（0~1随机数）
 //			
-//			标签：	> 『随机因子-迭代工具』
+//			标签：	> 『随机因子的迭代工具』
 //			说明：	> 如果随机种子为 1至100，那么你将得到线性均匀分布的随机值。不是乱序随机。
 //==============================
 Drill_COPa_BasicPar_Controller.prototype.drill_controller_Math1D_getRandomInSeed = function( seed ){
@@ -1747,13 +1771,13 @@ Drill_COPa_BasicPar_Controller.prototype.drill_controller_Math1D_getRandomInSeed
 	return new_ran;
 };
 //==============================
-// * I随机因子 - 数学工具 - 生成随机数（迭代）
+// * I随机因子 - 数学工具 - 生成随机数-迭代
 //			
 //			参数：	> org_ran 数字   （0~1原随机数）
 //					> iteration 数字 （正整数，迭代次数）
 //			返回：	> 数字           （0~1新随机数）
 //			
-//			标签：	> 『随机因子-迭代工具』
+//			标签：	> 『随机因子的迭代工具』
 //			说明：	> 经过迭代后，能够得到乱序的随机数。
 //==============================
 Drill_COPa_BasicPar_Controller.prototype.drill_controller_Math1D_getRandomInIteration = function( org_ran, iteration ){
@@ -1764,7 +1788,10 @@ Drill_COPa_BasicPar_Controller.prototype.drill_controller_Math1D_getRandomInIter
 	return new_ran;
 };
 //==============================
-// * I随机因子 - 数学工具 - 质数表（1000以内）
+// * I随机因子 - 数学工具 - 质数表
+//			
+//			标签：	> 『随机因子的迭代工具』
+//			说明：	> 迭代用的质数表。（1000以内）
 //==============================
 DrillUp.drill_COPa_Math1D_primeList = [2,3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,
 	73,79,83,89,97,101,103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,
@@ -1897,7 +1924,7 @@ Drill_COPa_BasicPar_Controller.prototype.drill_controller_resetParticles_Scale =
 		this._drill_parList_scaleY[i] = data['par_scaleBase'];
 	}
 	if( data['par_scaleMode'] == "缩放值+波动量" ){
-		var ran = this.drill_controller_curRandom( cur_iteration*i +41*i +2000 );
+		var ran = this.drill_controller_curRandom( cur_iteration*i +43*i +2000 );
 		this._drill_parList_scaleX[i] = data['par_scaleBase'] + (ran - 0.5) * data['par_scaleRandom'];
 		this._drill_parList_scaleY[i] = data['par_scaleBase'] + (ran - 0.5) * data['par_scaleRandom'];
 	}
@@ -1915,7 +1942,7 @@ Drill_COPa_BasicPar_Controller.prototype.drill_controller_resetParticles_Rotatio
 	var data = this.drill_data();
 	var cur_iteration = this._drill_parList_randomIteration[i];
 	if( data['par_selfRotateMode'] == "随机角度" ){
-		this._drill_parList_rotation[i] = Math.floor( 360*this.drill_controller_curRandom( cur_iteration*i +47*i ) );
+		this._drill_parList_rotation[i] = Math.floor( 360*this.drill_controller_curRandom( cur_iteration*i +47*i +2000 ) );
 	}
 	if( data['par_selfRotateMode'] == "固定角度" ){
 		this._drill_parList_rotation[i] = data['par_selfRotateFix'];
@@ -2194,7 +2221,7 @@ Drill_COPa_BasicPar_Controller.prototype.drill_controller_initSecond = function(
 // **					->C对象绑定
 // **						->设置控制器
 // **						->贴图初始化（手动）
-// **					->D指令叠加变化-控制器用
+// **					->D指令叠加变化-控制器用『弹道-图像用』
 // **					->E延迟指令
 // **					->F周期指令
 // **					
@@ -2736,17 +2763,19 @@ Drill_COPa_BasicPar_Sprite.prototype.drill_sprite_createTransformLayer = functio
 	// > 粒子层
 	//		（ParticleContainer 只管理向下一级的子贴图，不支持子贴图嵌套）
 	//		（ParticleContainer 不支持 子贴图设置skew）
+	//		（ParticleContainer 不支持 子贴图设置visible）
 	//		（ParticleContainer 不支持 子贴图切换bitmap，『粒子容器的材质固定问题』）
+	//		（ParticleContainer 不支持 子贴图继承的update，『粒子容器的外部帧刷新』）
 	//		（ParticleContainer 不支持 mask遮罩）
-	//		（ParticleContainer 没有 anchor定义）
+	//		（ParticleContainer 自身没有 anchor定义）
 	var temp_layer = new PIXI.particles.ParticleContainer(
-		1500, 					//粒子最大数量
+		1500, 					//粒子 - 最大数量
 		{
-			position: true,		//粒子平移
-			scale: true,		//粒子缩放
-			alpha: true,		//粒子透明度
-			rotation: true,		//粒子旋转
-			uvs: false			//粒子纹理（所有粒子只考虑同一个纹理）
+			position: true,		//粒子 - 平移
+			scale: true,		//粒子 - 缩放
+			alpha: true,		//粒子 - 透明度
+			rotation: true,		//粒子 - 旋转
+			uvs: false			//粒子 - 纹理（即是否启用'setFrame'功能）
 		}
 	);
 	return temp_layer;
@@ -3088,9 +3117,11 @@ Drill_COPa_BasicPar_Sprite.prototype.drill_sprite_createTrailingLayer = function
 	// > 拖尾层
 	//		（ParticleContainer 只管理向下一级的子贴图，不支持子贴图嵌套）
 	//		（ParticleContainer 不支持 子贴图设置skew）
+	//		（ParticleContainer 不支持 子贴图设置visible）
 	//		（ParticleContainer 不支持 子贴图切换bitmap，『粒子容器的材质固定问题』）
+	//		（ParticleContainer 不支持 子贴图继承的update，『粒子容器的外部帧刷新』）
 	//		（ParticleContainer 不支持 mask遮罩）
-	//		（ParticleContainer 没有 anchor定义）
+	//		（ParticleContainer 自身没有 anchor定义）
 	var temp_layer = new PIXI.particles.ParticleContainer(
 		1500, 					//拖尾 - 最大数量
 		{
@@ -3098,7 +3129,7 @@ Drill_COPa_BasicPar_Sprite.prototype.drill_sprite_createTrailingLayer = function
 			scale: true,		//拖尾 - 缩放
 			alpha: true,		//拖尾 - 透明度
 			rotation: true,		//拖尾 - 旋转
-			uvs: false			//拖尾 - 纹理（所有拖尾只考虑同一个纹理）
+			uvs: false			//拖尾 - 纹理（即是否启用'setFrame'功能）
 		}
 	);
 	return temp_layer;
@@ -3546,17 +3577,19 @@ Drill_COPa_BasicPar_SecSprite.prototype.drill_spriteSec_createTransformLayer = f
 	// > 粒子层
 	//		（ParticleContainer 只管理向下一级的子贴图，不支持子贴图嵌套）
 	//		（ParticleContainer 不支持 子贴图设置skew）
+	//		（ParticleContainer 不支持 子贴图设置visible）
 	//		（ParticleContainer 不支持 子贴图切换bitmap，『粒子容器的材质固定问题』）
+	//		（ParticleContainer 不支持 子贴图继承的update，『粒子容器的外部帧刷新』）
 	//		（ParticleContainer 不支持 mask遮罩）
-	//		（ParticleContainer 没有 anchor定义）
+	//		（ParticleContainer 自身没有 anchor定义）
 	var temp_layer = new PIXI.particles.ParticleContainer(
-		1500, 					//粒子最大数量
+		1500, 					//第二层粒子 - 最大数量
 		{
-			position: true,		//粒子平移
-			scale: true,		//粒子缩放
-			alpha: true,		//粒子透明度
-			rotation: true,		//粒子旋转
-			uvs: false			//粒子纹理（所有粒子只考虑同一个纹理）
+			position: true,		//第二层粒子 - 平移
+			scale: true,		//第二层粒子 - 缩放
+			alpha: true,		//第二层粒子 - 透明度
+			rotation: true,		//第二层粒子 - 旋转
+			uvs: false			//第二层粒子 - 纹理（即是否启用'setFrame'功能）
 		}
 	);
 	return temp_layer;

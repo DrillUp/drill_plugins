@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.8]        窗口字符 - 颜色核心
+ * @plugindesc [v1.9]        窗口字符 - 颜色核心
  * @author Drill_up
  * 
  * @Drill_LE_editForbidden
@@ -176,6 +176,8 @@
  * 优化了渐变色的结构，修复了部分渐变色只显示白色的bug。
  * [v1.8]
  * 更新并兼容了新的窗口字符底层。
+ * [v1.9]
+ * 完善了插件的兼容性。
  * 
  * 
  * 
@@ -2661,9 +2663,9 @@ Game_Temp.prototype.drill_COC_color_StringToRGB = function( color_string ){
 		}
 		if( /^[0-9a-f]{6}$/.test(color_string) ){
 			var color_obj = {};
-			color_obj['r'] = parseInt( color_string.substr(0,2), 16 );
-			color_obj['g'] = parseInt( color_string.substr(2,2), 16 );
-			color_obj['b'] = parseInt( color_string.substr(4,2), 16 );
+			color_obj['r'] = this.drill_COC_HexStringToNumber( color_string.substr(0,2) );
+			color_obj['g'] = this.drill_COC_HexStringToNumber( color_string.substr(2,2) );
+			color_obj['b'] = this.drill_COC_HexStringToNumber( color_string.substr(4,2) );
 			return color_obj;
 		}
 	}
@@ -2679,6 +2681,28 @@ Game_Temp.prototype.drill_COC_color_StringToRGB = function( color_string ){
 		return color_obj;
 	}
 	return null;
+}
+//==============================
+// * 颜色工具 - 字符串转RGB - 十六进制字符串 转 数字
+//			
+//			标签：	> 『十六进制的转义』
+//			说明：	> 插件单独实现的转换函数。
+//==============================
+Game_Temp.prototype.drill_COC_HexStringToNumber = function( hex_str ){
+	var result = 0;
+	for( var i = 0; i < hex_str.length; i++ ){
+		var c = hex_str.charCodeAt(i);
+		var digit = 0;
+		if( c >= 48 && c <= 57 ){         //0~9
+			digit = c - 48;
+		}else if( c >= 65 && c <= 70 ){   //A~F
+			digit = c - 55;
+		}else if( c >= 97 && c <= 102 ){  //a~f
+			digit = c - 87;
+		}
+		result = result * 16 + digit;     //（每*16，位数+1）
+	}
+	return result;
 }
 //==============================
 // * 颜色工具 - RGB转字符串（开放函数）
@@ -2711,9 +2735,9 @@ Game_Temp.prototype.drill_COC_color_StringToRGBA = function( color_string ){
 		}
 		if( /^[0-9a-f]{6}$/.test(color_string) ){
 			var color_obj = {};
-			color_obj['r'] = parseInt( color_string.substr(0,2), 16 );
-			color_obj['g'] = parseInt( color_string.substr(2,2), 16 );
-			color_obj['b'] = parseInt( color_string.substr(4,2), 16 );
+			color_obj['r'] = this.drill_COC_HexStringToNumber( color_string.substr(0,2) );
+			color_obj['g'] = this.drill_COC_HexStringToNumber( color_string.substr(2,2) );
+			color_obj['b'] = this.drill_COC_HexStringToNumber( color_string.substr(4,2) );
 			color_obj['a'] = 1;
 			return color_obj;
 		}

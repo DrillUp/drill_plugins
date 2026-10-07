@@ -608,6 +608,11 @@
  * @desc 类型为"扇形范围方向"时，扇形弧的角度数。
  * @default 90.0
  * 
+ * @param 方向角速率
+ * @parent 方向类型
+ * @desc 前面参数都是指定方向的初始值，而该参数指方向的变化速率。随着时间推移，方向会逐渐偏转。
+ * @default 0.0
+ * 
  * @param 方向计算公式
  * @parent 方向类型
  * @type note
@@ -976,6 +981,7 @@
 		data['polarDirFixed'] = Number( dataFrom["固定方向"] || 0);
 		data['polarDirSectorFace'] = Number( dataFrom["扇形朝向"] || 0);
 		data['polarDirSectorDegree'] = Number( dataFrom["扇形角度"] || 0);
+		data['polarDirRate'] = Number( dataFrom["方向角速率"] || 0);
 		temp_str = String( dataFrom["方向计算公式"] || "\"return 0\"" );
 		temp_str = temp_str.substring(1,temp_str.length-1);
 		temp_str = temp_str.replace(/\\n/g,"\n");
@@ -1804,10 +1810,10 @@ Game_Temp.prototype.drill_BFN_createSimple = function( pos, text, style_id, ball
 	
 	// > 内容文本初始化
 	text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {	// 变量转换（\v[2]）
-		return $gameVariables.value(parseInt(arguments[1]));
+		return $gameVariables.value( Number(arguments[1]) );
 	}.bind(this));
 	text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {
-		return $gameVariables.value(parseInt(arguments[1]));
+		return $gameVariables.value( Number(arguments[1]) );
 	}.bind(this));
 	data['param_context'] = text;
 	
@@ -1867,10 +1873,10 @@ Game_Temp.prototype.drill_BFN_createByBuffer = function( pos, time ){
 		return;
 	}
 	text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {	// 变量转换（\v[2]）
-		return $gameVariables.value(parseInt(arguments[1]));
+		return $gameVariables.value( Number(arguments[1]) );
 	}.bind(this));
 	text = text.replace(/\\[vV]\[(\d+)\]/gi, function() {
-		return $gameVariables.value(parseInt(arguments[1]));
+		return $gameVariables.value( Number(arguments[1]) );
 	}.bind(this));
 	data['param_context'] = text;
 	

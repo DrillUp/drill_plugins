@@ -1834,12 +1834,12 @@ Window_Base.prototype.convertEscapeCharacters = function( text ){
 	
 	// > 指代字符（含变量的）
     text = text.replace(/[\\]?\\STR\[\\V\[(\d+)\]\]/gi, function() {
-        return $gameStrings.convertedValue( $gameVariables.value(parseInt(arguments[1])) );
+        return $gameStrings.convertedValue( $gameVariables.value( Number(arguments[1]) ) );
     }.bind(this));
 	
 	// > 指代字符（提前转换）
     text = text.replace(/[\\]?\\STR\[(\d+)\]/gi, function() {
-        return $gameStrings.convertedValue( parseInt(arguments[1]) );
+        return $gameStrings.convertedValue( Number(arguments[1]) );
     }.bind(this));
 	
 	// > 原函数

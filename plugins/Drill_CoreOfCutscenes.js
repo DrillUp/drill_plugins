@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        系统 - 动画转场核心
+ * @plugindesc [v1.2]        系统 - 动画转场核心
  * @author Drill_up
  * 
  * 
@@ -64,6 +64,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 改进了内部结构。
+ * [v1.2]
+ * 完善了插件的兼容性。
  * 
  */
  
@@ -703,82 +705,118 @@ Scene_Base.prototype.drill_COCut_resetFadeConfig = function(){
 	this._drill_COCut_fade_timeEnabled = false;
 }
 //==============================
-// * 淡出淡入管理 - 执行淡出
+// * 淡出淡入管理 - 最后继承1级
+//
+//			说明：	> 这里使用最后继承是防止其他非drill插件的干扰。
 //==============================
-var _drill_COCut_map_startFadeOut = Scene_Base.prototype.startFadeOut;
-Scene_Base.prototype.startFadeOut = function( duration, is_white ){
+var _drill_COCut_scene_initialize = SceneManager.initialize;
+SceneManager.initialize = function() {
+	_drill_COCut_scene_initialize.call(this);
 	
-	// > 重设配置
-	this.drill_COCut_resetFadeConfig();
-	
-	
-	// > 配置初始化 - 参数准备
-	var fade_type = "淡出";
-	var cur_sceneName = "";
-	var tar_sceneName = "";
-	cur_sceneName = this.constructor.name;			//（当前场景）
-	if( SceneManager._nextScene != undefined &&		//（下一个场景）
-		SceneManager._nextScene.constructor != undefined ){
-		tar_sceneName = SceneManager._nextScene.constructor.name;
-	}
-	
-	// > 配置初始化
-	this.drill_COCut_setFadeData( cur_sceneName, tar_sceneName, fade_type, is_white );
-	
-	
-	// > 配置 - 修改时长
-	if( this._drill_COCut_fade_timeEnabled == true ){
-		duration = Math.max( this._drill_COCut_fade_time, 1 );
-	}
-	
-	// > 配置 - 可执行开关 关闭，跳出
-	if( this._drill_COCut_fade_canCall == false ){
-		return;
-	}
-	
-	
-	// > 原函数
-	_drill_COCut_map_startFadeOut.call( this, duration, is_white );
-}
-//==============================
-// * 淡出淡入管理 - 执行淡入
-//==============================
-var _drill_COCut_battle_startFadeIn = Scene_Base.prototype.startFadeIn;
-Scene_Base.prototype.startFadeIn = function( duration, is_white ){
-	
-	// > 配置初始化 - 参数准备
-	var fade_type = "淡入";
-	var cur_sceneName = "";
-	var tar_sceneName = "";
-	if( SceneManager._previousClass != undefined ){		//（前一个场景）
-		cur_sceneName = SceneManager._previousClass.name;
-	}
-	tar_sceneName = this.constructor.name;				//（当前场景）
-	
-	// > 配置初始化
-	this.drill_COCut_setFadeData( cur_sceneName, tar_sceneName, fade_type, is_white );
-	
-	
-	// > 配置 - 修改时长
-	if( this._drill_COCut_fade_timeEnabled == true ){
-		duration = Math.max( this._drill_COCut_fade_time, 1 );
-	}
-	
-	// > 配置 - 可执行开关 关闭，跳出
-	if( this._drill_COCut_fade_canCall == false ){
+	//==============================
+	// * 淡出淡入管理 - 执行淡出
+	//==============================
+	var _drill_COCut_map_startFadeOut = Scene_Base.prototype.startFadeOut;
+	Scene_Base.prototype.startFadeOut = function( duration, is_white ){
 		
 		// > 重设配置
 		this.drill_COCut_resetFadeConfig();
-		return;
-	}
+		
+		
+		// > 配置初始化 - 参数准备
+		var fade_type = "淡出";
+		var cur_sceneName = "";
+		var tar_sceneName = "";
+		cur_sceneName = this.constructor.name;			//（当前场景）
+		if( SceneManager._nextScene != undefined &&		//（下一个场景）
+			SceneManager._nextScene.constructor != undefined ){
+			tar_sceneName = SceneManager._nextScene.constructor.name;
+		}
+		
+		// > 配置初始化
+		this.drill_COCut_setFadeData( cur_sceneName, tar_sceneName, fade_type, is_white );
+		
+		
+		// > 配置 - 修改时长
+		if( this._drill_COCut_fade_timeEnabled == true ){
+			duration = Math.max( this._drill_COCut_fade_time, 1 );
+		}
+		
+		// > 配置 - 可执行开关 关闭，跳出
+		if( this._drill_COCut_fade_canCall == false ){
+			return;
+		}
+		
+		
+		// > 原函数
+		_drill_COCut_map_startFadeOut.call( this, duration, is_white );
+	};
+	//==============================
+	// * 淡出淡入管理 - 执行淡入
+	//==============================
+	var _drill_COCut_battle_startFadeIn = Scene_Base.prototype.startFadeIn;
+	Scene_Base.prototype.startFadeIn = function( duration, is_white ){
+		
+		// > 配置初始化 - 参数准备
+		var fade_type = "淡入";
+		var cur_sceneName = "";
+		var tar_sceneName = "";
+		if( SceneManager._previousClass != undefined ){		//（前一个场景）
+			cur_sceneName = SceneManager._previousClass.name;
+		}
+		tar_sceneName = this.constructor.name;				//（当前场景）
+		
+		// > 配置初始化
+		this.drill_COCut_setFadeData( cur_sceneName, tar_sceneName, fade_type, is_white );
+		
+		
+		// > 配置 - 修改时长
+		if( this._drill_COCut_fade_timeEnabled == true ){
+			duration = Math.max( this._drill_COCut_fade_time, 1 );
+		}
+		
+		// > 配置 - 可执行开关 关闭，跳出
+		if( this._drill_COCut_fade_canCall == false ){
+			
+			// > 重设配置
+			this.drill_COCut_resetFadeConfig();
+			return;
+		}
+		
+		
+		// > 原函数
+		_drill_COCut_battle_startFadeIn.call( this, duration, is_white );
+		
+		
+		// > 重设配置
+		this.drill_COCut_resetFadeConfig();
+	};
 	
+	//==============================
+	// * 淡出淡入管理 - 『淡入动画的禁止输入』 - 地图界面进入 菜单场景
+	//==============================
+	var _drill_COCut_in_updateCallMenu = Scene_Map.prototype.updateCallMenu;
+	Scene_Map.prototype.updateCallMenu = function(){
+		if( this._fadeDuration > 0 ){ return; }  //（临时阻止取消键）
+		_drill_COCut_in_updateCallMenu.call(this);
+	};
+	//==============================
+	// * 淡出淡入管理 - 『淡入动画的禁止输入』 - 地图界面进入 Debug场景
+	//==============================
+	var _drill_COCut_in_updateCallDebug = Scene_Map.prototype.updateCallDebug;
+	Scene_Map.prototype.updateCallDebug = function(){
+		if( this._fadeDuration > 0 ){ return; }  //（临时阻止F9键）
+		_drill_COCut_in_updateCallDebug.call(this);
+	};
+	//==============================
+	// * 淡出淡入管理 - 『淡入动画的禁止输入』 - 菜单界面退出
+	//==============================
+	var _drill_COCut_in_Menu_isCancelEnabled = Window_MenuCommand.prototype.isCancelEnabled;
+	Window_MenuCommand.prototype.isCancelEnabled = function(){
+		if( SceneManager._scene._fadeDuration > 0 ){ return false; }  //（临时阻止取消键）
+		return _drill_COCut_in_Menu_isCancelEnabled.call(this);
+	};
 	
-	// > 原函数
-	_drill_COCut_battle_startFadeIn.call( this, duration, is_white );
-	
-	
-	// > 重设配置
-	this.drill_COCut_resetFadeConfig();
 }
 
 
@@ -838,9 +876,9 @@ Game_Temp.prototype.drill_COCut_color_StringToRGB = function( color_string ){
 		}
 		if( /^[0-9a-f]{6}$/.test(color_string) ){
 			var color_obj = {};
-			color_obj['r'] = parseInt( color_string.substr(0,2), 16 );
-			color_obj['g'] = parseInt( color_string.substr(2,2), 16 );
-			color_obj['b'] = parseInt( color_string.substr(4,2), 16 );
+			color_obj['r'] = this.drill_COCut_HexStringToNumber( color_string.substr(0,2) );
+			color_obj['g'] = this.drill_COCut_HexStringToNumber( color_string.substr(2,2) );
+			color_obj['b'] = this.drill_COCut_HexStringToNumber( color_string.substr(4,2) );
 			return color_obj;
 		}
 	}
@@ -857,6 +895,28 @@ Game_Temp.prototype.drill_COCut_color_StringToRGB = function( color_string ){
 	}
 	return null;
 }
+//==============================
+// * 淡出淡入颜色 - 颜色工具 - 字符串转RGB - 十六进制字符串 转 数字
+//			
+//			标签：	> 『十六进制的转义』
+//			说明：	> 插件单独实现的转换函数。
+//==============================
+Game_Temp.prototype.drill_COCut_HexStringToNumber = function( hex_str ){
+	var result = 0;
+	for( var i = 0; i < hex_str.length; i++ ){
+		var c = hex_str.charCodeAt(i);
+		var digit = 0;
+		if( c >= 48 && c <= 57 ){         //0~9
+			digit = c - 48;
+		}else if( c >= 65 && c <= 70 ){   //A~F
+			digit = c - 55;
+		}else if( c >= 97 && c <= 102 ){  //a~f
+			digit = c - 87;
+		}
+		result = result * 16 + digit;     //（每*16，位数+1）
+	}
+	return result;
+};
 
 
 //=============================================================================

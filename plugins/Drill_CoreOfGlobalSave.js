@@ -523,7 +523,7 @@ StorageManager.drill_COGS_loadFile = function( file_id ){
 //==============================
 // * 存档管理器 - B文件载体 - 存储
 //
-//			说明：	> 传入的数据为加密字符串。
+//			说明：	> 传入的数据为 LZ加密 的字符串。
 //==============================
 StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
 	if( typeof(require) === "undefined" ){ return; }
@@ -533,7 +533,7 @@ StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
 	var filePath = this.drill_COGS_path_getPath( file_set );
 	var dirPath  = this.drill_COGS_path_getDir( file_set );
 	
-	// > 加密
+	// > LZ加密
 	var data = LZString.compressToBase64( json_str );
 	
 	// > 文件夹路径自动创建『文件载体-生成文件夹』
@@ -547,7 +547,7 @@ StorageManager.drill_COGS_saveToLocalFile = function( file_set, json_str ){
 //==============================
 // * 存档管理器 - B文件载体 - 读取
 //
-//			说明：	> 返回的数据为解密字符串。
+//			说明：	> 返回的数据为 LZ解密 的字符串。
 //==============================
 StorageManager.drill_COGS_loadFromLocalFile = function( file_set ){
 	if( typeof(require) === "undefined" ){ return ""; }
@@ -561,7 +561,7 @@ StorageManager.drill_COGS_loadFromLocalFile = function( file_set ){
 	if( fs.existsSync(filePath) != true ){ return ""; }
 	data = fs.readFileSync(filePath, { encoding: 'utf8' });
 	
-	// > 解密
+	// > LZ解密
 	return LZString.decompressFromBase64(data);	//（返回字符串）
 };
 //==============================

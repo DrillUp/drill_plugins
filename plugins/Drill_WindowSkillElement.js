@@ -859,7 +859,7 @@ Window_SkillList.prototype.drill_WSE_s_drawBlock = function( cur_bitmap, skill )
 	if( Imported.Drill_CoreOfString ){
 		// > 指代字符（提前转换）
 		skill_name = skill_name.replace(/[\\]?\\STR\[(\d+)\]/gi, function() {
-			return $gameStrings.convertedValue( parseInt(arguments[1]) );
+			return $gameStrings.convertedValue( Number(arguments[1]) );
 		}.bind(this));
 	}
 	cur_bitmap.drawText( skill_name, name_x, name_y, name_width, this.lineHeight(), name_align);

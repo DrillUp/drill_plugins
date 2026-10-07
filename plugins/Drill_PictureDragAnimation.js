@@ -679,8 +679,8 @@ Sprite_Picture.prototype.drill_PDA_updatePosition = function(){
 	}
 	var xx = x_tank[ this._drill_PDA_curIndex ];
 	var yy = y_tank[ this._drill_PDA_curIndex ];
-    this.x -= xx;		//『图片贴图累加变换值』
-    this.y -= yy;		//『图片贴图累加变换值』
+    this.x -= xx;
+    this.y -= yy;
 }
 
 

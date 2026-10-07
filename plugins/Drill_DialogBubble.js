@@ -1482,7 +1482,7 @@ Game_System.prototype.drill_DBu_updatePicPos = function() {
 	var pic = $gameScreen.picture( data['bindPos_picId'] );
 	if( pic == undefined ){ return; }
 	
-	// > 【图片 - 图片优化核心】『图片数据最终变换值』
+	// > 【图片 - 图片优化核心】『数据最终变换值-子插件调用』
 	var xx = pic.x();
 	var yy = pic.y();
 	if( Imported.Drill_CoreOfPicture == true ){

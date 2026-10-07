@@ -3,7 +3,7 @@
 //=============================================================================
 
 /*:
- * @plugindesc [v1.1]        地图 - 场所移动的动画转场
+ * @plugindesc [v1.2]        地图 - 场所移动的动画转场
  * @author Drill_up
  * 
  * 
@@ -75,6 +75,8 @@
  * 完成插件ヽ(*。>Д<)o゜
  * [v1.1]
  * 改进了内部结构。
+ * [v1.2]
+ * 完善了节点结构。
  * 
  * 
  * 
@@ -361,48 +363,60 @@ var _drill_LTCut_COCut_setFadeData = Scene_Base.prototype.drill_COCut_setFadeDat
 Scene_Base.prototype.drill_COCut_setFadeData = function( cur_sceneName, tar_sceneName, fade_type, is_white ){
 	_drill_LTCut_COCut_setFadeData.call( this, cur_sceneName, tar_sceneName, fade_type, is_white );
 	
-	// > 执行淡出（地图界面 -> 地图界面）『动画转场的界面』
+	// > 节点A
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Map" &&
 		fade_type == "淡出" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_LTCut_fade_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			if( is_white == true ){
-				this.drill_COCut_setFadeColor( $gameSystem._drill_LTCut_fade_colorWhite );
-			}else{
-				this.drill_COCut_setFadeColor( $gameSystem._drill_LTCut_fade_colorBlack );
-			}
-			this.drill_COCut_setFadeTime( $gameSystem._drill_LTCut_fade_time );
-			this.drill_COCut_submitFade( true );
-		}
+		this.drill_LTCut_stepA( is_white );
 		return;
 	}
 	
-	// > 执行淡入（地图界面 -> 地图界面）『动画转场的界面』
+	// > 节点B
 	if( cur_sceneName == "Scene_Map" &&
 		tar_sceneName == "Scene_Map" &&
 		fade_type == "淡入" ){
-		
-		// > 关闭动画时
-		if( $gameSystem._drill_LTCut_fade_enabled == false ){
-			this.drill_COCut_submitFade( false );
-			
-		// > 开启动画时
-		}else{
-			if( is_white == true ){
-				this.drill_COCut_setFadeColor( $gameSystem._drill_LTCut_fade_colorWhite );
-			}else{
-				this.drill_COCut_setFadeColor( $gameSystem._drill_LTCut_fade_colorBlack );
-			}
-			this.drill_COCut_setFadeTime( $gameSystem._drill_LTCut_fade_time );
-			this.drill_COCut_submitFade( true );
-		}
+		this.drill_LTCut_stepB( is_white );
 		return;
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点A（淡出）（地图界面 -> 地图界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_LTCut_stepA = function( is_white ){
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_LTCut_fade_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		if( is_white == true ){
+			this.drill_COCut_setFadeColor( $gameSystem._drill_LTCut_fade_colorWhite );
+		}else{
+			this.drill_COCut_setFadeColor( $gameSystem._drill_LTCut_fade_colorBlack );
+		}
+		this.drill_COCut_setFadeTime( $gameSystem._drill_LTCut_fade_time );
+		this.drill_COCut_submitFade( true );
+	}
+}
+//==============================
+// * 淡出淡入动画 - 节点B（淡入）（地图界面 -> 地图界面）『动画转场的界面』
+//==============================
+Scene_Base.prototype.drill_LTCut_stepB = function( is_white ){
+	
+	// > 关闭动画时
+	if( $gameSystem._drill_LTCut_fade_enabled == false ){
+		this.drill_COCut_submitFade( false );
+		
+	// > 开启动画时
+	}else{
+		if( is_white == true ){
+			this.drill_COCut_setFadeColor( $gameSystem._drill_LTCut_fade_colorWhite );
+		}else{
+			this.drill_COCut_setFadeColor( $gameSystem._drill_LTCut_fade_colorBlack );
+		}
+		this.drill_COCut_setFadeTime( $gameSystem._drill_LTCut_fade_time );
+		this.drill_COCut_submitFade( true );
 	}
 }
 

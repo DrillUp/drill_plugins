@@ -819,7 +819,7 @@ StorageManager.drill_GGT_saveToLocalFile = function( json_str ){
 	var dirPath = this.localFileDirectoryPath();
 	var filePath = this.drill_GGT_localFilePath();
 	
-	// > 加密
+	// > LZ加密
 	var data = LZString.compressToBase64( json_str );
 	
 	// > 文件夹路径自动创建『文件载体-生成文件夹』
@@ -843,7 +843,7 @@ StorageManager.drill_GGT_loadFromLocalFile = function(){
 	if( fs.existsSync(filePath) != true ){ return ""; }
 	data = fs.readFileSync(filePath, { encoding: 'utf8' });
 	
-	// > 解密
+	// > LZ解密
 	return LZString.decompressFromBase64(data);	//（返回字符串）
 };
 //==============================
